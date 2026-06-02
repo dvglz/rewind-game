@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Header } from '../components/Header';
 import { ShareCard } from '../components/ShareCard';
+import { Leaderboard } from '../components/Leaderboard';
 import { loadGameState, loadStats } from '../engine/storage';
 import { getTodaysPuzzle } from '../data/puzzles';
 import { getTodayString } from '../lib/date';
@@ -34,6 +35,8 @@ export function ResultsScreen({ onHome }: ResultsScreenProps) {
           totalScore={state.totalScore}
           stats={stats}
         />
+
+        <Leaderboard puzzleId={puzzle.id} />
 
         <button
           onClick={onHome}
