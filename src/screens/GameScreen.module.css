@@ -6,7 +6,7 @@
 
 .topSection {
   flex: 0 0 auto;
-  padding: 20px 20px 0;
+  padding: 0 20px 0;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -22,18 +22,18 @@
 .roundCounter {
   font-family: var(--font-body);
   font-weight: 400;
-  font-size: 18px;
+  font-size: 14px;
   line-height: 1;
   margin-bottom: 12px;
 }
 
 .promptShell {
-  min-height: 0;
+  min-height: 146px;
 }
 
 .question {
   font-family: var(--font-body);
-  font-size: clamp(24px, 6vw, 32px);
+  font-size: 22px;
   font-weight: 400;
   line-height: 1.34;
   margin: 0 auto;
@@ -47,6 +47,7 @@
   opacity: 0;
   pointer-events: none;
   margin-top: 14px;
+  min-height: 86px;
 }
 
 .revealPanelVisible {
@@ -57,7 +58,7 @@
 .answerYear {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(40px, 12vw, 56px);
+  font-size: 36px;
   line-height: 1;
   display: block;
 }
@@ -102,40 +103,29 @@
   align-items: center;
 }
 
-.indicatorRow {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 0 8px;
-}
-
-.centerIndicator {
-  width: 0;
-  height: 0;
-  border-left: 12px solid transparent;
-  border-right: 12px solid transparent;
-  border-bottom: 16px solid var(--color-text);
-  transition: border-bottom-color 0.3s ease;
-}
-
-.flavorText {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 16px;
-  color: var(--color-text);
-  animation: fadeIn 0.3s ease;
-}
-
 .footerSlot {
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  padding-bottom: 24px;
-  gap: 12px;
+  padding: 8px 0 12px;
+}
+
+.detailSlot {
+  width: 100%;
+  min-height: 72px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.buttonRail {
+  width: 100%;
+  min-height: 70px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
 }
 
 .revealDetail {
@@ -146,7 +136,7 @@
   color: #666;
   text-align: center;
   max-width: 90%;
-  margin: 0 auto;
+  margin: 0 auto 12px;
   opacity: 0;
 }
 
@@ -185,11 +175,19 @@
     margin-bottom: 28px;
   }
 
+  .promptShell {
+    min-height: 168px;
+  }
+
   .timelineRegion {
     padding: 0 0 10px;
   }
 
   .footerSlot {
-    padding-bottom: 34px;
+    padding-bottom: 20px;
+  }
+
+  .detailSlot {
+    min-height: 80px;
   }
 }

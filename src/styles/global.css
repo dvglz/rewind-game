@@ -22,6 +22,10 @@ body {
   touch-action: pan-x;
 }
 
+#root {
+  min-height: 100dvh;
+}
+
 h1, h2, h3, label, button {
   font-family: var(--font-display);
   font-weight: 400;

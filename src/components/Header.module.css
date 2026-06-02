@@ -2,7 +2,7 @@
   width: 100%;
   display: flex;
   justify-content: center;
-  padding: 24px var(--space-lg) 12px;
+  padding: 12px var(--space-lg) 12px;
 }
 
 .inner {

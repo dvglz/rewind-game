@@ -14,36 +14,6 @@ interface GameScreenProps {
   onFinish: () => void;
 }
 
-const FLAVOR_CORRECT = [
-  "You're him I guess",
-  'Nailed it',
-  'Too easy',
-  'Like you were there',
-];
-
-const FLAVOR_CLOSE = [
-  'Close enough to matter',
-  'Almost had it',
-  'Not bad',
-  'Right neighborhood',
-];
-
-const FLAVOR_WRONG = [
-  'Are you serious?',
-  'That one got away',
-  'Way off',
-  'Tough break',
-];
-
-function pickFlavor(diff: number): string {
-  const pool = diff === 0
-    ? FLAVOR_CORRECT
-    : Math.abs(diff) <= 2
-      ? FLAVOR_CLOSE
-      : FLAVOR_WRONG;
-  return pool[Math.floor(Math.random() * pool.length)];
-}
-
 export function GameScreen({ onFinish }: GameScreenProps) {
   const puzzle = getTodaysPuzzle();
   const game = useGame(puzzle);
@@ -52,7 +22,6 @@ export function GameScreen({ onFinish }: GameScreenProps) {
   const [revealResult, setRevealResult] = useState<RoundResult | null>(null);
   const [isResolving, setIsResolving] = useState(false);
   const [showRevealText, setShowRevealText] = useState(false);
-  const [flavorText, setFlavorText] = useState('');
   const revealTimer = useRef<ReturnType<typeof setTimeout>>(null);
   const activeResult = revealResult ?? pendingResult;
   const displayRound = activeResult
@@ -69,7 +38,6 @@ export function GameScreen({ onFinish }: GameScreenProps) {
       setPendingResult(result);
       setIsResolving(true);
       setShowRevealText(false);
-      setFlavorText('');
 
       await timeline.scrollToYear(result.actualYear, true);
 
@@ -85,7 +53,6 @@ export function GameScreen({ onFinish }: GameScreenProps) {
       setRevealResult(result);
       setPendingResult(null);
       setIsResolving(false);
-      setFlavorText(pickFlavor(result.diff));
 
       revealTimer.current = setTimeout(() => {
         setShowRevealText(true);
@@ -98,7 +65,6 @@ export function GameScreen({ onFinish }: GameScreenProps) {
     setRevealResult(null);
     setIsResolving(false);
     setShowRevealText(false);
-    setFlavorText('');
     if (revealTimer.current) clearTimeout(revealTimer.current);
 
     if (game.isComplete) {
@@ -142,7 +108,6 @@ export function GameScreen({ onFinish }: GameScreenProps) {
       : color === 'wrong'
         ? 'var(--color-wrong)'
         : 'var(--color-text)';
-
   const indicatorColor = isRevealing ? 'var(--color-correct)' : undefined;
 
   return (
@@ -167,7 +132,7 @@ export function GameScreen({ onFinish }: GameScreenProps) {
               {revealResult && (
                 <>
                   <span className={styles.answerYear} style={{ color: colorVar }}>
-                    {revealResult.actualYear}
+                    {revealResult.guessedYear}
                   </span>
                   <div className={styles.badgeRow}>
                     <span className={styles.badgeSquare} style={{ background: colorVar }} />
@@ -192,39 +157,34 @@ export function GameScreen({ onFinish }: GameScreenProps) {
           yearWidth={timeline.yearWidth}
           onScroll={handleScroll}
           disabled={isLocked}
+          revealedYear={revealResult?.actualYear ?? null}
+          indicatorColor={indicatorColor}
         />
-      </div>
-
-      {/* Indicator + flavor text — between timeline and footer */}
-      <div className={styles.indicatorRow}>
-        <div
-          className={styles.centerIndicator}
-          style={indicatorColor ? { borderBottomColor: indicatorColor } : undefined}
-        />
-        {isRevealing && flavorText && (
-          <p className={styles.flavorText}>{flavorText}</p>
-        )}
       </div>
 
       <div className={styles.footerSlot}>
-        {isRevealing ? (
-          <>
+        <div className={styles.detailSlot}>
+          {isRevealing ? (
             <p className={`${styles.revealDetail} ${showRevealText ? styles.revealDetailVisible : ''}`}>
               {revealResult?.event.detail ?? ''}
             </p>
+          ) : null}
+        </div>
+        <div className={styles.buttonRail}>
+          {isRevealing ? (
             <button
               onClick={handleNext}
               className={styles.nextButton}
             >
               {game.isComplete ? 'See results' : 'Next round'}
             </button>
-          </>
-        ) : !isResolving ? (
-          <ConfirmButton
-            onConfirm={handleConfirm}
-            disabled={isLocked}
-          />
-        ) : null}
+          ) : !isResolving ? (
+            <ConfirmButton
+              onConfirm={handleConfirm}
+              disabled={isLocked}
+            />
+          ) : null}
+        </div>
       </div>
     </div>
   );

@@ -8,6 +8,8 @@ interface TimelineProps {
   yearWidth: number;
   onScroll: () => void;
   disabled?: boolean;
+  revealedYear?: number | null;
+  indicatorColor?: string;
 }
 
 export function Timeline({
@@ -17,6 +19,8 @@ export function Timeline({
   yearWidth,
   onScroll,
   disabled,
+  revealedYear,
+  indicatorColor,
 }: TimelineProps) {
   const years = Array.from(
     { length: rangeEnd - rangeStart + 1 },
@@ -24,7 +28,7 @@ export function Timeline({
   );
 
   return (
-    <div className={styles.wrapper}>
+    <div className={styles.wrapper} data-testid="timeline-wrapper">
       <div
         ref={containerRef}
         className={styles.scrollContainer}
@@ -35,10 +39,19 @@ export function Timeline({
         <div className={styles.track}>
           {years.map((year) => {
             const isMajor = year % 5 === 0;
+            const isRevealed = revealedYear !== null && revealedYear !== undefined;
+            const isCorrectYear = revealedYear === year;
+            const tickClassName = [
+              styles.tick,
+              isMajor ? styles.tickMajor : styles.tickMinor,
+              isRevealed ? styles.tickRevealed : '',
+              isCorrectYear ? styles.tickCorrect : '',
+            ].filter(Boolean).join(' ');
+
             return (
               <div
                 key={year}
-                className={`${styles.tick} ${isMajor ? styles.tickMajor : styles.tickMinor}`}
+                className={tickClassName}
                 style={{ width: yearWidth }}
               >
                 <div className={styles.tickLine} />
@@ -49,6 +62,11 @@ export function Timeline({
         </div>
         <div style={{ minWidth: '50vw', flexShrink: 0 }} />
       </div>
+      <div
+        className={styles.centerIndicator}
+        data-testid="timeline-indicator"
+        style={indicatorColor ? { borderBottomColor: indicatorColor } : undefined}
+      />
     </div>
   );
 }

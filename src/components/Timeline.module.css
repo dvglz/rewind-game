@@ -43,12 +43,12 @@
 }
 
 .tickMinor .tickLine {
-  height: 220px;
+  height: 184px;
   opacity: 0.18;
 }
 
 .tickMajor .tickLine {
-  height: 260px;
+  height: 224px;
   opacity: 1;
 }
 
@@ -71,6 +71,36 @@
   color: var(--color-text);
 }
 
+.tickRevealed .tickLine {
+  opacity: 0.18;
+}
+
+.tickRevealed .yearLabel {
+  color: #666;
+}
+
+.tickCorrect .tickLine {
+  opacity: 1;
+  background: var(--color-correct);
+}
+
+.tickCorrect .yearLabel {
+  color: var(--color-correct);
+}
+
+.centerIndicator {
+  position: absolute;
+  left: 50%;
+  bottom: -10px;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 12px solid transparent;
+  border-right: 12px solid transparent;
+  border-bottom: 16px solid var(--color-text);
+  transition: border-bottom-color 0.2s ease;
+}
+
 @media (min-width: 900px) {
   .wrapper {
     height: 460px;
@@ -82,5 +112,9 @@
 
   .tickMajor .tickLine {
     height: 320px;
+  }
+
+  .centerIndicator {
+    bottom: -2px;
   }
 }
