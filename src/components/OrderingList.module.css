@@ -1,0 +1,55 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-bg);
+  font-family: var(--font-body);
+  font-size: 14px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  transition: box-shadow 0.15s ease;
+}
+
+.card:active {
+  cursor: grabbing;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.cardDragging {
+  opacity: 0.5;
+}
+
+.handle {
+  font-size: 18px;
+  color: var(--color-muted);
+  flex-shrink: 0;
+}
+
+.cardText {
+  flex: 1;
+}
+
+.year {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+.correct {
+  border-color: var(--color-correct);
+}
+
+.incorrect {
+  border-color: var(--color-wrong);
+}
