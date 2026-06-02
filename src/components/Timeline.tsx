@@ -8,8 +8,6 @@ interface TimelineProps {
   yearWidth: number;
   onScroll: () => void;
   disabled?: boolean;
-  indicatorColor?: string;
-  flavorText?: string;
 }
 
 export function Timeline({
@@ -19,8 +17,6 @@ export function Timeline({
   yearWidth,
   onScroll,
   disabled,
-  indicatorColor,
-  flavorText,
 }: TimelineProps) {
   const years = Array.from(
     { length: rangeEnd - rangeStart + 1 },
@@ -53,13 +49,6 @@ export function Timeline({
         </div>
         <div style={{ minWidth: '50vw', flexShrink: 0 }} />
       </div>
-      <div
-        className={styles.centerIndicator}
-        style={indicatorColor ? { borderBottomColor: indicatorColor } : undefined}
-      />
-      {flavorText && (
-        <p className={styles.flavorText}>{flavorText}</p>
-      )}
     </div>
   );
 }

@@ -143,7 +143,6 @@ export function GameScreen({ onFinish }: GameScreenProps) {
         ? 'var(--color-wrong)'
         : 'var(--color-text)';
 
-  // Always green indicator on reveal (matches Figma)
   const indicatorColor = isRevealing ? 'var(--color-correct)' : undefined;
 
   return (
@@ -164,7 +163,6 @@ export function GameScreen({ onFinish }: GameScreenProps) {
               </h2>
             )}
 
-            {/* Reveal: year + badge in top section (per Figma) */}
             <div className={`${styles.revealPanel} ${isRevealing ? styles.revealPanelVisible : ''}`}>
               {revealResult && (
                 <>
@@ -194,15 +192,23 @@ export function GameScreen({ onFinish }: GameScreenProps) {
           yearWidth={timeline.yearWidth}
           onScroll={handleScroll}
           disabled={isLocked}
-          indicatorColor={indicatorColor}
-          flavorText={isRevealing ? flavorText : undefined}
         />
+      </div>
+
+      {/* Indicator + flavor text — between timeline and footer */}
+      <div className={styles.indicatorRow}>
+        <div
+          className={styles.centerIndicator}
+          style={indicatorColor ? { borderBottomColor: indicatorColor } : undefined}
+        />
+        {isRevealing && flavorText && (
+          <p className={styles.flavorText}>{flavorText}</p>
+        )}
       </div>
 
       <div className={styles.footerSlot}>
         {isRevealing ? (
           <>
-            {/* Reveal detail text below triangle, per Figma */}
             <p className={`${styles.revealDetail} ${showRevealText ? styles.revealDetailVisible : ''}`}>
               {revealResult?.event.detail ?? ''}
             </p>

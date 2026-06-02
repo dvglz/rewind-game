@@ -71,32 +71,6 @@
   color: var(--color-text);
 }
 
-.centerIndicator {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 12px solid transparent;
-  border-right: 12px solid transparent;
-  border-bottom: 16px solid var(--color-text);
-  transition: border-bottom-color 0.3s ease;
-}
-
-.flavorText {
-  position: absolute;
-  bottom: -24px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 16px;
-  color: var(--color-text);
-  white-space: nowrap;
-  animation: fadeIn 0.3s ease;
-}
-
 @media (min-width: 900px) {
   .wrapper {
     height: 460px;
