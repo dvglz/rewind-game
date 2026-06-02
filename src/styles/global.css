@@ -1,0 +1,41 @@
+@font-face {
+  font-family: 'Special Gothic Condensed One';
+  src: url('/fonts/SpecialGothicCondensedOne.woff2') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lora';
+  src: url('/fonts/Lora-variable.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+@import './tokens.css';
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background: var(--color-bg);
+  min-height: 100dvh;
+  overflow: hidden;
+  touch-action: pan-x;
+}
+
+h1, h2, h3, label, button {
+  font-family: var(--font-display);
+}

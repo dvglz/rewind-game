@@ -1,0 +1,28 @@
+:root {
+  /* Colors */
+  --color-bg: #FFFFFF;
+  --color-text: #000000;
+  --color-correct: #22C55E;
+  --color-close: #EAB308;
+  --color-wrong: #EF4444;
+  --color-muted: #9CA3AF;
+  --color-border: #E5E7EB;
+
+  /* Type */
+  --font-display: 'Special Gothic Condensed One', sans-serif;
+  --font-body: 'Lora', serif;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Timeline */
+  --timeline-height: 300px;
+  --timeline-year-width: 60px;
+  --timeline-range-start: 1996;
+  --timeline-range-end: 2026;
+}
