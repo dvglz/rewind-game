@@ -17,12 +17,24 @@
 
 .emojiRow {
   font-size: 28px;
-  letter-spacing: 8px;
+  letter-spacing: 4px;
 }
 
 .score {
   font-family: var(--font-display);
   font-size: 36px;
+}
+
+.scoreMax {
+  font-size: 20px;
+  color: var(--color-muted);
+  margin-left: 4px;
+}
+
+.scoreMeta {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-muted);
 }
 
 .streak {
@@ -60,25 +72,4 @@
   font-size: 14px;
   min-width: 50px;
   text-align: right;
-}
-
-.shareButton {
-  font-family: var(--font-display);
-  font-size: 18px;
-  padding: var(--space-md) var(--space-2xl);
-  border: none;
-  background: var(--color-text);
-  color: var(--color-bg);
-  border-radius: 999px;
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  width: 100%;
-}
-
-.copied {
-  font-family: var(--font-body);
-  font-size: 14px;
-  color: var(--color-correct);
-  min-height: 20px;
 }

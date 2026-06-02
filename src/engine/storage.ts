@@ -14,6 +14,12 @@ export function loadGameState(puzzleId: string): GameState | null {
   return all[puzzleId] || null;
 }
 
+export function clearGameState(puzzleId: string): void {
+  const all = JSON.parse(localStorage.getItem(GAME_STATE_KEY) || '{}');
+  delete all[puzzleId];
+  localStorage.setItem(GAME_STATE_KEY, JSON.stringify(all));
+}
+
 const DEFAULT_STATS: PlayerStats = {
   currentStreak: 0,
   maxStreak: 0,

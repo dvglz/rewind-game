@@ -18,6 +18,12 @@ export interface LeaderboardEntry {
   submittedAt: string;
 }
 
+interface ScoreRow {
+  score: number;
+  submitted_at: string;
+  profiles: { display_name: string } | { display_name: string }[] | null;
+}
+
 export async function submitScore(
   puzzleId: string,
   score: number,
@@ -51,12 +57,16 @@ export async function getLeaderboard(puzzleId: string): Promise<LeaderboardEntry
 
   if (error || !data) return [];
 
-  return data.map((row: any, i: number) => ({
-    rank: i + 1,
-    displayName: row.profiles?.display_name || 'Anonymous',
-    score: row.score,
-    submittedAt: row.submitted_at,
-  }));
+  return (data as ScoreRow[]).map((row, i: number) => {
+    const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+
+    return {
+      rank: i + 1,
+      displayName: profile?.display_name || 'Anonymous',
+      score: row.score,
+      submittedAt: row.submitted_at,
+    };
+  });
 }
 
 export async function signInWithEmail(email: string): Promise<boolean> {

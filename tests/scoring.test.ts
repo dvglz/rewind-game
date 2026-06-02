@@ -1,26 +1,30 @@
 import { describe, it, expect } from 'vitest';
-import { calculateScore, getResultColor } from '../src/engine/scoring';
+import { calculateScore, getResultColor, MAX_SCORE_PER_ROUND } from '../src/engine/scoring';
 
 describe('calculateScore', () => {
-  it('returns 1000 for exact guess', () => {
-    expect(calculateScore(0)).toBe(1000);
+  it('returns 200 for exact guess', () => {
+    expect(calculateScore(0)).toBe(200);
+  });
+
+  it('max score per round is 200 (1000 total for 5 rounds)', () => {
+    expect(MAX_SCORE_PER_ROUND).toBe(200);
   });
 
   it('returns high score for 1 year off', () => {
     const score = calculateScore(1);
-    expect(score).toBeGreaterThan(700);
-    expect(score).toBeLessThan(1000);
+    expect(score).toBeGreaterThan(140);
+    expect(score).toBeLessThan(200);
   });
 
   it('returns moderate score for 3 years off', () => {
     const score = calculateScore(3);
-    expect(score).toBeGreaterThan(300);
-    expect(score).toBeLessThan(600);
+    expect(score).toBeGreaterThan(60);
+    expect(score).toBeLessThan(120);
   });
 
   it('returns low score for 10+ years off', () => {
     const score = calculateScore(10);
-    expect(score).toBeLessThan(150);
+    expect(score).toBeLessThan(30);
   });
 
   it('treats positive and negative diff the same', () => {

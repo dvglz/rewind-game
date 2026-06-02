@@ -1,6 +1,12 @@
+import type { Sport } from '../data/puzzles';
+import { SPORT_ICONS } from '../data/puzzles';
 import styles from './Header.module.css';
 
-export function Header() {
+interface HeaderProps {
+  sport?: Sport;
+}
+
+export function Header({ sport }: HeaderProps) {
   const today = new Date();
   const formatted = today.toLocaleDateString('en-US', {
     month: 'short',
@@ -10,8 +16,17 @@ export function Header() {
 
   return (
     <header className={styles.header}>
-      <span className={styles.wordmark}>REWIND</span>
-      <span className={styles.date}>{formatted}</span>
+      <div className={styles.inner}>
+        <div className={styles.brand}>
+          <span className={styles.wordmark}>REWIND</span>
+          {sport && (
+            <span className={styles.sportIcon} aria-hidden="true">
+              {SPORT_ICONS[sport]}
+            </span>
+          )}
+        </div>
+        <span className={styles.date}>{formatted}</span>
+      </div>
     </header>
   );
 }

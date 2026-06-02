@@ -7,7 +7,7 @@ export interface GameEvent {
 export interface Puzzle {
   id: string;
   number: number;
-  sport: 'nba' | 'nfl' | 'soccer';
+  sport: 'nba' | 'soccer' | 'mlb';
   theme?: string;
   events: GameEvent[];
 }

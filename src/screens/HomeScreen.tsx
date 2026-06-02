@@ -1,7 +1,11 @@
-import { useMemo, useState, useRef } from 'react';
-import { loadStats, loadGameState } from '../engine/storage';
-import { getTodayString } from '../lib/date';
-import { getSport, SPORT_LABELS, type Sport } from '../data/puzzles';
+import { useMemo, useState } from 'react';
+import {
+  getSport,
+  isRandomModeEnabled,
+  setRandomModeEnabled,
+  SPORT_LABELS,
+  type Sport,
+} from '../data/puzzles';
 import styles from './HomeScreen.module.css';
 
 interface HomeScreenProps {
@@ -9,95 +13,82 @@ interface HomeScreenProps {
 }
 
 export function HomeScreen({ onPlay }: HomeScreenProps) {
-  const stats = useMemo(() => loadStats(), []);
   const currentSport = getSport();
-  const todayState = useMemo(() => loadGameState(`${getTodayString()}-${currentSport}`), [currentSport]);
-  const alreadyPlayed = todayState?.completed ?? false;
+  const [showDebugMenu, setShowDebugMenu] = useState(false);
+  const [randomEnabled, setRandomEnabled] = useState(() => isRandomModeEnabled());
 
-  // Hidden sport picker — triple tap wordmark to reveal
-  const [showSportPicker, setShowSportPicker] = useState(false);
-  const tapCount = useRef(0);
-  const tapTimer = useRef<ReturnType<typeof setTimeout>>(null);
-
-  const handleWordmarkTap = () => {
-    tapCount.current += 1;
-    if (tapCount.current >= 3) {
-      setShowSportPicker((prev) => !prev);
-      tapCount.current = 0;
-      if (tapTimer.current) clearTimeout(tapTimer.current);
-      return;
-    }
-    if (tapTimer.current) clearTimeout(tapTimer.current);
-    tapTimer.current = setTimeout(() => {
-      tapCount.current = 0;
-    }, 1000);
-  };
+  const sportOptions = useMemo(() => ['nba', 'soccer', 'mlb'] as Sport[], []);
 
   const switchSport = (sport: Sport) => {
     const url = new URL(window.location.href);
     url.searchParams.set('sport', sport);
-    window.location.href = url.toString();
+    window.location.assign(url.toString());
   };
+
+  const toggleRandom = () => {
+    const next = !randomEnabled;
+    setRandomEnabled(next);
+    setRandomModeEnabled(next);
+  };
+
+  // Format today's date nicely
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.wordmark} onClick={handleWordmarkTap}>
-        Rewind
-      </h1>
+      <div className={styles.top}>
+        <h1 className={styles.wordmark}>Rewind</h1>
 
-      {showSportPicker && (
-        <div style={{ display: 'flex', gap: '12px' }}>
-          {(['nba', 'soccer'] as Sport[]).map((sport) => (
-            <button
-              key={sport}
-              onClick={() => switchSport(sport)}
-              style={{
-                fontFamily: 'var(--font-display)',
-                fontSize: '14px',
-                padding: '8px 16px',
-                border: sport === currentSport ? '2px solid var(--color-text)' : '1px solid var(--color-border)',
-                background: sport === currentSport ? 'var(--color-text)' : 'transparent',
-                color: sport === currentSport ? 'var(--color-bg)' : 'var(--color-text)',
-                borderRadius: '999px',
-                cursor: 'pointer',
-              }}
-            >
-              {SPORT_LABELS[sport]}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <p className={styles.tagline}>
-        Guess the year. No typing. Just scroll.
-      </p>
-
-      <div className={styles.stats}>
-        <div className={styles.stat}>
-          <span className={styles.statValue}>{stats.gamesPlayed}</span>
-          <span className={styles.statLabel}>Played</span>
-        </div>
-        <div className={styles.stat}>
-          <span className={styles.statValue}>{stats.currentStreak}</span>
-          <span className={styles.statLabel}>Streak</span>
-        </div>
-        <div className={styles.stat}>
-          <span className={styles.statValue}>{stats.maxStreak}</span>
-          <span className={styles.statLabel}>Best</span>
-        </div>
+        <p className={styles.date}>{dateStr}</p>
       </div>
 
-      {alreadyPlayed ? (
-        <>
-          <span className={styles.completedBadge}>Today's puzzle complete ✓</span>
-          <button className={styles.playButton} onClick={onPlay}>
-            View Results
-          </button>
-        </>
-      ) : (
-        <button className={styles.playButton} onClick={onPlay}>
-          Play
-        </button>
+      <div className={styles.description}>
+        <p>Quick daily game.</p>
+        <p>Scroll to the year it happened.</p>
+        <p>5 rounds.</p>
+      </div>
+
+      <button className={styles.playButton} onClick={onPlay}>
+        Start
+      </button>
+
+      <button
+        className={styles.debugToggle}
+        onClick={() => setShowDebugMenu((prev) => !prev)}
+        type="button"
+      >
+        {showDebugMenu ? 'Hide Debug' : 'Debug'}
+      </button>
+
+      {showDebugMenu && (
+        <div className={styles.debugMenu}>
+          <span className={styles.debugTitle}>Debug</span>
+          <label className={styles.toggleRow}>
+            <span>Random questions</span>
+            <input
+              type="checkbox"
+              checked={randomEnabled}
+              onChange={toggleRandom}
+            />
+          </label>
+          <div className={styles.sportPicker}>
+            {sportOptions.map((sport) => (
+              <button
+                key={sport}
+                onClick={() => switchSport(sport)}
+                className={sport === currentSport ? styles.sportButtonActive : styles.sportButton}
+              >
+                {SPORT_LABELS[sport]}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

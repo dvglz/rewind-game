@@ -1,28 +1,38 @@
-import { useTimeline } from '../hooks/useTimeline';
+import { type RefObject } from 'react';
 import styles from './Timeline.module.css';
 
 interface TimelineProps {
+  containerRef: RefObject<HTMLDivElement | null>;
+  rangeStart: number;
+  rangeEnd: number;
+  yearWidth: number;
+  onScroll: () => void;
   disabled?: boolean;
-  onYearChange?: (year: number) => void;
+  indicatorColor?: string;
+  flavorText?: string;
 }
 
-export function Timeline({ disabled, onYearChange }: TimelineProps) {
-  const timeline = useTimeline();
-
+export function Timeline({
+  containerRef,
+  rangeStart,
+  rangeEnd,
+  yearWidth,
+  onScroll,
+  disabled,
+  indicatorColor,
+  flavorText,
+}: TimelineProps) {
   const years = Array.from(
-    { length: timeline.rangeEnd - timeline.rangeStart + 1 },
-    (_, i) => timeline.rangeStart + i
+    { length: rangeEnd - rangeStart + 1 },
+    (_, i) => rangeStart + i
   );
 
   return (
     <div className={styles.wrapper}>
       <div
-        ref={timeline.containerRef}
+        ref={containerRef}
         className={styles.scrollContainer}
-        onScroll={() => {
-          timeline.handleScroll();
-          onYearChange?.(timeline.selectedYear);
-        }}
+        onScroll={onScroll}
         style={{ pointerEvents: disabled ? 'none' : 'auto' }}
       >
         <div style={{ minWidth: '50vw', flexShrink: 0 }} />
@@ -33,6 +43,7 @@ export function Timeline({ disabled, onYearChange }: TimelineProps) {
               <div
                 key={year}
                 className={`${styles.tick} ${isMajor ? styles.tickMajor : styles.tickMinor}`}
+                style={{ width: yearWidth }}
               >
                 <div className={styles.tickLine} />
                 <span className={styles.yearLabel}>{year}</span>
@@ -42,7 +53,13 @@ export function Timeline({ disabled, onYearChange }: TimelineProps) {
         </div>
         <div style={{ minWidth: '50vw', flexShrink: 0 }} />
       </div>
-      <div className={styles.centerIndicator} />
+      <div
+        className={styles.centerIndicator}
+        style={indicatorColor ? { borderBottomColor: indicatorColor } : undefined}
+      />
+      {flavorText && (
+        <p className={styles.flavorText}>{flavorText}</p>
+      )}
     </div>
   );
 }

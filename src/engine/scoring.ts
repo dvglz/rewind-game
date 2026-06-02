@@ -1,11 +1,20 @@
 import type { ResultColor } from '../types';
 
-const MAX_SCORE = 1000;
+export const MAX_SCORE_PER_ROUND = 200;
 const DECAY_RATE = 0.25;
 
 export function calculateScore(diff: number): number {
   const absDiff = Math.abs(diff);
-  return Math.round(MAX_SCORE * Math.exp(-DECAY_RATE * absDiff));
+  return Math.round(MAX_SCORE_PER_ROUND * Math.exp(-DECAY_RATE * absDiff));
+}
+
+export function getMaxPossibleScore(rounds: number): number {
+  return MAX_SCORE_PER_ROUND * rounds;
+}
+
+export function normalizePuzzleScore(totalScore: number, rounds: number): number {
+  if (rounds <= 0) return 0;
+  return Math.round(totalScore / rounds);
 }
 
 export function getResultColor(diff: number): ResultColor {

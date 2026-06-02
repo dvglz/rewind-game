@@ -1,10 +1,12 @@
 .wrapper {
   position: relative;
   width: 100%;
-  height: var(--timeline-height, 300px);
+  height: var(--timeline-height, 380px);
+  max-width: 100%;
 }
 
 .scrollContainer {
+  display: flex;
   width: 100%;
   height: 100%;
   overflow-x: auto;
@@ -22,51 +24,56 @@
   display: flex;
   align-items: flex-end;
   height: 100%;
-  padding-bottom: 48px;
+  padding-bottom: 0;
 }
 
 .tick {
   flex-shrink: 0;
-  width: 60px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 12px;
   scroll-snap-align: center;
 }
 
 .tickLine {
   width: 1px;
   background: var(--color-text);
-  transition: height 0.15s ease;
 }
 
 .tickMinor .tickLine {
-  height: 60px;
-  opacity: 0.3;
+  height: 220px;
+  opacity: 0.18;
 }
 
 .tickMajor .tickLine {
-  height: 100px;
+  height: 260px;
   opacity: 1;
 }
 
+/* 60x40 container, vertical-align middle */
 .yearLabel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 40px;
   font-family: var(--font-display);
-  font-size: 14px;
-  color: var(--color-text);
-  opacity: 0;
-  transition: opacity 0.15s ease;
+  font-weight: 400;
+  font-size: 16px;
+  color: #666;
+  line-height: 1;
 }
 
 .tickMajor .yearLabel {
-  opacity: 1;
+  font-size: 24px;
+  color: var(--color-text);
 }
 
 .centerIndicator {
   position: absolute;
-  bottom: 0;
+  bottom: 10px;
   left: 50%;
   transform: translateX(-50%);
   width: 0;
@@ -74,4 +81,32 @@
   border-left: 12px solid transparent;
   border-right: 12px solid transparent;
   border-bottom: 16px solid var(--color-text);
+  transition: border-bottom-color 0.3s ease;
+}
+
+.flavorText {
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 16px;
+  color: var(--color-text);
+  white-space: nowrap;
+  animation: fadeIn 0.3s ease;
+}
+
+@media (min-width: 900px) {
+  .wrapper {
+    height: 460px;
+  }
+
+  .tickMinor .tickLine {
+    height: 260px;
+  }
+
+  .tickMajor .tickLine {
+    height: 320px;
+  }
 }

@@ -1,19 +1,52 @@
 .header {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 24px var(--space-lg) 12px;
+}
+
+.inner {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-md) var(--space-lg);
+  width: 100%;
+  max-width: 720px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .wordmark {
   font-family: var(--font-display);
+  font-weight: 400;
   font-size: 20px;
-  letter-spacing: 0.05em;
+  line-height: 1;
   text-transform: uppercase;
+  letter-spacing: -0.4px;
 }
 
 .date {
   font-family: var(--font-display);
-  font-size: 14px;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 1;
   text-transform: uppercase;
+}
+
+.sportIcon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+@media (min-width: 900px) {
+  .header {
+    padding: 28px 32px 12px;
+  }
+
+  .inner {
+    max-width: min(80vw, 1200px);
+  }
 }
