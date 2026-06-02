@@ -20,3 +20,20 @@ test('renders the indicator inside the timeline wrapper', () => {
 
   expect(wrapper.contains(indicator)).toBe(true);
 });
+
+test('renders the year label above the tick line', () => {
+  render(
+    <Timeline
+      containerRef={createRef<HTMLDivElement>()}
+      rangeStart={2010}
+      rangeEnd={2016}
+      yearWidth={60}
+      onScroll={() => {}}
+    />
+  );
+
+  const label = screen.getByText('2010');
+  const tick = label.parentElement;
+
+  expect(tick?.firstElementChild?.tagName).toBe('SPAN');
+});

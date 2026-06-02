@@ -1,7 +1,7 @@
 .wrapper {
   position: relative;
   width: 100%;
-  height: var(--timeline-height, 380px);
+  height: var(--timeline-height, 320px);
   max-width: 100%;
 }
 
@@ -22,9 +22,9 @@
 
 .track {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   height: 100%;
-  padding-bottom: 0;
+  padding-top: 20px;
 }
 
 .tick {
@@ -32,8 +32,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
+  justify-content: flex-start;
+  gap: 10px;
   scroll-snap-align: center;
 }
 
@@ -43,12 +43,12 @@
 }
 
 .tickMinor .tickLine {
-  height: 184px;
+  height: 128px;
   opacity: 0.18;
 }
 
 .tickMajor .tickLine {
-  height: 224px;
+  height: 156px;
   opacity: 1;
 }
 
@@ -58,7 +58,7 @@
   align-items: center;
   justify-content: center;
   width: 60px;
-  height: 40px;
+  height: 36px;
   font-family: var(--font-display);
   font-weight: 400;
   font-size: 16px;
@@ -91,30 +91,35 @@
 .centerIndicator {
   position: absolute;
   left: 50%;
-  bottom: -10px;
+  top: 0;
   transform: translateX(-50%);
   width: 0;
   height: 0;
   border-left: 12px solid transparent;
   border-right: 12px solid transparent;
-  border-bottom: 16px solid var(--color-text);
-  transition: border-bottom-color 0.2s ease;
+  border-top: 16px solid var(--color-text);
+  border-bottom: 0;
+  transition: border-top-color 0.2s ease;
 }
 
 @media (min-width: 900px) {
   .wrapper {
-    height: 460px;
+    height: 400px;
+  }
+
+  .track {
+    padding-top: 26px;
   }
 
   .tickMinor .tickLine {
-    height: 260px;
+    height: 176px;
   }
 
   .tickMajor .tickLine {
-    height: 320px;
+    height: 216px;
   }
 
   .centerIndicator {
-    bottom: -2px;
+    top: 2px;
   }
 }

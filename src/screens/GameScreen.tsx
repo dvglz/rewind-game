@@ -100,6 +100,7 @@ export function GameScreen({ onFinish }: GameScreenProps) {
       ? `You're correct. ${revealResult.score} pts.`
       : `Picked ${Math.abs(revealResult.diff)} year${Math.abs(revealResult.diff) > 1 ? 's' : ''} off. ${revealResult.score} pts.`
     : '';
+  const headlineYear = revealResult?.guessedYear ?? pendingResult?.guessedYear ?? timeline.selectedYear;
 
   const colorVar = color === 'correct'
     ? 'var(--color-correct)'
@@ -108,6 +109,7 @@ export function GameScreen({ onFinish }: GameScreenProps) {
       : color === 'wrong'
         ? 'var(--color-wrong)'
         : 'var(--color-text)';
+  const headlineYearColor = revealResult ? colorVar : 'var(--color-text)';
   const indicatorColor = isRevealing ? 'var(--color-correct)' : undefined;
 
   return (
@@ -128,18 +130,22 @@ export function GameScreen({ onFinish }: GameScreenProps) {
               </h2>
             )}
 
-            <div className={`${styles.revealPanel} ${isRevealing ? styles.revealPanelVisible : ''}`}>
-              {revealResult && (
-                <>
-                  <span className={styles.answerYear} style={{ color: colorVar }}>
-                    {revealResult.guessedYear}
-                  </span>
+            <div className={`${styles.revealPanel} ${isRevealing ? styles.revealPanelVisible : styles.revealPanelIdle}`}>
+              <>
+                <span
+                  className={styles.answerYear}
+                  data-testid="headline-year"
+                  style={{ color: headlineYearColor }}
+                >
+                  {headlineYear}
+                </span>
+                {revealResult && (
                   <div className={styles.badgeRow}>
                     <span className={styles.badgeSquare} style={{ background: colorVar }} />
                     <span className={styles.badgeText}>{scoreBadgeText}</span>
                   </div>
-                </>
-              )}
+                )}
+              </>
             </div>
 
             <p className={styles.themeLine}>

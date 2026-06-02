@@ -54,8 +54,8 @@ export function Timeline({
                 className={tickClassName}
                 style={{ width: yearWidth }}
               >
-                <div className={styles.tickLine} />
                 <span className={styles.yearLabel}>{year}</span>
+                <div className={styles.tickLine} />
               </div>
             );
           })}
@@ -65,7 +65,7 @@ export function Timeline({
       <div
         className={styles.centerIndicator}
         data-testid="timeline-indicator"
-        style={indicatorColor ? { borderBottomColor: indicatorColor } : undefined}
+        style={indicatorColor ? { borderTopColor: indicatorColor } : undefined}
       />
     </div>
   );
