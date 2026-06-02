@@ -17,7 +17,7 @@ export function HomeScreen({ onPlay }: HomeScreenProps) {
   // Hidden sport picker — triple tap wordmark to reveal
   const [showSportPicker, setShowSportPicker] = useState(false);
   const tapCount = useRef(0);
-  const tapTimer = useRef<ReturnType<typeof setTimeout>>();
+  const tapTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
   const handleWordmarkTap = () => {
     tapCount.current += 1;
