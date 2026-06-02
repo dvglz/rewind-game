@@ -1,0 +1,84 @@
+.card {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  align-items: center;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  text-transform: uppercase;
+}
+
+.emojiRow {
+  font-size: 28px;
+  letter-spacing: 8px;
+}
+
+.score {
+  font-family: var(--font-display);
+  font-size: 36px;
+}
+
+.streak {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--color-muted);
+}
+
+.roundList {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.roundRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-xs) 0;
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+
+.roundEvent {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: var(--space-md);
+}
+
+.roundDiff {
+  font-family: var(--font-display);
+  font-size: 14px;
+  min-width: 50px;
+  text-align: right;
+}
+
+.shareButton {
+  font-family: var(--font-display);
+  font-size: 18px;
+  padding: var(--space-md) var(--space-2xl);
+  border: none;
+  background: var(--color-text);
+  color: var(--color-bg);
+  border-radius: 999px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  width: 100%;
+}
+
+.copied {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-correct);
+  min-height: 20px;
+}
