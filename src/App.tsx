@@ -3,6 +3,8 @@ import { HomeScreen } from './screens/HomeScreen';
 import { GameScreen } from './screens/GameScreen';
 import { OrderingScreen } from './screens/OrderingScreen';
 import { ResultsScreen } from './screens/ResultsScreen';
+import { loadGameState } from './engine/storage';
+import { getTodayString } from './lib/date';
 import './styles/global.css';
 
 type Screen = 'home' | 'game' | 'ordering' | 'results';
@@ -23,7 +25,18 @@ export function App() {
 
   return (
     <>
-      {screen === 'home' && <HomeScreen onPlay={() => navigate('game')} />}
+      {screen === 'home' && (
+        <HomeScreen
+          onPlay={() => {
+            const todayState = loadGameState(getTodayString());
+            if (todayState?.completed) {
+              navigate('results');
+            } else {
+              navigate('game');
+            }
+          }}
+        />
+      )}
       {screen === 'game' && <GameScreen onFinish={() => navigate('results')} />}
       {screen === 'ordering' && <OrderingScreen onFinish={() => navigate('results')} />}
       {screen === 'results' && <ResultsScreen onHome={() => navigate('home')} />}
