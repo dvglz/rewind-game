@@ -1,0 +1,54 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg);
+  z-index: 10;
+  padding: var(--space-xl);
+  gap: var(--space-lg);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.resultColor {
+  font-size: 48px;
+}
+
+.actualYear {
+  font-family: var(--font-display);
+  font-size: 64px;
+}
+
+.diff {
+  font-family: var(--font-body);
+  font-size: 20px;
+  color: var(--color-muted);
+}
+
+.eventText {
+  font-family: var(--font-body);
+  font-size: 16px;
+  text-align: center;
+  max-width: 300px;
+  color: var(--color-muted);
+}
+
+.nextButton {
+  font-family: var(--font-display);
+  font-size: 18px;
+  padding: var(--space-md) var(--space-xl);
+  border: 2px solid var(--color-text);
+  background: var(--color-text);
+  color: var(--color-bg);
+  border-radius: 999px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
