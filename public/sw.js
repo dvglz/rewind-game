@@ -3,8 +3,6 @@ const ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/fonts/SpecialGothicCondensedOne.woff2',
-  '/fonts/Lora-variable.woff2',
 ];
 
 self.addEventListener('install', (event) => {

@@ -3,7 +3,7 @@ import { Header } from '../components/Header';
 import { ShareCard } from '../components/ShareCard';
 import { Leaderboard } from '../components/Leaderboard';
 import { loadGameState, loadStats } from '../engine/storage';
-import { getTodaysPuzzle } from '../data/puzzles';
+import { getTodaysPuzzle, getSport } from '../data/puzzles';
 import { getTodayString } from '../lib/date';
 
 interface ResultsScreenProps {
@@ -12,7 +12,8 @@ interface ResultsScreenProps {
 
 export function ResultsScreen({ onHome }: ResultsScreenProps) {
   const puzzle = getTodaysPuzzle();
-  const state = useMemo(() => loadGameState(getTodayString()), []);
+  const sport = getSport();
+  const state = useMemo(() => loadGameState(`${getTodayString()}-${sport}`), [sport]);
   const stats = useMemo(() => loadStats(), []);
 
   if (!state || !state.completed) {
@@ -34,6 +35,7 @@ export function ResultsScreen({ onHome }: ResultsScreenProps) {
           results={state.results}
           totalScore={state.totalScore}
           stats={stats}
+          sport={sport}
         />
 
         <Leaderboard puzzleId={puzzle.id} />

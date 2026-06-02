@@ -5,6 +5,7 @@ import { OrderingScreen } from './screens/OrderingScreen';
 import { ResultsScreen } from './screens/ResultsScreen';
 import { loadGameState } from './engine/storage';
 import { getTodayString } from './lib/date';
+import { getSport } from './data/puzzles';
 import './styles/global.css';
 
 type Screen = 'home' | 'game' | 'ordering' | 'results';
@@ -28,7 +29,8 @@ export function App() {
       {screen === 'home' && (
         <HomeScreen
           onPlay={() => {
-            const todayState = loadGameState(getTodayString());
+            const sport = getSport();
+            const todayState = loadGameState(`${getTodayString()}-${sport}`);
             if (todayState?.completed) {
               navigate('results');
             } else {

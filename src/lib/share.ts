@@ -6,7 +6,10 @@ export function generateShareText(
   results: RoundResult[],
   totalScore: number,
   streak: number,
+  sport: 'nba' | 'soccer' = 'nba',
 ): string {
+  const sportEmoji = sport === 'soccer' ? '⚽' : '🏀';
+
   const emojiRow = results
     .map((r) => getResultEmoji(getResultColor(r.diff)))
     .join(' ');
@@ -18,7 +21,7 @@ export function generateShareText(
     })
     .join('  ');
 
-  let text = `🏀 Rewind #${String(puzzleNumber).padStart(3, '0')}\n\n`;
+  let text = `${sportEmoji} Rewind #${String(puzzleNumber).padStart(3, '0')}\n\n`;
   text += `${emojiRow}\n`;
   text += `${diffRow}\n\n`;
   text += `Score: ${totalScore.toLocaleString()}`;

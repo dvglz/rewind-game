@@ -9,7 +9,7 @@
   --color-border: #E5E7EB;
 
   /* Type */
-  --font-display: 'Special Gothic Condensed One', sans-serif;
+  --font-display: 'Special Gothic Expanded One', sans-serif;
   --font-body: 'Lora', serif;
 
   /* Spacing */
@@ -23,6 +23,6 @@
   /* Timeline */
   --timeline-height: 300px;
   --timeline-year-width: 60px;
-  --timeline-range-start: 1996;
+  --timeline-range-start: 1984;
   --timeline-range-end: 2026;
 }

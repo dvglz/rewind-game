@@ -9,9 +9,10 @@ interface ShareCardProps {
   results: RoundResult[];
   totalScore: number;
   stats: PlayerStats;
+  sport?: 'nba' | 'soccer';
 }
 
-export function ShareCard({ puzzleNumber, results, totalScore, stats }: ShareCardProps) {
+export function ShareCard({ puzzleNumber, results, totalScore, stats, sport = 'nba' }: ShareCardProps) {
   const [copied, setCopied] = useState(false);
 
   const emojiRow = results
@@ -19,7 +20,7 @@ export function ShareCard({ puzzleNumber, results, totalScore, stats }: ShareCar
     .join(' ');
 
   const handleShare = async () => {
-    const text = generateShareText(puzzleNumber, results, totalScore, stats.currentStreak);
+    const text = generateShareText(puzzleNumber, results, totalScore, stats.currentStreak, sport);
     const success = await shareResults(text);
     if (success) {
       setCopied(true);

@@ -2,7 +2,7 @@ import { useRef, useState, useCallback, useEffect } from 'react';
 import { vibrateLight, vibrateMedium } from '../lib/haptics';
 
 const YEAR_WIDTH = 60;
-const RANGE_START = 1996;
+const RANGE_START = 1984;
 const RANGE_END = 2026;
 
 export function useTimeline() {
