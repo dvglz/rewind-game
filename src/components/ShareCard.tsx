@@ -1,5 +1,5 @@
 import type { RoundResult, PlayerStats } from '../types';
-import { getResultColor, getResultEmoji } from '../engine/scoring';
+import { getResultColor, getResultEmoji, getResultLabel } from '../engine/scoring';
 import styles from './ShareCard.module.css';
 
 interface ShareCardProps {
@@ -36,9 +36,7 @@ export function ShareCard({ puzzleNumber, results, totalScore, maxScore, stats }
             <span>{getResultEmoji(getResultColor(r.diff))}</span>
             <span className={styles.roundEvent}>Round {i + 1}</span>
             <span className={styles.roundDiff}>
-              {r.diff === 0
-                ? 'Exact'
-                : `${Math.abs(r.diff)}y ${r.diff > 0 ? 'late' : 'early'}`}
+              {getResultLabel(getResultColor(r.diff))}
             </span>
           </div>
         ))}

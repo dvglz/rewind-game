@@ -5,7 +5,7 @@ import { ConfirmButton } from '../components/ConfirmButton';
 import { useGame } from '../hooks/useGame';
 import { useTimeline } from '../hooks/useTimeline';
 import { getTodaysPuzzle } from '../data/puzzles';
-import { getResultColor } from '../engine/scoring';
+import { getResultColor, getResultColorVar, getResultLabel } from '../engine/scoring';
 import { vibrateConfirm, vibrateError, vibrateMedium } from '../lib/haptics';
 import type { RoundResult } from '../types';
 import styles from './GameScreen.module.css';
@@ -42,9 +42,9 @@ export function GameScreen({ onFinish }: GameScreenProps) {
       await timeline.scrollToYear(result.actualYear, true);
 
       const resultColor = getResultColor(result.diff);
-      if (resultColor === 'correct') {
+      if (resultColor === 'perfect' || resultColor === 'great') {
         vibrateConfirm();
-      } else if (resultColor === 'close') {
+      } else if (resultColor === 'ballpark') {
         vibrateMedium();
       } else {
         vibrateError();
@@ -97,18 +97,12 @@ export function GameScreen({ onFinish }: GameScreenProps) {
 
   const scoreBadgeText = revealResult
     ? revealResult.diff === 0
-      ? `You're correct. ${revealResult.score} pts.`
-      : `Picked ${Math.abs(revealResult.diff)} year${Math.abs(revealResult.diff) > 1 ? 's' : ''} off. ${revealResult.score} pts.`
+      ? `${getResultLabel(color!)} · ${revealResult.score} pts.`
+      : `${getResultLabel(color!)} · ${Math.abs(revealResult.diff)}y off · ${revealResult.score} pts.`
     : '';
   const headlineYear = revealResult?.guessedYear ?? pendingResult?.guessedYear ?? timeline.selectedYear;
 
-  const colorVar = color === 'correct'
-    ? 'var(--color-correct)'
-    : color === 'close'
-      ? 'var(--color-close)'
-      : color === 'wrong'
-        ? 'var(--color-wrong)'
-        : 'var(--color-text)';
+  const colorVar = color ? getResultColorVar(color) : 'var(--color-text)';
   const headlineYearColor = revealResult ? colorVar : 'var(--color-text)';
   const indicatorColor = isRevealing ? 'var(--color-correct)' : undefined;
 

@@ -28,7 +28,7 @@ export function useGame(puzzle: Puzzle) {
       if (state.completed || !currentEvent) return null;
 
       const diff = guessedYear - currentEvent.year;
-      const score = calculateScore(diff);
+      const score = calculateScore(diff, state.currentRound);
 
       const result: RoundResult = {
         event: currentEvent,

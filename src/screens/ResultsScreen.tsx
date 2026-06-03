@@ -3,7 +3,7 @@ import { Header } from '../components/Header';
 import { ShareCard } from '../components/ShareCard';
 import { loadGameState, loadStats } from '../engine/storage';
 import { getTodaysPuzzle, getSport } from '../data/puzzles';
-import { normalizePuzzleScore } from '../engine/scoring';
+import { getMaxPossibleScore } from '../engine/scoring';
 import { generateShareText, shareResults, type ShareOutcome } from '../lib/share';
 import { getUser, signInWithEmail } from '../lib/supabase';
 
@@ -21,7 +21,7 @@ export function ResultsScreen({ onHome }: ResultsScreenProps) {
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
-  const maxScore = 1000;
+  const maxScore = getMaxPossibleScore(5);
 
   useEffect(() => {
     void (async () => {
@@ -40,7 +40,7 @@ export function ResultsScreen({ onHome }: ResultsScreenProps) {
     const text = generateShareText(
       puzzle.number,
       state.results,
-      normalizePuzzleScore(state.totalScore, state.results.length),
+      state.totalScore,
       maxScore,
       stats.currentStreak,
       sport,
@@ -89,7 +89,7 @@ export function ResultsScreen({ onHome }: ResultsScreenProps) {
         <ShareCard
           puzzleNumber={puzzle.number}
           results={state.results}
-          totalScore={normalizePuzzleScore(state.totalScore, state.results.length)}
+          totalScore={state.totalScore}
           maxScore={maxScore}
           stats={stats}
           sport={sport}

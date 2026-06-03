@@ -1,33 +1,75 @@
 import type { ResultColor } from '../types';
 
-export const MAX_SCORE_PER_ROUND = 200;
-const DECAY_RATE = 0.25;
+export const ROUND_WEIGHTS = [100, 100, 200, 300, 300] as const;
+const SCORE_FACTORS = [1, 0.82, 0.72, 0.64, 0.57, 0.5, 0.42, 0.35, 0.29] as const;
 
-export function calculateScore(diff: number): number {
+function getRoundWeight(roundIndex: number): number {
+  return ROUND_WEIGHTS[roundIndex] ?? ROUND_WEIGHTS[ROUND_WEIGHTS.length - 1];
+}
+
+export function calculateScore(diff: number, roundIndex = 0): number {
   const absDiff = Math.abs(diff);
-  return Math.round(MAX_SCORE_PER_ROUND * Math.exp(-DECAY_RATE * absDiff));
+  const factor = SCORE_FACTORS[absDiff] ?? 0.2;
+  return Math.round(getRoundWeight(roundIndex) * factor);
 }
 
 export function getMaxPossibleScore(rounds: number): number {
-  return MAX_SCORE_PER_ROUND * rounds;
+  return ROUND_WEIGHTS.slice(0, rounds).reduce((sum, weight) => sum + weight, 0);
 }
 
 export function normalizePuzzleScore(totalScore: number, rounds: number): number {
   if (rounds <= 0) return 0;
-  return Math.round(totalScore / rounds);
+  return Math.min(Math.round(totalScore), getMaxPossibleScore(rounds));
 }
 
 export function getResultColor(diff: number): ResultColor {
   const absDiff = Math.abs(diff);
-  if (absDiff <= 1) return 'correct';
-  if (absDiff <= 3) return 'close';
-  return 'wrong';
+  if (absDiff === 0) return 'perfect';
+  if (absDiff <= 2) return 'great';
+  if (absDiff <= 5) return 'ballpark';
+  if (absDiff <= 8) return 'wrong-era';
+  return 'not-even-close';
 }
 
 export function getResultEmoji(color: ResultColor): string {
   switch (color) {
-    case 'correct': return '🟩';
-    case 'close': return '🟨';
-    case 'wrong': return '🟥';
+    case 'perfect':
+    case 'great':
+      return '🟢';
+    case 'ballpark':
+      return '🟡';
+    case 'wrong-era':
+      return '🟠';
+    case 'not-even-close':
+      return '🔴';
+  }
+}
+
+export function getResultLabel(color: ResultColor): string {
+  switch (color) {
+    case 'perfect':
+      return 'Perfect';
+    case 'great':
+      return 'Great';
+    case 'ballpark':
+      return 'Ballpark';
+    case 'wrong-era':
+      return 'Wrong Era';
+    case 'not-even-close':
+      return 'Not Even Close';
+  }
+}
+
+export function getResultColorVar(color: ResultColor): string {
+  switch (color) {
+    case 'perfect':
+    case 'great':
+      return 'var(--color-correct)';
+    case 'ballpark':
+      return 'var(--color-close)';
+    case 'wrong-era':
+      return 'var(--color-wrong-era)';
+    case 'not-even-close':
+      return 'var(--color-wrong)';
   }
 }

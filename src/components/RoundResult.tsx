@@ -1,5 +1,5 @@
 import type { RoundResult as RoundResultType } from '../types';
-import { getResultColor, getResultEmoji } from '../engine/scoring';
+import { getResultColor, getResultEmoji, getResultLabel } from '../engine/scoring';
 import styles from './RoundResult.module.css';
 
 interface RoundResultProps {
@@ -12,12 +12,7 @@ export function RoundResult({ result, onNext, isLast }: RoundResultProps) {
   const color = getResultColor(result.diff);
   const emoji = getResultEmoji(color);
 
-  const diffText =
-    result.diff === 0
-      ? 'Exact!'
-      : result.diff > 0
-        ? `+${result.diff} year${Math.abs(result.diff) > 1 ? 's' : ''}`
-        : `${result.diff} year${Math.abs(result.diff) > 1 ? 's' : ''}`;
+  const diffText = getResultLabel(color);
 
   return (
     <div className={styles.overlay}>
