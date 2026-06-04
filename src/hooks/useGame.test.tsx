@@ -12,7 +12,7 @@ vi.mock('../engine/storage', () => ({
 const puzzle: Puzzle = {
   id: 'rewind-001',
   number: 1,
-  sport: 'nba',
+  sport: 'american',
   theme: 'NBA Finals',
   events: [
     { text: 'Q1', year: 2001 },

@@ -1,11 +1,29 @@
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useRef, useState, useCallback, useEffect, useMemo } from 'react';
 import { vibrateLight, vibrateMedium } from '../lib/haptics';
+import type { GameEvent } from '../types';
 
 const YEAR_WIDTH = 60;
-const RANGE_START = 1984;
-const RANGE_END = 2026;
+const DEFAULT_RANGE_START = 1980;
+const DEFAULT_RANGE_END = 2026;
+const RANGE_PADDING = 5;
 
-export function useTimeline() {
+function computeRange(events: GameEvent[]): { start: number; end: number } {
+  const currentYear = new Date().getFullYear();
+  const end = Math.max(currentYear, DEFAULT_RANGE_END);
+  if (events.length === 0) return { start: DEFAULT_RANGE_START, end };
+  const minYear = Math.min(...events.map(e => e.year));
+  // Only expand past default if a question is older; round down to nearest 5 with padding
+  const start = minYear < DEFAULT_RANGE_START
+    ? Math.floor((minYear - RANGE_PADDING) / 5) * 5
+    : DEFAULT_RANGE_START;
+  return { start, end };
+}
+
+export function useTimeline(events: GameEvent[] = []) {
+  const range = useMemo(() => computeRange(events), [events]);
+  const RANGE_START = range.start;
+  const RANGE_END = range.end;
+
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedYear, setSelectedYear] = useState(RANGE_END);
   const lastHapticYear = useRef(RANGE_END);

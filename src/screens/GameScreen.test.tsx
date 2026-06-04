@@ -43,7 +43,7 @@ beforeEach(() => {
   vi.mocked(getTodaysPuzzle).mockReturnValue({
     id: 'puzzle-1',
     number: 1,
-    sport: 'nba',
+    sport: 'american',
     theme: 'NBA Finals',
     events: [{ text: 'LeBron makes The Block', year: 2016 }],
   });

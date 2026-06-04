@@ -54,7 +54,7 @@ export function App() {
           }}
         />
       )}
-      {screen === 'game' && <GameScreen onFinish={() => navigate('results')} />}
+      {screen === 'game' && <GameScreen onFinish={() => navigate('results')} onHome={() => navigate('home')} />}
       {screen === 'ordering' && <OrderingScreen onFinish={() => navigate('results')} />}
       {screen === 'results' && <ResultsScreen onHome={() => navigate('home')} />}
     </>

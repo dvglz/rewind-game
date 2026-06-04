@@ -9,9 +9,9 @@ export function generateShareText(
   totalScore: number,
   maxScore: number,
   streak: number,
-  sport: 'nba' | 'soccer' | 'mlb' = 'nba',
+  sport: 'american' | 'soccer' = 'american',
 ): string {
-  const sportEmoji = sport === 'soccer' ? '⚽' : sport === 'mlb' ? '⚾' : '🏀';
+  const sportEmoji = sport === 'soccer' ? '⚽' : '🇺🇸';
 
   const emojiRow = results
     .map((r) => getResultEmoji(getResultColor(r.diff)))

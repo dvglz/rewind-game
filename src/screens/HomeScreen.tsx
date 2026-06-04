@@ -17,7 +17,7 @@ export function HomeScreen({ onPlay }: HomeScreenProps) {
   const [showDebugMenu, setShowDebugMenu] = useState(false);
   const [randomEnabled, setRandomEnabled] = useState(() => isRandomModeEnabled());
 
-  const sportOptions = useMemo(() => ['nba', 'soccer', 'mlb'] as Sport[], []);
+  const sportOptions = useMemo(() => ['american', 'soccer'] as Sport[], []);
 
   const switchSport = (sport: Sport) => {
     const url = new URL(window.location.href);

@@ -4,9 +4,10 @@ import styles from './Header.module.css';
 
 interface HeaderProps {
   sport?: Sport;
+  onHome?: () => void;
 }
 
-export function Header({ sport }: HeaderProps) {
+export function Header({ sport, onHome }: HeaderProps) {
   const today = new Date();
   const formatted = today.toLocaleDateString('en-US', {
     month: 'short',
@@ -18,7 +19,13 @@ export function Header({ sport }: HeaderProps) {
     <header className={styles.header}>
       <div className={styles.inner}>
         <div className={styles.brand}>
-          <span className={styles.wordmark}>REWIND</span>
+          <span
+            className={styles.wordmark}
+            onClick={onHome}
+            style={onHome ? { cursor: 'pointer' } : undefined}
+          >
+            REWIND
+          </span>
           {sport && (
             <span className={styles.sportIcon} aria-hidden="true">
               {SPORT_ICONS[sport]}

@@ -8,7 +8,7 @@ interface ShareCardProps {
   totalScore: number;
   maxScore: number;
   stats: PlayerStats;
-  sport?: 'nba' | 'soccer' | 'mlb';
+  sport?: 'american' | 'soccer';
 }
 
 export function ShareCard({ puzzleNumber, results, totalScore, maxScore, stats }: ShareCardProps) {

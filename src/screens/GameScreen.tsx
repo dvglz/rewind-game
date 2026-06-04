@@ -12,12 +12,13 @@ import styles from './GameScreen.module.css';
 
 interface GameScreenProps {
   onFinish: () => void;
+  onHome?: () => void;
 }
 
-export function GameScreen({ onFinish }: GameScreenProps) {
+export function GameScreen({ onFinish, onHome }: GameScreenProps) {
   const puzzle = getTodaysPuzzle();
   const game = useGame(puzzle);
-  const timeline = useTimeline();
+  const timeline = useTimeline(puzzle.events);
   const [pendingResult, setPendingResult] = useState<RoundResult | null>(null);
   const [revealResult, setRevealResult] = useState<RoundResult | null>(null);
   const [isResolving, setIsResolving] = useState(false);
@@ -108,7 +109,7 @@ export function GameScreen({ onFinish }: GameScreenProps) {
 
   return (
     <div className={styles.screen}>
-      <Header sport={puzzle.sport} />
+      <Header sport={puzzle.sport} onHome={onHome} />
 
       <div className={styles.topSection}>
         <div className={styles.contentWidth}>

@@ -73,7 +73,7 @@ export function ResultsScreen({ onHome }: ResultsScreenProps) {
       alignItems: 'center',
       overflow: 'hidden',
     }}>
-      <Header sport={sport} />
+      <Header sport={sport} onHome={onHome} />
       <div style={{
         flex: 1,
         width: '100%',
