@@ -11,6 +11,8 @@ html {
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior: none;
+  color: var(--color-text);
+  background: var(--color-bg);
 }
 
 body {

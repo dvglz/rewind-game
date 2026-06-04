@@ -7,6 +7,7 @@ import { clearGameState } from './engine/storage';
 import { beginPuzzleSession, getSport, getTodaysPuzzle } from './data/puzzles';
 import { useWebHaptics } from 'web-haptics/react';
 import { initHaptics } from './lib/haptics';
+import { useThemePreference } from './hooks/useThemePreference';
 import './styles/global.css';
 
 type Screen = 'home' | 'game' | 'ordering' | 'results';
@@ -15,6 +16,7 @@ export function App() {
   const { trigger } = useWebHaptics({
     debug: typeof navigator !== 'undefined' && !('vibrate' in navigator),
   });
+  useThemePreference();
 
   useEffect(() => {
     initHaptics(trigger);

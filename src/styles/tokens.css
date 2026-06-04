@@ -1,12 +1,15 @@
 :root {
+  color-scheme: light;
+
   /* Colors */
   --color-bg: #FFFFFF;
-  --color-text: #000000;
+  --color-surface-elevated: rgba(255, 255, 255, 0.96);
+  --color-text: #17181C;
   --color-correct: #22C55E;
   --color-close: #EAB308;
   --color-wrong-era: #F97316;
   --color-wrong: #EF4444;
-  --color-muted: #9CA3AF;
+  --color-muted: #666A73;
   --color-border: #E5E7EB;
 
   /* Type */
@@ -26,4 +29,14 @@
   --timeline-year-width: 60px;
   --timeline-range-start: 1984;
   --timeline-range-end: 2026;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-bg: #17181C;
+  --color-surface-elevated: rgba(31, 33, 39, 0.96);
+  --color-text: #F3EEE4;
+  --color-muted: #A4A8B3;
+  --color-border: #3A3D45;
 }
