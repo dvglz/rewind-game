@@ -1,8 +1,10 @@
 .wrapper {
   position: relative;
   width: 100%;
-  height: var(--timeline-height, 320px);
+  height: min(var(--timeline-height, 320px), 100%);
   max-width: 100%;
+  mask-image: linear-gradient(to right, transparent 0%, black 60px, black calc(100% - 60px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 60px, black calc(100% - 60px), transparent 100%);
 }
 
 .scrollContainer {

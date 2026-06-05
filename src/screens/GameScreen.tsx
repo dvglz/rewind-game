@@ -6,7 +6,7 @@ import { ConfirmButton } from '../components/ConfirmButton';
 import { useGame } from '../hooks/useGame';
 import { useTimeline } from '../hooks/useTimeline';
 import { getTodaysPuzzle } from '../data/puzzles';
-import { getResultColor, getResultColorVar, getResultLabel } from '../engine/scoring';
+import { getResultColor, getResultColorVar, getResultLabel, ROUND_WEIGHTS } from '../engine/scoring';
 import { vibrateConfirm, vibrateError, vibrateMedium } from '../lib/haptics';
 import type { RoundResult } from '../types';
 import styles from './GameScreen.module.css';
@@ -36,10 +36,17 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
   const [badgeVisible, setBadgeVisible] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isPerfectReveal, setIsPerfectReveal] = useState(false);
+  const [displayedScore, setDisplayedScore] = useState(0);
+  const [scorePopping, setScorePopping] = useState(false);
+  const [showPointsToast, setShowPointsToast] = useState(false);
+  const [toastScore, setToastScore] = useState(0);
+  const [toastColor, setToastColor] = useState('var(--color-text)');
+  const [toastTextDark, setToastTextDark] = useState(false);
   const spotlightYearRef = useRef<number | null>(null);
   const revealTimer = useRef<ReturnType<typeof setTimeout>>(null);
   const flashTimer = useRef<ReturnType<typeof setTimeout>>(null);
   const flashOffTimer = useRef<ReturnType<typeof setTimeout>>(null);
+  const rafRef = useRef<number | null>(null);
   const activeResult = revealResult ?? pendingResult;
   const displayRound = activeResult
     ? Math.min(game.currentRound, game.totalRounds)
@@ -117,6 +124,30 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
     spotlightYearRef.current = null;
     setMicropause(false);
 
+    setToastScore(result.score);
+    setToastColor(resultColorVar);
+    setToastTextDark(resultColor === 'ballpark');
+    setShowPointsToast(true);
+
+    // Count up displayedScore to new totalScore
+    const startScore = displayedScore;
+    const endScore = game.totalScore + result.score;
+    const duration = 400;
+    const startTime = performance.now();
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const t = Math.min(elapsed / duration, 1);
+      setDisplayedScore(Math.round(startScore + (endScore - startScore) * t));
+      if (t < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        rafRef.current = null;
+        setScorePopping(true);
+      }
+    };
+    rafRef.current = requestAnimationFrame(tick);
+
     if (isPerfect) {
       setIsPerfectReveal(true);
     }
@@ -127,7 +158,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
     revealTimer.current = setTimeout(() => {
       setShowRevealText(true);
     }, 250);
-  }, [game, timeline]);
+  }, [game, timeline, displayedScore]);
 
   const handleNext = useCallback(() => {
     setPendingResult(null);
@@ -139,6 +170,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
     setIsPerfectReveal(false);
     setMicropause(false);
     setFlashState('off');
+    setShowPointsToast(false);
     setFlashColor(null);
     setSpotlightActive(false);
     setSpotlightCenter(null);
@@ -146,6 +178,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
     if (revealTimer.current) clearTimeout(revealTimer.current);
     if (flashTimer.current) clearTimeout(flashTimer.current);
     if (flashOffTimer.current) clearTimeout(flashOffTimer.current);
+    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
 
     if (game.isComplete) {
       onFinish();
@@ -174,6 +207,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
     if (revealTimer.current) clearTimeout(revealTimer.current);
     if (flashTimer.current) clearTimeout(flashTimer.current);
     if (flashOffTimer.current) clearTimeout(flashOffTimer.current);
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
   }, []);
 
   if (game.isComplete && !activeResult && !isResolving) {
@@ -183,8 +217,8 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
 
   const scoreBadgeText = revealResult
     ? revealResult.diff === 0
-      ? `${getResultLabel(color!)} · ${revealResult.score} pts.`
-      : `${getResultLabel(color!)} · ${Math.abs(revealResult.diff)}y off · ${revealResult.score} pts.`
+      ? getResultLabel(color!)
+      : `${getResultLabel(color!)} · ${Math.abs(revealResult.diff)} ${Math.abs(revealResult.diff) === 1 ? 'YEAR' : 'YEARS'} ${revealResult.diff < 0 ? 'EARLY' : 'LATE'}`
     : '';
   const headlineYear = revealResult?.guessedYear ?? pendingResult?.guessedYear ?? timeline.selectedYear;
 
@@ -214,7 +248,15 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
           style={{ '--flash-color': flashColor ?? 'transparent' } as CSSProperties}
         />
       )}
-      <Header sport={puzzle.sport} onHome={onHome} />
+      <Header
+        sport={puzzle.sport}
+        onHome={onHome}
+        gameNumber={puzzle.number}
+        rightText={`${displayedScore} PTS`}
+        rightLabel="Score:"
+        scorePopping={scorePopping}
+        onScoreAnimationEnd={() => setScorePopping(false)}
+      />
 
       <div className={styles.topSection}>
         <div className={styles.contentWidth}>
@@ -223,7 +265,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
               micropause ? styles.micropauseDim : ''
             } ${!micropause && revealResult ? styles.micropauseRestore : ''}`}
           >
-            Question {displayRound}/{game.totalRounds}
+            Question {displayRound} of {game.totalRounds}
           </p>
           <div className={styles.promptShell}>
             {!!displayText && (
@@ -252,7 +294,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
               </div>
               {revealResult && (
                 <div className={`${styles.badgeRow} ${badgeVisible ? styles.badgeSlideUp : ''}`}>
-                  <span className={styles.badgeSquare} style={{ background: colorVar }} />
+                  <span className={styles.badgeDot} style={{ background: colorVar }} aria-hidden="true" />
                   <span className={styles.badgeText}>{scoreBadgeText}</span>
                 </div>
               )}
@@ -278,6 +320,15 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
           spotlightCenter={spotlightCenter}
           spotlightActive={spotlightActive}
         />
+        {showPointsToast && (
+          <span
+            className={styles.pointsToast}
+            style={{ background: toastColor, color: toastTextDark ? '#000' : '#fff' }}
+            onAnimationEnd={() => setShowPointsToast(false)}
+          >
+            +{toastScore} PTS
+          </span>
+        )}
       </div>
 
       <div className={styles.footerSlot}>
@@ -289,12 +340,17 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
           ) : null}
         </div>
         <div className={styles.buttonRail}>
+          {!isRevealing && !isResolving && (ROUND_WEIGHTS[game.currentRound] ?? 0) > 100 && (
+            <p className={styles.worthLabel}>
+              Worth {(ROUND_WEIGHTS[game.currentRound] ?? 0) / 100}x points
+            </p>
+          )}
           {isRevealing ? (
             <button
               onClick={handleNext}
               className={styles.nextButton}
             >
-              {game.isComplete ? 'See results' : 'Next round'}
+              {game.isComplete ? 'See Results' : 'Next Round'}
             </button>
           ) : !isResolving ? (
             <ConfirmButton
