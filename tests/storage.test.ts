@@ -23,6 +23,42 @@ describe('game state persistence', () => {
   });
 });
 
+describe('resume detection', () => {
+  it('detects in-progress game', () => {
+    const state = {
+      puzzleId: '2026-06-03-american',
+      currentRound: 2,
+      results: [],
+      totalScore: 1500,
+      completed: false,
+    };
+    saveGameState(state);
+    const loaded = loadGameState('2026-06-03-american');
+    expect(loaded).not.toBeNull();
+    expect(loaded!.completed).toBe(false);
+    expect(loaded!.currentRound).toBe(2);
+  });
+
+  it('detects completed game', () => {
+    const state = {
+      puzzleId: '2026-06-03-american',
+      currentRound: 5,
+      results: [],
+      totalScore: 5000,
+      completed: true,
+    };
+    saveGameState(state);
+    const loaded = loadGameState('2026-06-03-american');
+    expect(loaded).not.toBeNull();
+    expect(loaded!.completed).toBe(true);
+  });
+
+  it('returns null for no saved game', () => {
+    const loaded = loadGameState('nonexistent-puzzle');
+    expect(loaded).toBeNull();
+  });
+});
+
 describe('player stats', () => {
   it('returns default stats when none saved', () => {
     const stats = loadStats();
