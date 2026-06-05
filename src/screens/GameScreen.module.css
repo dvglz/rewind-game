@@ -1,7 +1,9 @@
 .screen {
+  position: relative;
   height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .topSection {
@@ -58,6 +60,42 @@
   animation: fadeIn 0.25s ease;
 }
 
+.flashOverlay {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 18%, color-mix(in srgb, var(--flash-color) 72%, white 28%) 0%, transparent 34%),
+    radial-gradient(circle at 50% 42%, var(--flash-color) 0%, transparent 72%);
+  filter: blur(18px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10;
+  transition: opacity 0.08s ease;
+}
+
+.flashOverlayVisible {
+  opacity: 0.1;
+}
+
+.flashOverlayFading {
+  opacity: 0;
+  transition: opacity 0.24s ease;
+}
+
+.flashOverlayPerfect {
+  opacity: 0.14;
+}
+
+.micropauseDim {
+  opacity: 0.35;
+  transition: opacity 0.2s ease;
+}
+
+.micropauseRestore {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
 .answerYear {
   font-family: var(--font-display);
   font-weight: 400;
@@ -66,14 +104,30 @@
   display: block;
 }
 
+.yearWrap {
+  display: inline-block;
+}
+
+.yearPop {
+  animation: perfectPop 0.4s cubic-bezier(0.22, 1.6, 0.36, 1) forwards;
+}
+
 .badgeRow {
   margin-top: 12px;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   padding: 0 12px;
   min-height: 22px;
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.badgeSlideUp {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.16s ease, transform 0.18s ease;
 }
 
 .badgeSquare {
@@ -142,11 +196,36 @@
   max-width: 90%;
   margin: 0 auto 12px;
   opacity: 0;
+  transform: translateY(10px);
 }
 
 .revealDetailVisible {
   opacity: 1;
-  animation: fadeIn 0.25s ease;
+  transform: translateY(0);
+  animation: fadeInUp 0.28s ease;
+}
+
+.yearShimmer {
+  -webkit-text-fill-color: transparent;
+  background: linear-gradient(
+    90deg,
+    var(--color-correct) 0%,
+    var(--color-correct) 25%,
+    #bbf7d0 42%,
+    #f0fdf4 50%,
+    #bbf7d0 58%,
+    var(--color-correct) 75%,
+    var(--color-correct) 100%
+  );
+  background-size: 250% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  animation: shimmerLTR 0.9s 0.3s linear infinite;
+}
+
+.indicatorDimmed {
+  border-top-color: var(--color-muted) !important;
+  transition: border-top-color 0.15s ease;
 }
 
 .nextButton {
@@ -164,6 +243,56 @@
 
 .nextButton:active {
   transform: scale(0.98);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes perfectPop {
+  0% {
+    transform: scale(1);
+  }
+
+  30% {
+    transform: scale(1.15);
+  }
+
+  60% {
+    transform: scale(0.97);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmerLTR {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: -30% 0;
+  }
 }
 
 @media (min-width: 900px) {

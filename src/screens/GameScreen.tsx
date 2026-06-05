@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, type CSSProperties } from 'react';
+import { Confetti } from '../components/Confetti';
 import { Header } from '../components/Header';
 import { Timeline } from '../components/Timeline';
 import { ConfirmButton } from '../components/ConfirmButton';
@@ -9,6 +10,10 @@ import { getResultColor, getResultColorVar, getResultLabel } from '../engine/sco
 import { vibrateConfirm, vibrateError, vibrateMedium } from '../lib/haptics';
 import type { RoundResult } from '../types';
 import styles from './GameScreen.module.css';
+
+const sleep = (ms: number) => new Promise<void>((resolve) => {
+  window.setTimeout(resolve, ms);
+});
 
 interface GameScreenProps {
   onFinish: () => void;
@@ -23,7 +28,18 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
   const [revealResult, setRevealResult] = useState<RoundResult | null>(null);
   const [isResolving, setIsResolving] = useState(false);
   const [showRevealText, setShowRevealText] = useState(false);
+  const [spotlightCenter, setSpotlightCenter] = useState<number | null>(null);
+  const [spotlightActive, setSpotlightActive] = useState(false);
+  const [flashColor, setFlashColor] = useState<string | null>(null);
+  const [flashState, setFlashState] = useState<'off' | 'on' | 'fading'>('off');
+  const [micropause, setMicropause] = useState(false);
+  const [badgeVisible, setBadgeVisible] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [isPerfectReveal, setIsPerfectReveal] = useState(false);
+  const spotlightYearRef = useRef<number | null>(null);
   const revealTimer = useRef<ReturnType<typeof setTimeout>>(null);
+  const flashTimer = useRef<ReturnType<typeof setTimeout>>(null);
+  const flashOffTimer = useRef<ReturnType<typeof setTimeout>>(null);
   const activeResult = revealResult ?? pendingResult;
   const displayRound = activeResult
     ? Math.min(game.currentRound, game.totalRounds)
@@ -35,30 +51,82 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
 
   const handleConfirm = useCallback(async () => {
     const result = game.submitGuess(timeline.selectedYear);
-    if (result) {
-      setPendingResult(result);
-      setIsResolving(true);
-      setShowRevealText(false);
+    if (!result) return;
 
-      await timeline.scrollToYear(result.actualYear, true);
+    setPendingResult(result);
+    setIsResolving(true);
+    setShowRevealText(false);
+    setBadgeVisible(false);
+    setIsPerfectReveal(false);
+    setShowConfetti(false);
+    spotlightYearRef.current = null;
 
-      const resultColor = getResultColor(result.diff);
-      if (resultColor === 'perfect' || resultColor === 'great') {
-        vibrateConfirm();
-      } else if (resultColor === 'ballpark') {
-        vibrateMedium();
-      } else {
-        vibrateError();
-      }
+    const resultColor = getResultColor(result.diff);
+    const resultColorVar = getResultColorVar(resultColor);
+    const isPerfect = result.diff === 0;
 
-      setRevealResult(result);
-      setPendingResult(null);
-      setIsResolving(false);
+    setMicropause(true);
+    await sleep(280);
 
-      revealTimer.current = setTimeout(() => {
-        setShowRevealText(true);
-      }, 250);
+    if (isPerfect) {
+      setShowConfetti(true);
+    } else {
+      setSpotlightCenter(timeline.selectedYear);
+      setSpotlightActive(true);
+      await timeline.scrollToYear(
+        result.actualYear,
+        true,
+        false,
+        (centerX: number) => {
+          const spacer = timeline.containerRef.current
+            ? timeline.containerRef.current.clientWidth / 2
+            : 0;
+          const posInTrack = centerX - spacer;
+          const yearFloat = (posInTrack - timeline.yearWidth / 2) / timeline.yearWidth + timeline.rangeStart;
+          const year = Math.round(yearFloat);
+          if (spotlightYearRef.current !== year) {
+            spotlightYearRef.current = year;
+            setSpotlightCenter(year);
+          }
+        },
+      );
     }
+
+    setFlashColor(resultColorVar);
+    setFlashState('on');
+    flashTimer.current = setTimeout(() => {
+      setFlashState('fading');
+    }, isPerfect ? 150 : 120);
+    flashOffTimer.current = setTimeout(() => {
+      setFlashState('off');
+    }, isPerfect ? 650 : 520);
+
+    if (resultColor === 'perfect' || resultColor === 'great') {
+      vibrateConfirm();
+    } else if (resultColor === 'ballpark') {
+      vibrateMedium();
+    } else {
+      vibrateError();
+    }
+
+    setRevealResult(result);
+    setPendingResult(null);
+    setIsResolving(false);
+    setSpotlightActive(false);
+    setSpotlightCenter(null);
+    spotlightYearRef.current = null;
+    setMicropause(false);
+
+    if (isPerfect) {
+      setIsPerfectReveal(true);
+    }
+
+    await sleep(150);
+    setBadgeVisible(true);
+
+    revealTimer.current = setTimeout(() => {
+      setShowRevealText(true);
+    }, 250);
   }, [game, timeline]);
 
   const handleNext = useCallback(() => {
@@ -66,7 +134,18 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
     setRevealResult(null);
     setIsResolving(false);
     setShowRevealText(false);
+    setBadgeVisible(false);
+    setShowConfetti(false);
+    setIsPerfectReveal(false);
+    setMicropause(false);
+    setFlashState('off');
+    setFlashColor(null);
+    setSpotlightActive(false);
+    setSpotlightCenter(null);
+    spotlightYearRef.current = null;
     if (revealTimer.current) clearTimeout(revealTimer.current);
+    if (flashTimer.current) clearTimeout(flashTimer.current);
+    if (flashOffTimer.current) clearTimeout(flashOffTimer.current);
 
     if (game.isComplete) {
       onFinish();
@@ -91,6 +170,12 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [isRevealing, handleNext]);
 
+  useEffect(() => () => {
+    if (revealTimer.current) clearTimeout(revealTimer.current);
+    if (flashTimer.current) clearTimeout(flashTimer.current);
+    if (flashOffTimer.current) clearTimeout(flashOffTimer.current);
+  }, []);
+
   if (game.isComplete && !activeResult && !isResolving) {
     onFinish();
     return null;
@@ -104,43 +189,73 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
   const headlineYear = revealResult?.guessedYear ?? pendingResult?.guessedYear ?? timeline.selectedYear;
 
   const colorVar = color ? getResultColorVar(color) : 'var(--color-text)';
-  const headlineYearColor = revealResult ? colorVar : 'var(--color-text)';
-  const indicatorColor = isRevealing ? 'var(--color-correct)' : undefined;
+  const headlineYearColor = isResolving
+    ? 'var(--color-text)'
+    : revealResult
+      ? colorVar
+      : 'var(--color-text)';
+  const indicatorColor = isResolving
+    ? 'var(--color-text)'
+    : isRevealing
+      ? 'var(--color-correct)'
+      : undefined;
 
   return (
     <div className={styles.screen}>
+      {flashState !== 'off' && (
+        <div
+          className={`${styles.flashOverlay} ${
+            flashState === 'on'
+              ? isPerfectReveal || (pendingResult && pendingResult.diff === 0)
+                ? styles.flashOverlayPerfect
+                : styles.flashOverlayVisible
+              : styles.flashOverlayFading
+          }`}
+          style={{ '--flash-color': flashColor ?? 'transparent' } as CSSProperties}
+        />
+      )}
       <Header sport={puzzle.sport} onHome={onHome} />
 
       <div className={styles.topSection}>
         <div className={styles.contentWidth}>
-          <p className={styles.roundCounter}>
+          <p
+            className={`${styles.roundCounter} ${
+              micropause ? styles.micropauseDim : ''
+            } ${!micropause && revealResult ? styles.micropauseRestore : ''}`}
+          >
             Question {displayRound}/{game.totalRounds}
           </p>
           <div className={styles.promptShell}>
             {!!displayText && (
               <h2
-                className={`${styles.question} ${activeResult ? '' : styles.questionFresh}`}
+                className={`${styles.question} ${activeResult ? '' : styles.questionFresh} ${
+                  micropause ? styles.micropauseDim : ''
+                } ${!micropause && revealResult ? styles.micropauseRestore : ''}`}
               >
                 {displayText}
               </h2>
             )}
 
             <div className={`${styles.revealPanel} ${isRevealing ? styles.revealPanelVisible : styles.revealPanelIdle}`}>
-              <>
+              <div className={isPerfectReveal ? `${styles.yearWrap} ${styles.yearPop}` : styles.yearWrap}>
                 <span
-                  className={styles.answerYear}
+                  className={`${styles.answerYear} ${
+                    micropause ? styles.micropauseDim : ''
+                  } ${!micropause && revealResult ? styles.micropauseRestore : ''} ${
+                    isPerfectReveal ? styles.yearShimmer : ''
+                  }`}
                   data-testid="headline-year"
-                  style={{ color: headlineYearColor }}
+                  style={!isPerfectReveal ? { color: headlineYearColor } : undefined}
                 >
                   {headlineYear}
                 </span>
-                {revealResult && (
-                  <div className={styles.badgeRow}>
-                    <span className={styles.badgeSquare} style={{ background: colorVar }} />
-                    <span className={styles.badgeText}>{scoreBadgeText}</span>
-                  </div>
-                )}
-              </>
+              </div>
+              {revealResult && (
+                <div className={`${styles.badgeRow} ${badgeVisible ? styles.badgeSlideUp : ''}`}>
+                  <span className={styles.badgeSquare} style={{ background: colorVar }} />
+                  <span className={styles.badgeText}>{scoreBadgeText}</span>
+                </div>
+              )}
             </div>
 
             <p className={styles.themeLine}>
@@ -160,6 +275,8 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
           disabled={isLocked}
           revealedYear={revealResult?.actualYear ?? null}
           indicatorColor={indicatorColor}
+          spotlightCenter={spotlightCenter}
+          spotlightActive={spotlightActive}
         />
       </div>
 
@@ -187,6 +304,8 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
           ) : null}
         </div>
       </div>
+
+      <Confetti active={showConfetti} onComplete={() => setShowConfetti(false)} />
     </div>
   );
 }

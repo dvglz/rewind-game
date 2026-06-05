@@ -2,6 +2,24 @@ import { useRef, useState, useCallback, useEffect, useMemo } from 'react';
 import { vibrateLight, vibrateMedium } from '../lib/haptics';
 import type { GameEvent } from '../types';
 
+export function easeOvershoot(t: number): number {
+  if (t < 0.18) {
+    const p = t / 0.18;
+    return 0.05 * p * p;
+  }
+  if (t < 0.94) {
+    const p = (t - 0.18) / 0.76;
+    return 0.05 + (1.008 - 0.05) * (1 - Math.pow(1 - p, 3));
+  }
+
+  const p = (t - 0.94) / 0.06;
+  return 1.008 + (1.0 - 1.008) * (1 - Math.pow(1 - p, 2));
+}
+
+export function getScrollDuration(yearDiff: number): number {
+  return Math.min(2400, Math.max(900, Math.abs(yearDiff) * 160));
+}
+
 const YEAR_WIDTH = 60;
 const DEFAULT_RANGE_START = 1980;
 const DEFAULT_RANGE_END = 2026;
@@ -26,6 +44,7 @@ export function useTimeline(events: GameEvent[] = []) {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedYear, setSelectedYear] = useState(RANGE_END);
+  const selectedYearRef = useRef(RANGE_END);
   const lastHapticYear = useRef(RANGE_END);
   const animationFrameRef = useRef<number | null>(null);
   const animationRejectRef = useRef<(() => void) | null>(null);
@@ -33,6 +52,7 @@ export function useTimeline(events: GameEvent[] = []) {
 
   const syncYear = useCallback((year: number) => {
     setSelectedYear(year);
+    selectedYearRef.current = year;
     lastHapticYear.current = year;
   }, []);
 
@@ -51,6 +71,7 @@ export function useTimeline(events: GameEvent[] = []) {
     year: number,
     smooth = true,
     suppressFeedback = false,
+    spotlightCallback?: (centerX: number) => void,
   ) => {
     const container = containerRef.current;
     if (!container) return Promise.resolve();
@@ -86,14 +107,9 @@ export function useTimeline(events: GameEvent[] = []) {
         return;
       }
 
-      const duration = Math.min(1900, Math.max(1150, Math.abs(distance) * 5.5));
+      const yearDiff = Math.abs(year - selectedYearRef.current);
+      const duration = getScrollDuration(yearDiff);
       const startedAt = performance.now();
-
-      const easeInOutCubic = (t: number) => (
-        t < 0.5
-          ? 4 * t * t * t
-          : 1 - Math.pow(-2 * t + 2, 3) / 2
-      );
 
       animationRejectRef.current = () => {
         resolve();
@@ -102,8 +118,13 @@ export function useTimeline(events: GameEvent[] = []) {
       const tick = (now: number) => {
         const elapsed = now - startedAt;
         const progress = Math.min(1, elapsed / duration);
-        const eased = easeInOutCubic(progress);
+        const eased = easeOvershoot(progress);
         container.scrollLeft = start + distance * eased;
+
+        if (spotlightCallback) {
+          const currentCenterX = container.scrollLeft + container.clientWidth / 2;
+          spotlightCallback(currentCenterX);
+        }
 
         if (progress < 1) {
           animationFrameRef.current = window.requestAnimationFrame(tick);
@@ -119,7 +140,7 @@ export function useTimeline(events: GameEvent[] = []) {
 
       animationFrameRef.current = window.requestAnimationFrame(tick);
     });
-  }, [cancelAnimation, syncYear]);
+  }, [RANGE_START, cancelAnimation, syncYear]);
 
   const handleScroll = useCallback(() => {
     const container = containerRef.current;
@@ -132,6 +153,7 @@ export function useTimeline(events: GameEvent[] = []) {
     const clamped = Math.max(RANGE_START, Math.min(RANGE_END, yearIndex + RANGE_START));
 
     setSelectedYear(clamped);
+    selectedYearRef.current = clamped;
 
     if (suppressScrollFeedbackRef.current) {
       lastHapticYear.current = clamped;
@@ -153,13 +175,13 @@ export function useTimeline(events: GameEvent[] = []) {
       }
       lastHapticYear.current = clamped;
     }
-  }, []);
+  }, [RANGE_END, RANGE_START]);
 
   useEffect(() => {
     requestAnimationFrame(() => {
       void scrollToYear(RANGE_END, false, true);
     });
-  }, [scrollToYear]);
+  }, [RANGE_END, scrollToYear]);
 
   useEffect(() => cancelAnimation, [cancelAnimation]);
 

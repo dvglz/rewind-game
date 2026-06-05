@@ -10,6 +10,8 @@ interface TimelineProps {
   disabled?: boolean;
   revealedYear?: number | null;
   indicatorColor?: string;
+  spotlightCenter?: number | null;
+  spotlightActive?: boolean;
 }
 
 export function Timeline({
@@ -21,6 +23,8 @@ export function Timeline({
   disabled,
   revealedYear,
   indicatorColor,
+  spotlightCenter,
+  spotlightActive,
 }: TimelineProps) {
   const years = Array.from(
     { length: rangeEnd - rangeStart + 1 },
@@ -33,7 +37,10 @@ export function Timeline({
         ref={containerRef}
         className={styles.scrollContainer}
         onScroll={onScroll}
-        style={{ pointerEvents: disabled ? 'none' : 'auto' }}
+        style={{
+          pointerEvents: disabled ? 'none' : 'auto',
+          scrollSnapType: disabled || spotlightActive ? 'none' : 'x mandatory',
+        }}
       >
         <div style={{ minWidth: '50vw', flexShrink: 0 }} />
         <div className={styles.track}>
@@ -41,11 +48,19 @@ export function Timeline({
             const isMajor = year % 5 === 0;
             const isRevealed = revealedYear !== null && revealedYear !== undefined;
             const isCorrectYear = revealedYear === year;
+
+            let spotlightClass = '';
+            if (!isRevealed && spotlightActive && spotlightCenter != null) {
+              const dist = Math.abs(year - spotlightCenter);
+              spotlightClass = dist === 0 ? styles.tickHighlight : styles.tickDimmed;
+            }
+
             const tickClassName = [
               styles.tick,
               isMajor ? styles.tickMajor : styles.tickMinor,
               isRevealed ? styles.tickRevealed : '',
               isCorrectYear ? styles.tickCorrect : '',
+              spotlightClass,
             ].filter(Boolean).join(' ');
 
             return (

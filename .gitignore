@@ -23,4 +23,8 @@ dist-ssr
 *.sln
 *.sw?
 .claude/
+.superpowers/
+.tmp
+docs/
+test-results/
 output/

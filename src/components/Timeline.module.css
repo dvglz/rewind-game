@@ -102,6 +102,29 @@
   transition: border-top-color 0.2s ease;
 }
 
+.tickHighlight .tickLine {
+  opacity: 1 !important;
+}
+
+.tickHighlight .yearLabel {
+  opacity: 1 !important;
+}
+
+.tickDimmed .tickLine {
+  opacity: 0.05 !important;
+  transition: none;
+}
+
+.tickDimmed.tickMajor .tickLine {
+  opacity: 0.1 !important;
+}
+
+.tickDimmed .yearLabel {
+  color: var(--color-muted) !important;
+  opacity: 0.2 !important;
+  transition: none;
+}
+
 @media (min-width: 900px) {
   .wrapper {
     height: 400px;

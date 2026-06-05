@@ -51,7 +51,7 @@ test('shows result tiers in the per-round summary', () => {
         gamesPlayed: 10,
         lastPlayedDate: '2026-06-03',
       }}
-      sport="nba"
+      sport="american"
     />
   );
 
