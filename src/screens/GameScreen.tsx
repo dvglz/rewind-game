@@ -36,7 +36,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
   const [badgeVisible, setBadgeVisible] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [isPerfectReveal, setIsPerfectReveal] = useState(false);
-  const [displayedScore, setDisplayedScore] = useState(0);
+  const [displayedScore, setDisplayedScore] = useState(game.totalScore);
   const [scorePopping, setScorePopping] = useState(false);
   const [showPointsToast, setShowPointsToast] = useState(false);
   const [toastScore, setToastScore] = useState(0);
