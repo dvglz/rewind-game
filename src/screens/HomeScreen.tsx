@@ -10,9 +10,12 @@ import styles from './HomeScreen.module.css';
 
 interface HomeScreenProps {
   onPlay: () => void;
+  hasInProgressGame: boolean;
+  // hasCompletedGame: boolean;
+  // onViewResults: () => void;
 }
 
-export function HomeScreen({ onPlay }: HomeScreenProps) {
+export function HomeScreen({ onPlay, hasInProgressGame }: HomeScreenProps) {
   const currentSport = getSport();
   const [showDebugMenu, setShowDebugMenu] = useState(false);
   const [randomEnabled, setRandomEnabled] = useState(() => isRandomModeEnabled());
@@ -55,8 +58,17 @@ export function HomeScreen({ onPlay }: HomeScreenProps) {
       </div>
 
       <button className={styles.playButton} onClick={onPlay}>
-        Start
+        {hasInProgressGame ? 'Resume' : 'Start'}
       </button>
+
+      {/* TODO: uncomment when done testing — lets completed users revisit results
+      {hasCompletedGame && (
+        <button className={styles.playButton} onClick={onViewResults}
+          style={{ background: 'transparent', border: '2px solid var(--color-text)', color: 'var(--color-text)' }}>
+          View Results
+        </button>
+      )}
+      */}
 
       <button
         className={styles.debugToggle}

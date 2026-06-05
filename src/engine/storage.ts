@@ -20,6 +20,21 @@ export function clearGameState(puzzleId: string): void {
   localStorage.setItem(GAME_STATE_KEY, JSON.stringify(all));
 }
 
+export function pruneOldGameStates(currentPuzzleId: string): void {
+  const all = JSON.parse(localStorage.getItem(GAME_STATE_KEY) || '{}');
+  const keys = Object.keys(all);
+  let changed = false;
+  for (const key of keys) {
+    if (key !== currentPuzzleId) {
+      delete all[key];
+      changed = true;
+    }
+  }
+  if (changed) {
+    localStorage.setItem(GAME_STATE_KEY, JSON.stringify(all));
+  }
+}
+
 const DEFAULT_STATS: PlayerStats = {
   currentStreak: 0,
   maxStreak: 0,
