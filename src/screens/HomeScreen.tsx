@@ -10,9 +10,10 @@ import styles from './HomeScreen.module.css';
 
 interface HomeScreenProps {
   onPlay: () => void;
+  hasInProgressGame: boolean;
 }
 
-export function HomeScreen({ onPlay }: HomeScreenProps) {
+export function HomeScreen({ onPlay, hasInProgressGame }: HomeScreenProps) {
   const currentSport = getSport();
   const [showDebugMenu, setShowDebugMenu] = useState(false);
   const [randomEnabled, setRandomEnabled] = useState(() => isRandomModeEnabled());
@@ -55,7 +56,7 @@ export function HomeScreen({ onPlay }: HomeScreenProps) {
       </div>
 
       <button className={styles.playButton} onClick={onPlay}>
-        Start
+        {hasInProgressGame ? 'Resume' : 'Start'}
       </button>
 
       <button
