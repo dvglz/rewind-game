@@ -31,6 +31,18 @@
   --timeline-range-end: 2026;
 }
 
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+
+    --color-bg: #17181C;
+    --color-surface-elevated: rgba(31, 33, 39, 0.96);
+    --color-text: #F3EEE4;
+    --color-muted: #A4A8B3;
+    --color-border: #3A3D45;
+  }
+}
+
 [data-theme='dark'] {
   color-scheme: dark;
 
