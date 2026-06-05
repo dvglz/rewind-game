@@ -3,7 +3,7 @@ import { HomeScreen } from './screens/HomeScreen';
 import { GameScreen } from './screens/GameScreen';
 import { OrderingScreen } from './screens/OrderingScreen';
 import { ResultsScreen } from './screens/ResultsScreen';
-import { clearGameState, loadGameState } from './engine/storage';
+import { clearGameState, loadGameState, pruneOldGameStates } from './engine/storage';
 import { beginPuzzleSession, getSport, getTodaysPuzzle } from './data/puzzles';
 import { useWebHaptics } from 'web-haptics/react';
 import { initHaptics } from './lib/haptics';
@@ -21,6 +21,11 @@ export function App() {
   useEffect(() => {
     initHaptics(trigger);
   }, [trigger]);
+
+  useEffect(() => {
+    const puzzle = getTodaysPuzzle(getSport());
+    pruneOldGameStates(puzzle.id);
+  }, []);
   const [screen, setScreen] = useState<Screen>(() => {
     const params = new URLSearchParams(window.location.search);
     const mode = params.get('mode');
