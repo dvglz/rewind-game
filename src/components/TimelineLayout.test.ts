@@ -7,6 +7,6 @@ test('timeline uses a more compact mobile geometry', () => {
   const wrapperBlock = css.match(/\.wrapper\s*\{([^}]*)\}/);
   const trackBlock = css.match(/\.track\s*\{([^}]*)\}/);
 
-  expect(wrapperBlock?.[1] ?? '').toMatch(/height:\s*var\(--timeline-height,\s*320px\);/);
+  expect(wrapperBlock?.[1] ?? '').toMatch(/height:\s*min\(var\(--timeline-height,\s*320px\),\s*100%\);/);
   expect(trackBlock?.[1] ?? '').toMatch(/padding-top:\s*20px;/);
 });
