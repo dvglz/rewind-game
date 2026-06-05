@@ -11,6 +11,8 @@ import styles from './HomeScreen.module.css';
 interface HomeScreenProps {
   onPlay: () => void;
   hasInProgressGame: boolean;
+  // hasCompletedGame: boolean;
+  // onViewResults: () => void;
 }
 
 export function HomeScreen({ onPlay, hasInProgressGame }: HomeScreenProps) {
@@ -58,6 +60,15 @@ export function HomeScreen({ onPlay, hasInProgressGame }: HomeScreenProps) {
       <button className={styles.playButton} onClick={onPlay}>
         {hasInProgressGame ? 'Resume' : 'Start'}
       </button>
+
+      {/* TODO: uncomment when done testing — lets completed users revisit results
+      {hasCompletedGame && (
+        <button className={styles.playButton} onClick={onViewResults}
+          style={{ background: 'transparent', border: '2px solid var(--color-text)', color: 'var(--color-text)' }}>
+          View Results
+        </button>
+      )}
+      */}
 
       <button
         className={styles.debugToggle}

@@ -77,6 +77,15 @@ export function App() {
             clearGameState(puzzle.id);
             navigate('game');
           }}
+          /* TODO: uncomment when done testing
+          hasCompletedGame={(() => {
+            const sport = getSport();
+            const puzzle = getTodaysPuzzle(sport);
+            const saved = loadGameState(puzzle.id);
+            return !!saved && saved.completed;
+          })()}
+          onViewResults={() => navigate('results')}
+          */
         />
       )}
       {screen === 'game' && <GameScreen onFinish={() => navigate('results')} onHome={() => navigate('home')} />}
