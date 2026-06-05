@@ -3,7 +3,7 @@ import { HomeScreen } from './screens/HomeScreen';
 import { GameScreen } from './screens/GameScreen';
 import { OrderingScreen } from './screens/OrderingScreen';
 import { ResultsScreen } from './screens/ResultsScreen';
-import { clearGameState } from './engine/storage';
+import { clearGameState, loadGameState } from './engine/storage';
 import { beginPuzzleSession, getSport, getTodaysPuzzle } from './data/puzzles';
 import { useWebHaptics } from 'web-haptics/react';
 import { initHaptics } from './lib/haptics';
@@ -25,16 +25,30 @@ export function App() {
     const params = new URLSearchParams(window.location.search);
     const mode = params.get('mode');
     if (mode === 'ordering') return 'ordering';
+    if (mode === 'game') {
+      const sport = getSport();
+      const puzzle = getTodaysPuzzle(sport);
+      const saved = loadGameState(puzzle.id);
+      if (saved && !saved.completed) return 'game';
+      return 'home';
+    }
+    if (mode === 'results') {
+      const sport = getSport();
+      const puzzle = getTodaysPuzzle(sport);
+      const saved = loadGameState(puzzle.id);
+      if (saved && saved.completed) return 'results';
+      return 'home';
+    }
     return 'home';
   });
 
   const navigate = (s: Screen) => {
     setScreen(s);
     const params = new URLSearchParams(window.location.search);
-    if (s === 'ordering') {
-      params.set('mode', 'ordering');
-    } else {
+    if (s === 'home') {
       params.delete('mode');
+    } else {
+      params.set('mode', s);
     }
 
     const nextSearch = params.toString();
@@ -45,10 +59,21 @@ export function App() {
     <>
       {screen === 'home' && (
         <HomeScreen
+          hasInProgressGame={(() => {
+            const sport = getSport();
+            const puzzle = getTodaysPuzzle(sport);
+            const saved = loadGameState(puzzle.id);
+            return !!saved && !saved.completed;
+          })()}
           onPlay={() => {
             const sport = getSport();
-            beginPuzzleSession();
             const puzzle = getTodaysPuzzle(sport);
+            const saved = loadGameState(puzzle.id);
+            if (saved && !saved.completed) {
+              navigate('game');
+              return;
+            }
+            beginPuzzleSession();
             clearGameState(puzzle.id);
             navigate('game');
           }}
