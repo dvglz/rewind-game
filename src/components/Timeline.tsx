@@ -1,4 +1,4 @@
-import { type RefObject } from 'react';
+import { useCallback, useRef, useState, type PointerEvent as ReactPointerEvent, type RefObject } from 'react';
 import styles from './Timeline.module.css';
 
 interface TimelineProps {
@@ -12,6 +12,7 @@ interface TimelineProps {
   indicatorColor?: string;
   spotlightCenter?: number | null;
   spotlightActive?: boolean;
+  onDragEndSnap?: () => void;
 }
 
 export function Timeline({
@@ -25,7 +26,62 @@ export function Timeline({
   indicatorColor,
   spotlightCenter,
   spotlightActive,
+  onDragEndSnap,
 }: TimelineProps) {
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStateRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startScrollLeft: number;
+  } | null>(null);
+
+  const stopDragging = useCallback((pointerId: number) => {
+    const dragState = dragStateRef.current;
+    if (!dragState || dragState.pointerId !== pointerId) {
+      return;
+    }
+
+    dragStateRef.current = null;
+    setIsDragging(false);
+    onDragEndSnap?.();
+  }, [onDragEndSnap]);
+
+  const handlePointerDown = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    if (disabled || event.pointerType !== 'mouse' || event.button !== 0) {
+      return;
+    }
+
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
+
+    dragStateRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startScrollLeft: container.scrollLeft,
+    };
+    setIsDragging(true);
+    container.setPointerCapture?.(event.pointerId);
+    event.preventDefault();
+  }, [containerRef, disabled]);
+
+  const handlePointerMove = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    const dragState = dragStateRef.current;
+    const container = containerRef.current;
+    if (!dragState || dragState.pointerId !== event.pointerId || !container) {
+      return;
+    }
+
+    container.scrollLeft = dragState.startScrollLeft - (event.clientX - dragState.startX);
+    onScroll();
+  }, [containerRef, onScroll]);
+
+  const handlePointerUp = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    event.currentTarget.releasePointerCapture?.(event.pointerId);
+    stopDragging(event.pointerId);
+  }, [stopDragging]);
+
   const years = Array.from(
     { length: rangeEnd - rangeStart + 1 },
     (_, i) => rangeStart + i
@@ -35,11 +91,19 @@ export function Timeline({
     <div className={styles.wrapper} data-testid="timeline-wrapper">
       <div
         ref={containerRef}
+        data-testid="timeline-scroller"
         className={styles.scrollContainer}
         onScroll={onScroll}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        onLostPointerCapture={handlePointerUp}
         style={{
           pointerEvents: disabled ? 'none' : 'auto',
-          scrollSnapType: disabled || spotlightActive ? 'none' : 'x mandatory',
+          scrollSnapType: disabled || spotlightActive || isDragging ? 'none' : 'x mandatory',
+          cursor: disabled ? 'default' : isDragging ? 'grabbing' : 'grab',
+          userSelect: isDragging ? 'none' : 'auto',
         }}
       >
         <div style={{ minWidth: '50vw', flexShrink: 0 }} />

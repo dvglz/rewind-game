@@ -1,43 +1,50 @@
-import type { RoundResult, PlayerStats } from '../types';
-import { getResultColor, getResultEmoji, getResultLabel } from '../engine/scoring';
+import type { RoundResult } from '../types';
+import { getResultColor, getResultEmoji, getAccuracyLabel, getScoreTierLabel } from '../engine/scoring';
 import styles from './ShareCard.module.css';
 
 interface ShareCardProps {
-  puzzleNumber: number;
   results: RoundResult[];
   totalScore: number;
   maxScore: number;
-  stats: PlayerStats;
-  sport?: 'american' | 'soccer';
 }
 
-export function ShareCard({ puzzleNumber, results, totalScore, maxScore, stats }: ShareCardProps) {
-  const emojiRow = results
-    .map((r) => getResultEmoji(getResultColor(r.diff)))
-    .join(' ');
-  const scorePercent = Math.round((totalScore / maxScore) * 100);
+export function ShareCard({
+  results,
+  totalScore,
+  maxScore,
+}: ShareCardProps) {
+  const tierLabel = getScoreTierLabel(totalScore, maxScore)
+    .replace(/!/g, '')
+    .toLowerCase()
+    .replace(/^./, (char) => char.toUpperCase());
 
   return (
     <div className={styles.card}>
-      <span className={styles.title}>Rewind #{String(puzzleNumber).padStart(3, '0')}</span>
-      <span className={styles.emojiRow}>{emojiRow}</span>
-      <span className={styles.score}>
-        {totalScore.toLocaleString()}
-        <span className={styles.scoreMax}>/{maxScore.toLocaleString()}</span>
-      </span>
-      <span className={styles.scoreMeta}>{scorePercent}% of max possible</span>
-      {stats.currentStreak > 1 && (
-        <span className={styles.streak}>🔥 {stats.currentStreak}-day streak</span>
-      )}
+      <div className={styles.scoreBlock} style={{ animationDelay: '0ms' }}>
+        <span className={styles.score}>
+          {totalScore.toLocaleString()}
+          <span className={styles.scoreMax}>/ {maxScore.toLocaleString()}</span>
+        </span>
+        <span className={styles.tierLabel}>{tierLabel}</span>
+      </div>
 
-      <div className={styles.roundList}>
+      <div className={styles.questionList}>
         {results.map((r, i) => (
-          <div key={i} className={styles.roundRow}>
-            <span>{getResultEmoji(getResultColor(r.diff))}</span>
-            <span className={styles.roundEvent}>Round {i + 1}</span>
-            <span className={styles.roundDiff}>
-              {getResultLabel(getResultColor(r.diff))}
+          <div
+            key={i}
+            className={styles.questionRow}
+            style={{ animationDelay: `${200 + i * 80}ms` }}
+          >
+            <span className={styles.questionEmoji}>
+              {getResultEmoji(getResultColor(r.diff))}
             </span>
+            <div className={styles.questionText}>
+              <span className={styles.questionLabel}>Question {i + 1}</span>
+              <span className={styles.questionAccuracy}>
+                {getAccuracyLabel(r.diff)}
+              </span>
+            </div>
+            <span className={styles.questionScore}>{r.score}</span>
           </div>
         ))}
       </div>

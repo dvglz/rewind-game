@@ -308,17 +308,20 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
       </div>
 
       <div className={styles.timelineRegion}>
-        <Timeline
-          containerRef={timeline.containerRef}
-          rangeStart={timeline.rangeStart}
-          rangeEnd={timeline.rangeEnd}
-          yearWidth={timeline.yearWidth}
-          onScroll={handleScroll}
-          disabled={isLocked}
-          revealedYear={revealResult?.actualYear ?? null}
-          indicatorColor={indicatorColor}
-          spotlightCenter={spotlightCenter}
-          spotlightActive={spotlightActive}
+      <Timeline
+        containerRef={timeline.containerRef}
+        rangeStart={timeline.rangeStart}
+        rangeEnd={timeline.rangeEnd}
+        yearWidth={timeline.yearWidth}
+        onScroll={handleScroll}
+        onDragEndSnap={() => {
+          void timeline.snapToClosestYear();
+        }}
+        disabled={isLocked}
+        revealedYear={revealResult?.actualYear ?? null}
+        indicatorColor={indicatorColor}
+        spotlightCenter={spotlightCenter}
+        spotlightActive={spotlightActive}
         />
         {showPointsToast && (
           <span

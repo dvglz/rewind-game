@@ -60,6 +60,24 @@ export function getResultLabel(color: ResultColor): string {
   }
 }
 
+export function getAccuracyLabel(diff: number): string {
+  if (diff === 0) return 'Perfect';
+  const absDiff = Math.abs(diff);
+  const unit = absDiff === 1 ? 'yr' : 'yrs';
+  const direction = diff > 0 ? 'late' : 'early';
+  return `${absDiff}${unit} ${direction}`;
+}
+
+export function getScoreTierLabel(totalScore: number, maxScore: number): string {
+  if (maxScore <= 0) return 'NOT BAD';
+  const pct = totalScore / maxScore;
+  if (pct >= 1) return 'PERFECT!';
+  if (pct >= 0.8) return 'INCREDIBLE!';
+  if (pct >= 0.6) return 'IMPRESSIVE!';
+  if (pct >= 0.4) return 'NOT BAD';
+  return 'BETTER LUCK TOMORROW';
+}
+
 export function getResultColorVar(color: ResultColor): string {
   switch (color) {
     case 'perfect':
