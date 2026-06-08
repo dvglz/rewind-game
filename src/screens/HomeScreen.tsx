@@ -11,11 +11,18 @@ import styles from './HomeScreen.module.css';
 interface HomeScreenProps {
   onPlay: () => void;
   hasInProgressGame: boolean;
-  // hasCompletedGame: boolean;
-  // onViewResults: () => void;
+  hasCompletedGame: boolean;
+  onViewResults: () => void;
+  showDebugTools: boolean;
 }
 
-export function HomeScreen({ onPlay, hasInProgressGame }: HomeScreenProps) {
+export function HomeScreen({
+  onPlay,
+  hasInProgressGame,
+  hasCompletedGame,
+  onViewResults,
+  showDebugTools,
+}: HomeScreenProps) {
   const currentSport = getSport();
   const [showDebugMenu, setShowDebugMenu] = useState(false);
   const [randomEnabled, setRandomEnabled] = useState(() => isRandomModeEnabled());
@@ -57,28 +64,29 @@ export function HomeScreen({ onPlay, hasInProgressGame }: HomeScreenProps) {
         <p>5 rounds.</p>
       </div>
 
-      <button className={styles.playButton} onClick={onPlay}>
-        {hasInProgressGame ? 'Resume' : 'Start'}
-      </button>
-
-      {/* TODO: uncomment when done testing — lets completed users revisit results
-      {hasCompletedGame && (
-        <button className={styles.playButton} onClick={onViewResults}
-          style={{ background: 'transparent', border: '2px solid var(--color-text)', color: 'var(--color-text)' }}>
-          View Results
+      {!hasCompletedGame && (
+        <button className={styles.playButton} onClick={onPlay}>
+          {hasInProgressGame ? 'Resume' : 'Start'}
         </button>
       )}
-      */}
 
-      <button
-        className={styles.debugToggle}
-        onClick={() => setShowDebugMenu((prev) => !prev)}
-        type="button"
-      >
-        {showDebugMenu ? 'Hide Debug' : 'Debug'}
-      </button>
+      {hasCompletedGame && (
+        <button className={styles.playButton} onClick={onViewResults}>
+          See Results
+        </button>
+      )}
 
-      {showDebugMenu && (
+      {showDebugTools && (
+        <>
+          <button
+            className={styles.debugToggle}
+            onClick={() => setShowDebugMenu((prev) => !prev)}
+            type="button"
+          >
+            {showDebugMenu ? 'Hide Debug' : 'Debug'}
+          </button>
+
+          {showDebugMenu && (
         <div className={styles.debugMenu}>
           <span className={styles.debugTitle}>Debug</span>
           <label className={styles.toggleRow}>
@@ -101,6 +109,8 @@ export function HomeScreen({ onPlay, hasInProgressGame }: HomeScreenProps) {
             ))}
           </div>
         </div>
+          )}
+        </>
       )}
     </div>
   );

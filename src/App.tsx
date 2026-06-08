@@ -7,12 +7,14 @@ import { clearGameState, loadGameState, pruneOldGameStates } from './engine/stor
 import { beginPuzzleSession, getSport, getTodaysPuzzle } from './data/puzzles';
 import { useWebHaptics } from 'web-haptics/react';
 import { initHaptics } from './lib/haptics';
+import { hidesCompletedGameLock } from './lib/testMode';
 import { useThemePreference } from './hooks/useThemePreference';
 import './styles/global.css';
 
 type Screen = 'home' | 'game' | 'ordering' | 'results';
 
 export function App() {
+  const allowReplay = hidesCompletedGameLock(window.location.search);
   const { trigger } = useWebHaptics({
     debug: typeof navigator !== 'undefined' && !('vibrate' in navigator),
   });
@@ -41,7 +43,7 @@ export function App() {
       const sport = getSport();
       const puzzle = getTodaysPuzzle(sport);
       const saved = loadGameState(puzzle.id);
-      if (saved && saved.completed) return 'results';
+      if (saved && saved.completed && !allowReplay) return 'results';
       return 'home';
     }
     return 'home';
@@ -82,15 +84,14 @@ export function App() {
             clearGameState(puzzle.id);
             navigate('game');
           }}
-          /* TODO: uncomment when done testing
           hasCompletedGame={(() => {
             const sport = getSport();
             const puzzle = getTodaysPuzzle(sport);
             const saved = loadGameState(puzzle.id);
-            return !!saved && saved.completed;
+            return !!saved && saved.completed && !allowReplay;
           })()}
           onViewResults={() => navigate('results')}
-          */
+          showDebugTools={allowReplay}
         />
       )}
       {screen === 'game' && <GameScreen onFinish={() => navigate('results')} onHome={() => navigate('home')} />}
