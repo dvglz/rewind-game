@@ -3,33 +3,36 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  padding-top: max(60px, env(safe-area-inset-top, 0px) + 40px);
   z-index: 50;
   animation: fadeIn 0.15s ease;
+  overflow-y: auto;
 }
 
 .card {
   background: var(--color-bg);
-  border: 1px solid var(--color-border);
+  border: 0.5px solid var(--color-border);
   border-radius: 20px;
   padding: var(--space-xl);
   width: min(340px, calc(100vw - 48px));
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
 }
 
 .title {
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 28px;
   text-align: center;
 }
 
 .input {
   font-family: var(--font-display);
-  font-size: 16px;
-  padding: var(--space-sm) var(--space-md);
+  font-size: 18px;
+  padding: 14px var(--space-md);
   border: 1px solid var(--color-border);
   border-radius: 12px;
   background: transparent;
@@ -43,6 +46,38 @@
   border-color: var(--color-text);
 }
 
+/* ── OTP-style code input ── */
+
+.codeFields {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: center;
+}
+
+.codeChar {
+  width: 44px;
+  height: 52px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: 22px;
+  text-align: center;
+  text-transform: uppercase;
+  outline: none;
+  transition: border-color 0.15s ease;
+  caret-color: transparent;
+}
+
+.codeChar:focus {
+  border-color: var(--color-text);
+}
+
+.codeCharFilled {
+  border-color: var(--color-text);
+}
+
 .actions {
   display: flex;
   gap: var(--space-sm);
@@ -50,13 +85,13 @@
 
 .primaryButton {
   flex: 1;
-  height: 48px;
+  height: 52px;
   border: 2px solid var(--color-text);
   border-radius: 999px;
   background: var(--color-text);
   color: var(--color-bg);
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 18px;
   cursor: pointer;
   transition: transform 0.1s ease, opacity 0.15s ease;
 }
@@ -72,13 +107,13 @@
 
 .secondaryButton {
   flex: 1;
-  height: 48px;
+  height: 52px;
   border: 1px solid var(--color-border);
   border-radius: 999px;
   background: transparent;
   color: var(--color-text);
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 18px;
   cursor: pointer;
   transition: transform 0.1s ease;
 }
@@ -97,4 +132,11 @@
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@media (min-width: 900px) {
+  .backdrop {
+    align-items: center;
+    padding-top: 0;
+  }
 }

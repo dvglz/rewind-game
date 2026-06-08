@@ -6,6 +6,7 @@ import {
   SPORT_LABELS,
   type Sport,
 } from '../data/puzzles';
+import { BurgerMenu } from '../components/BurgerMenu';
 import styles from './HomeScreen.module.css';
 
 interface HomeScreenProps {
@@ -14,6 +15,7 @@ interface HomeScreenProps {
   hasCompletedGame: boolean;
   onViewResults: () => void;
   showDebugTools: boolean;
+  onGroups: () => void;
 }
 
 export function HomeScreen({
@@ -22,6 +24,7 @@ export function HomeScreen({
   hasCompletedGame,
   onViewResults,
   showDebugTools,
+  onGroups,
 }: HomeScreenProps) {
   const currentSport = getSport();
   const [showDebugMenu, setShowDebugMenu] = useState(false);
@@ -52,6 +55,7 @@ export function HomeScreen({
 
   return (
     <div className={styles.container}>
+      <BurgerMenu items={[{ label: 'Groups', onClick: onGroups }]} />
       <div className={styles.top}>
         <h1 className={styles.wordmark}>Rewind</h1>
 

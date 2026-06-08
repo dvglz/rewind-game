@@ -10,6 +10,7 @@ test('renders the home screen core actions without the theme switcher', () => {
       hasCompletedGame={false}
       onViewResults={() => {}}
       showDebugTools={false}
+      onGroups={() => {}}
     />
   );
 
@@ -26,6 +27,7 @@ test('shows only see results when todays game is already completed', () => {
       hasCompletedGame={true}
       onViewResults={() => {}}
       showDebugTools={false}
+      onGroups={() => {}}
     />
   );
 

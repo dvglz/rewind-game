@@ -37,3 +37,22 @@ export interface PlayerStats {
   gamesPlayed: number;
   lastPlayedDate: string | null;
 }
+
+export interface GroupMember {
+  group: number;
+  user: string;
+  joined_at: string;
+}
+
+export interface PlayhubGroup {
+  id: number;
+  name: string;
+  invite_link: string;
+  members: GroupMember[];
+}
+
+export interface GroupLeaderboardEntry {
+  displayName: string;
+  score: number | null;
+  isCurrentUser: boolean;
+}

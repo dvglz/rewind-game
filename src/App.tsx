@@ -3,6 +3,7 @@ import { HomeScreen } from './screens/HomeScreen';
 import { GameScreen } from './screens/GameScreen';
 import { OrderingScreen } from './screens/OrderingScreen';
 import { ResultsScreen } from './screens/ResultsScreen';
+import { GroupsScreen } from './screens/GroupsScreen';
 import { clearGameState, loadGameState, pruneOldGameStates } from './engine/storage';
 import { beginPuzzleSession, getSport, getTodaysPuzzle } from './data/puzzles';
 import { useWebHaptics } from 'web-haptics/react';
@@ -11,7 +12,7 @@ import { hidesCompletedGameLock, shouldEnableHapticsDebug } from './lib/testMode
 import { useThemePreference } from './hooks/useThemePreference';
 import './styles/global.css';
 
-type Screen = 'home' | 'game' | 'ordering' | 'results';
+type Screen = 'home' | 'game' | 'ordering' | 'results' | 'groups';
 
 export function App() {
   const allowReplay = hidesCompletedGameLock(window.location.search);
@@ -93,11 +94,13 @@ export function App() {
           })()}
           onViewResults={() => navigate('results')}
           showDebugTools={allowReplay}
+          onGroups={() => navigate('groups')}
         />
       )}
       {screen === 'game' && <GameScreen onFinish={() => navigate('results')} onHome={() => navigate('home')} />}
       {screen === 'ordering' && <OrderingScreen onFinish={() => navigate('results')} />}
-      {screen === 'results' && <ResultsScreen onHome={() => navigate('home')} />}
+      {screen === 'results' && <ResultsScreen onHome={() => navigate('home')} onGroups={() => navigate('groups')} />}
+      {screen === 'groups' && <GroupsScreen onBack={() => navigate('home')} />}
     </>
   );
 }

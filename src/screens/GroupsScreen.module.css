@@ -43,7 +43,7 @@
 .content {
   flex: 1;
   width: 100%;
-  max-width: 400px;
+  max-width: 100%;
   padding: 16px 24px 24px;
   display: flex;
   flex-direction: column;
@@ -55,8 +55,14 @@
 
 .groupName {
   font-family: var(--font-display);
-  font-size: 48px;
+  font-size: clamp(24px, 10vw, 48px);
   text-align: center;
+  margin-bottom: -12px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 var(--space-sm);
 }
 
 .memberCount {
@@ -109,10 +115,10 @@
   border: 0;
   background: transparent;
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 16px;
   color: var(--color-muted);
   cursor: pointer;
-  padding: var(--space-md) 0;
+  padding: var(--space-sm) 0;
   margin-top: auto;
   transition: color 0.15s ease;
 }
@@ -136,6 +142,7 @@
   font-size: 48px;
   text-align: center;
   line-height: 1;
+  animation: revealUp 0.5s ease both;
 }
 
 .emptySubtitle {
@@ -144,6 +151,7 @@
   text-align: center;
   color: var(--color-text);
   line-height: 1.4;
+  animation: revealUp 0.5s ease 0.15s both;
 }
 
 .emptyActions {
@@ -153,6 +161,18 @@
   width: 100%;
   max-width: 240px;
   margin-top: var(--space-md);
+  animation: revealUp 0.5s ease 0.3s both;
+}
+
+@keyframes revealUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .emptyButtonPrimary {
@@ -193,23 +213,12 @@
   transform: scale(0.95);
 }
 
-.toast {
-  position: fixed;
-  left: 50%;
-  top: max(18px, env(safe-area-inset-top));
-  transform: translateX(-50%);
-  padding: 10px 16px;
-  border-radius: 999px;
-  background: var(--color-text);
-  color: var(--color-bg);
-  font-family: var(--font-display);
-  font-size: 14px;
-  line-height: 1;
-  box-shadow: 0 8px 24px rgb(0 0 0 / 0.24);
-  z-index: 20;
-}
-
 @media (min-width: 900px) {
+  .topBar {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
   .content {
     max-width: 480px;
     padding: 24px 32px 32px;

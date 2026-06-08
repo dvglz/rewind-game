@@ -8,8 +8,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px;
-  border-bottom: 1px solid var(--color-border);
+  padding: 10px 16px;
+  border-bottom: 0.5px solid var(--color-border);
 }
 
 .rowHighlight {
@@ -20,27 +20,37 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+  flex: 1;
 }
 
 .rank {
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 20px;
   width: 20px;
+  flex-shrink: 0;
   color: var(--color-text);
+}
+
+.rankMuted {
+  color: var(--color-muted);
 }
 
 .name {
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 20px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
 }
 
 .score {
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 20px;
   text-align: right;
+  flex-shrink: 0;
+  margin-left: var(--space-sm);
 }
 
 .notPlayed {
@@ -50,8 +60,21 @@
 .empty {
   text-align: center;
   font-family: var(--font-body);
-  font-size: 20px;
-  color: var(--color-text);
-  opacity: 0.4;
-  padding: var(--space-2xl) var(--space-md);
+  font-size: 16px;
+  color: var(--color-muted);
+  padding: 108px var(--space-lg);
+  white-space: pre-line;
+  line-height: 1.5;
+}
+
+@media (min-width: 900px) {
+  .rank,
+  .name,
+  .score {
+    font-size: 24px;
+  }
+
+  .row {
+    padding: 12px 16px;
+  }
 }

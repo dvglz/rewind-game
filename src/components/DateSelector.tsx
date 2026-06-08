@@ -1,3 +1,5 @@
+import { ChevronLeft } from './icons';
+import { ChevronRight } from './icons';
 import styles from './DateSelector.module.css';
 
 interface DateSelectorProps {
@@ -31,7 +33,7 @@ export function DateSelector({ dayOffset, onPrev, onNext }: DateSelectorProps) {
         type="button"
         aria-label="Previous day"
       >
-        ‹
+        <ChevronLeft />
       </button>
       <div className={styles.center}>
         <span className={styles.dayLabel}>{dayLabel}</span>
@@ -44,7 +46,7 @@ export function DateSelector({ dayOffset, onPrev, onNext }: DateSelectorProps) {
         type="button"
         aria-label="Next day"
       >
-        ›
+        <ChevronRight />
       </button>
     </div>
   );

@@ -4,14 +4,16 @@ import { GroupLeaderboard } from '../components/GroupLeaderboard';
 import { DateSelector } from '../components/DateSelector';
 import { CreateGroupModal } from '../components/CreateGroupModal';
 import { JoinGroupModal } from '../components/JoinGroupModal';
+import { ArrowLeft, Plus } from '../components/icons';
+import { Toast } from '../components/Toast';
 import type { PlayhubGroup, GroupLeaderboardEntry } from '../types';
 import styles from './GroupsScreen.module.css';
 
 interface GroupsScreenProps {
-  onHome: () => void;
+  onBack: () => void;
 }
 
-export function GroupsScreen({ onHome }: GroupsScreenProps) {
+export function GroupsScreen({ onBack }: GroupsScreenProps) {
   const [group, setGroup] = useState<PlayhubGroup | null>(null);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -31,7 +33,7 @@ export function GroupsScreen({ onHome }: GroupsScreenProps) {
 
   const showToast = (msg: string) => {
     setToast(msg);
-    setTimeout(() => setToast(''), 2000);
+    setTimeout(() => setToast(''), 3000);
   };
 
   const handleCreate = async (name: string) => {
@@ -60,6 +62,26 @@ export function GroupsScreen({ onHome }: GroupsScreenProps) {
     showToast('You left the group');
   };
 
+  const fallbackCopy = (text: string): boolean => {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', 'true');
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    textarea.style.pointerEvents = 'none';
+    document.body.appendChild(textarea);
+    textarea.select();
+    textarea.setSelectionRange(0, text.length);
+    try {
+      const ok = document.execCommand('copy');
+      document.body.removeChild(textarea);
+      return ok;
+    } catch {
+      document.body.removeChild(textarea);
+      return false;
+    }
+  };
+
   const handleInvite = async () => {
     if (!group) return;
 
@@ -83,7 +105,7 @@ export function GroupsScreen({ onHome }: GroupsScreenProps) {
       await navigator.clipboard.writeText(group.invite_link);
       showToast('Copied!');
     } catch {
-      showToast('Copy failed');
+      showToast(fallbackCopy(group.invite_link) ? 'Copied!' : 'Copy failed');
     }
   };
 
@@ -111,8 +133,8 @@ export function GroupsScreen({ onHome }: GroupsScreenProps) {
   return (
     <div className={styles.screen}>
       <div className={styles.topBar}>
-        <button className={styles.backButton} onClick={onHome} type="button" aria-label="Back">
-          ←
+        <button className={styles.backButton} onClick={onBack} type="button" aria-label="Back">
+          <ArrowLeft />
         </button>
         <span className={styles.wordmark}>REWIND</span>
         <span className={styles.topBarSpacer} />
@@ -124,8 +146,8 @@ export function GroupsScreen({ onHome }: GroupsScreenProps) {
           <p className={styles.memberCount}>{memberLabel}</p>
 
           <button className={styles.inviteButton} onClick={handleInvite} type="button">
-            <span className={styles.inviteIcon}>+</span>
-            Invite
+            <Plus />
+            Invite Friends
           </button>
 
           <DateSelector
@@ -137,7 +159,7 @@ export function GroupsScreen({ onHome }: GroupsScreenProps) {
           <div className={styles.leaderboardArea}>
             <GroupLeaderboard
               entries={leaderboardEntries}
-              emptyMessage={'Believe it or not,\nno one played that day'}
+              emptySeed={`day-${dayOffset}`}
             />
           </div>
 
@@ -153,11 +175,10 @@ export function GroupsScreen({ onHome }: GroupsScreenProps) {
         <div className={styles.content}>
           <div className={styles.emptyState}>
             <h1 className={styles.emptyTitle}>
-              Compete Rewind{'\n'}with friends
+              Bring Rewind{'\n'}to your group chat
             </h1>
             <p className={styles.emptySubtitle}>
-              Find out who's best at sports history.{' '}
-              Custom leaderboards and stats.
+              Compare scores and see who knows sports best.
             </p>
             <div className={styles.emptyActions}>
               <button
@@ -185,7 +206,7 @@ export function GroupsScreen({ onHome }: GroupsScreenProps) {
       {showJoin && (
         <JoinGroupModal onClose={() => setShowJoin(false)} onJoin={handleJoin} />
       )}
-      {toast && <div className={styles.toast}>{toast}</div>}
+      {toast && <Toast message={toast} />}
     </div>
   );
 }

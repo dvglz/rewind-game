@@ -1,16 +1,34 @@
 import type { GroupLeaderboardEntry } from '../types';
 import styles from './GroupLeaderboard.module.css';
 
-interface GroupLeaderboardProps {
-  entries: GroupLeaderboardEntry[];
-  emptyMessage?: string;
+const EMPTY_LINES: string[] = [
+  'Believe it or not,\nno one played that day',
+  'Looks like everyone\nsat this one out.',
+  'No plays on the board\n(yet?)',
+  'This day got benched.',
+  'Rest day.\nEven champs need one.',
+];
+
+function pickEmptyMessage(seed: string): string {
+  // Deterministic pick based on the seed so it doesn't change on re-render
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash * 31 + seed.charCodeAt(i)) | 0;
+  }
+  return EMPTY_LINES[Math.abs(hash) % EMPTY_LINES.length];
 }
 
-export function GroupLeaderboard({ entries, emptyMessage }: GroupLeaderboardProps) {
+interface GroupLeaderboardProps {
+  entries: GroupLeaderboardEntry[];
+  /** Seed string for deterministic random empty message (e.g. date string) */
+  emptySeed?: string;
+}
+
+export function GroupLeaderboard({ entries, emptySeed }: GroupLeaderboardProps) {
   if (entries.length === 0) {
     return (
       <p className={styles.empty}>
-        {emptyMessage ?? 'Believe it or not,\nno one played that day'}
+        {pickEmptyMessage(emptySeed ?? 'default')}
       </p>
     );
   }
@@ -32,7 +50,7 @@ export function GroupLeaderboard({ entries, emptyMessage }: GroupLeaderboardProp
             className={`${styles.row} ${entry.isCurrentUser ? styles.rowHighlight : ''}`}
           >
             <div className={styles.userInfo}>
-              <span className={styles.rank}>{rank ?? '––'}</span>
+              <span className={`${styles.rank} ${rank === null ? styles.rankMuted : ''}`}>{rank ?? '––'}</span>
               <span className={styles.name}>{entry.displayName}</span>
             </div>
             <span className={`${styles.score} ${entry.score === null ? styles.notPlayed : ''}`}>
