@@ -59,7 +59,9 @@ export function ResultsScreen({ onHome }: ResultsScreenProps) {
   return (
     <div className={styles.screen}>
       <header className={styles.topBar}>
-        <span className={styles.wordmark}>REWIND</span>
+        <button type="button" className={styles.wordmarkButton} onClick={onHome}>
+          <span className={styles.wordmark}>REWIND</span>
+        </button>
       </header>
       <div className={styles.content}>
         <ShareCard

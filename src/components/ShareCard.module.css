@@ -102,16 +102,16 @@
 
 @media (min-width: 900px) {
   .score {
-    font-size: 88px;
+    font-size: 76px;
     gap: 5px;
   }
 
   .scoreMax {
-    font-size: 52px;
+    font-size: 44px;
   }
 
   .tierLabel {
-    font-size: 28px;
+    font-size: 20px;
   }
 
   .questionList {
@@ -133,15 +133,15 @@
   }
 
   .questionLabel {
-    font-size: 28px;
+    font-size: 22px;
   }
 
   .questionAccuracy {
-    font-size: 20px;
+    font-size: 16px;
   }
 
   .questionScore {
-    font-size: 32px;
-    min-width: 78px;
+    font-size: 24px;
+    min-width: 64px;
   }
 }
