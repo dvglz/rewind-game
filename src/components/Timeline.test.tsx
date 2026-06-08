@@ -1,6 +1,6 @@
 import { createRef } from 'react';
-import { render, screen } from '@testing-library/react';
-import { expect, test } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { expect, test, vi } from 'vitest';
 import { Timeline } from './Timeline';
 
 test('renders the indicator inside the timeline wrapper', () => {
@@ -97,4 +97,54 @@ test('marks only the revealed year as correct', () => {
 
   expect(tick2005.className).toContain('Correct');
   expect(tick2004.className).not.toContain('Correct');
+});
+
+test('supports mouse drag scrolling and snaps on release', () => {
+  const onDragEndSnap = vi.fn();
+  render(
+    <Timeline
+      containerRef={createRef<HTMLDivElement>()}
+      rangeStart={2000}
+      rangeEnd={2006}
+      yearWidth={60}
+      onScroll={() => {}}
+      onDragEndSnap={onDragEndSnap}
+    />
+  );
+
+  const scroller = screen.getByTestId('timeline-scroller') as HTMLDivElement & {
+    setPointerCapture?: (pointerId: number) => void;
+    releasePointerCapture?: (pointerId: number) => void;
+  };
+
+  scroller.setPointerCapture = () => {};
+  scroller.releasePointerCapture = () => {};
+  Object.defineProperty(scroller, 'scrollLeft', {
+    value: 180,
+    writable: true,
+  });
+
+  fireEvent.pointerDown(scroller, {
+    button: 0,
+    pointerId: 1,
+    pointerType: 'mouse',
+    clientX: 100,
+  });
+  fireEvent.pointerMove(scroller, {
+    pointerId: 1,
+    pointerType: 'mouse',
+    clientX: 140,
+  });
+
+  expect(scroller.scrollLeft).toBe(140);
+  expect(scroller.style.scrollSnapType).toBe('none');
+
+  fireEvent.pointerUp(scroller, {
+    pointerId: 1,
+    pointerType: 'mouse',
+    clientX: 140,
+  });
+
+  expect(onDragEndSnap).toHaveBeenCalledTimes(1);
+  expect(scroller.style.scrollSnapType).toBe('x mandatory');
 });

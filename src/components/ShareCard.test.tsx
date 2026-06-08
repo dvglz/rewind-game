@@ -5,7 +5,6 @@ import { ShareCard } from './ShareCard';
 test('shows result tiers in the per-round summary', () => {
   render(
     <ShareCard
-      puzzleNumber={12}
       results={[
         {
           event: { text: 'Round 1', year: 2012 },
@@ -45,19 +44,13 @@ test('shows result tiers in the per-round summary', () => {
       ]}
       totalScore={323}
       maxScore={1000}
-      stats={{
-        currentStreak: 3,
-        maxStreak: 4,
-        gamesPlayed: 10,
-        lastPlayedDate: '2026-06-03',
-      }}
-      sport="american"
     />
   );
 
+  expect(screen.getByText('Better luck tomorrow')).not.toBeNull();
   expect(screen.getByText('Perfect')).not.toBeNull();
-  expect(screen.getByText('Great')).not.toBeNull();
-  expect(screen.getByText('Ballpark')).not.toBeNull();
-  expect(screen.getByText('Wrong Era')).not.toBeNull();
-  expect(screen.getByText('Not Even Close')).not.toBeNull();
+  expect(screen.getByText('2yrs early')).not.toBeNull();
+  expect(screen.getByText('4yrs late')).not.toBeNull();
+  expect(screen.getByText('8yrs late')).not.toBeNull();
+  expect(screen.getByText('12yrs late')).not.toBeNull();
 });

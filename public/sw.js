@@ -1,7 +1,5 @@
-const CACHE_NAME = 'rewind-v1';
+const CACHE_NAME = 'rewind-v2';
 const ASSETS = [
-  '/',
-  '/index.html',
   '/manifest.json',
 ];
 
@@ -24,7 +22,15 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Network-first for API calls, cache-first for assets
+  // Always fetch the current HTML shell so hashed asset references stay fresh across deploys.
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Network-first for API calls, cache-first for static assets.
   if (event.request.url.includes('supabase')) {
     event.respondWith(fetch(event.request));
     return;

@@ -8,30 +8,27 @@ export function generateShareText(
   results: RoundResult[],
   totalScore: number,
   maxScore: number,
-  streak: number,
+  _streak: number,
   sport: 'american' | 'soccer' = 'american',
+  date?: string,
 ): string {
-  const sportEmoji = sport === 'soccer' ? '⚽' : '🇺🇸';
+  const title = sport === 'soccer' ? 'Rewind ⚽' : 'Rewind';
+  const dateStr = new Date(`${date ?? new Date().toISOString().slice(0, 10)}T00:00:00`).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
 
   const emojiRow = results
     .map((r) => getResultEmoji(getResultColor(r.diff)))
-    .join(' ');
+    .join('');
 
-  const diffRow = results
-    .map((r) => {
-      if (r.diff === 0) return ' 0';
-      return r.diff > 0 ? `+${r.diff}` : `${r.diff}`;
-    })
-    .join('  ');
-
-  let text = `${sportEmoji} Rewind #${String(puzzleNumber).padStart(3, '0')}\n\n`;
+  let text = `${title}\n`;
+  text += `#${puzzleNumber} / ${dateStr}\n\n`;
   text += `${emojiRow}\n`;
-  text += `${diffRow}\n\n`;
-  text += `Score: ${totalScore.toLocaleString()}/${maxScore.toLocaleString()}`;
-  if (streak > 1) {
-    text += `\n🔥 ${streak}-day streak`;
-  }
-  text += `\n\n${window.location.origin}${window.location.pathname}${window.location.search}`;
+  text += `Score ${totalScore.toLocaleString()} / ${maxScore.toLocaleString()}\n\n`;
+  text += `rewind.clutchpoints.com\n`;
+  text += `Guess when this sports event happened.`;
   return text;
 }
 
@@ -60,10 +57,9 @@ export async function shareResults(text: string): Promise<ShareOutcome> {
   const shareData = {
     title: 'Rewind',
     text,
-    url: `${window.location.origin}${window.location.pathname}${window.location.search}`,
   };
 
-  if (navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
+  if (window.isSecureContext && navigator.share) {
     try {
       await navigator.share(shareData);
       return 'shared';

@@ -87,6 +87,7 @@ beforeEach(() => {
       return selectedYear;
     },
     scrollToYear: vi.fn(),
+    snapToClosestYear: vi.fn(() => Promise.resolve()),
     syncYear: vi.fn(),
     handleScroll: vi.fn(),
     rangeStart: 1984,
@@ -136,6 +137,7 @@ test('keeps showing the guessed year while the timeline scrolls to the correct a
       selectedYear = year;
       return scrollPromise;
     }),
+    snapToClosestYear: vi.fn(() => Promise.resolve()),
     syncYear: vi.fn(),
     handleScroll: vi.fn(),
     rangeStart: 1984,
@@ -182,6 +184,7 @@ test('activates spotlight while a non-perfect reveal is scrolling', async () => 
       return selectedYear;
     },
     scrollToYear: vi.fn(() => scrollPromise),
+    snapToClosestYear: vi.fn(() => Promise.resolve()),
     syncYear: vi.fn(),
     handleScroll: vi.fn(),
     rangeStart: 1984,
@@ -238,6 +241,7 @@ test('keeps the headline year dimmed until reveal state is committed', async () 
       return selectedYear;
     },
     scrollToYear: vi.fn(() => scrollPromise),
+    snapToClosestYear: vi.fn(() => Promise.resolve()),
     syncYear: vi.fn(),
     handleScroll: vi.fn(),
     rangeStart: 1984,
@@ -293,6 +297,7 @@ test('shows confetti on a perfect reveal', async () => {
       return selectedYear;
     },
     scrollToYear: vi.fn(() => Promise.resolve()),
+    snapToClosestYear: vi.fn(() => Promise.resolve()),
     syncYear: vi.fn(),
     handleScroll: vi.fn(),
     rangeStart: 1984,
@@ -338,6 +343,7 @@ test('keeps the reveal indicator green even on a wrong answer', async () => {
       return selectedYear;
     },
     scrollToYear: vi.fn(() => Promise.resolve()),
+    snapToClosestYear: vi.fn(() => Promise.resolve()),
     syncYear: vi.fn(),
     handleScroll: vi.fn(),
     rangeStart: 1984,

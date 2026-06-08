@@ -177,6 +177,10 @@ export function useTimeline(events: GameEvent[] = []) {
     }
   }, [RANGE_END, RANGE_START]);
 
+  const snapToClosestYear = useCallback(() => {
+    return scrollToYear(selectedYearRef.current, false, true);
+  }, [scrollToYear]);
+
   useEffect(() => {
     requestAnimationFrame(() => {
       void scrollToYear(RANGE_END, false, true);
@@ -191,6 +195,7 @@ export function useTimeline(events: GameEvent[] = []) {
     scrollToYear,
     syncYear,
     handleScroll,
+    snapToClosestYear,
     rangeStart: RANGE_START,
     rangeEnd: RANGE_END,
     yearWidth: YEAR_WIDTH,

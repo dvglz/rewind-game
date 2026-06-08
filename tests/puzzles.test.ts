@@ -50,21 +50,21 @@ describe('getPuzzleForDate', () => {
     expect(unique.size).toBe(10);
   });
 
-  it('2026-06-01 maps to Day 1 (LeBron for nba)', () => {
-    const puzzle = getPuzzleForDate('2026-06-01', 'american');
+  it('2026-06-06 maps to Day 1 (LeBron for nba)', () => {
+    const puzzle = getPuzzleForDate('2026-06-06', 'american');
     expect(puzzle.events[0].text).toContain('LeBron');
     expect(puzzle.number).toBe(1);
   });
 
-  it('2026-06-02 maps to Day 2 (Jordan for nba)', () => {
-    const puzzle = getPuzzleForDate('2026-06-02', 'american');
+  it('2026-06-07 maps to Day 2 (Jordan for nba)', () => {
+    const puzzle = getPuzzleForDate('2026-06-07', 'american');
     expect(puzzle.events[0].text).toContain('Jordan');
     expect(puzzle.number).toBe(2);
   });
 
   it('cycles back after pool size (10 days)', () => {
-    const a = getPuzzleForDate('2026-06-01', 'american');
-    const b = getPuzzleForDate('2026-06-11', 'american');
+    const a = getPuzzleForDate('2026-06-06', 'american');
+    const b = getPuzzleForDate('2026-06-16', 'american');
     expect(a.events.map(e => e.text)).toEqual(b.events.map(e => e.text));
   });
 
@@ -77,7 +77,7 @@ describe('getPuzzleForDate', () => {
   });
 
   it('soccer day 1 Q3 uses South Africa hosting (not Saudi/Argentina)', () => {
-    const puzzle = getPuzzleForDate('2026-06-01', 'soccer');
+    const puzzle = getPuzzleForDate('2026-06-06', 'soccer');
     // Q1 is Messi, Q3 should be South Africa (not Saudi)
     expect(puzzle.events[0].text).toContain('Messi');
     expect(puzzle.events[2].text).toContain('South Africa');
