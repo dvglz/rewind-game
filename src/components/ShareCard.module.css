@@ -45,7 +45,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .questionRow {
@@ -53,7 +53,7 @@
   grid-template-columns: 20px minmax(0, 1fr) auto;
   align-items: baseline;
   column-gap: 10px;
-  padding: 10px 0;
+  padding: 8px 0;
 }
 
 .questionEmoji {
@@ -102,7 +102,7 @@
 
 @media (min-width: 900px) {
   .score {
-    font-size: 76px;
+    font-size: 60px;
     gap: 5px;
   }
 
@@ -115,13 +115,13 @@
   }
 
   .questionList {
-    gap: 12px;
+    gap: 8px;
   }
 
   .questionRow {
     grid-template-columns: 24px minmax(0, 1fr) auto;
-    column-gap: 14px;
-    padding: 12px 0;
+    column-gap: 8px;
+    padding: 8px 0;
   }
 
   .questionEmoji {

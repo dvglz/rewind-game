@@ -138,7 +138,7 @@
   }
 
   .content {
-    max-width: 560px;
+    max-width: 480px;
     padding: 24px 32px 32px;
     gap: 16px;
   }
@@ -156,7 +156,7 @@
   }
 
   .crossPromo {
-    font-size: 16px;
+    font-size: 18px;
     max-width: 42ch;
   }
 
