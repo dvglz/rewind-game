@@ -208,7 +208,7 @@ export function MenuOverlay({
   const isHowToPlayActive = currentScreen === 'home';
 
   const overlay = (
-    <div className={open ? styles.root : styles.rootClosing}>
+    <div className={open ? styles.root : styles.rootClosing} data-theme-invert>
       <div className={styles.surface} role="dialog" aria-modal="true" aria-label="Menu" ref={dialogRef}>
         <div className={styles.header}>
           <button

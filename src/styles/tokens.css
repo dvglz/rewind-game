@@ -52,3 +52,30 @@
   --color-muted: #A4A8B3;
   --color-border: #3A3D45;
 }
+
+/* Inverted overlay: flip light ↔ dark */
+[data-theme-invert] {
+  --color-bg: #17181C;
+  --color-surface-elevated: rgba(31, 33, 39, 0.96);
+  --color-text: #F3EEE4;
+  --color-muted: #A4A8B3;
+  --color-border: #3A3D45;
+}
+
+[data-theme='dark'] [data-theme-invert] {
+  --color-bg: #FFFFFF;
+  --color-surface-elevated: rgba(255, 255, 255, 0.96);
+  --color-text: #17181C;
+  --color-muted: #666A73;
+  --color-border: #E5E7EB;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) [data-theme-invert] {
+    --color-bg: #FFFFFF;
+    --color-surface-elevated: rgba(255, 255, 255, 0.96);
+    --color-text: #17181C;
+    --color-muted: #666A73;
+    --color-border: #E5E7EB;
+  }
+}
