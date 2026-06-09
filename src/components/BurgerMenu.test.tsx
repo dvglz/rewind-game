@@ -140,6 +140,20 @@ describe('BurgerMenu', () => {
     expect(document.activeElement).toBe(closeButton);
   });
 
+  it('truncates long signed-in emails even when the domain is the long part', () => {
+    render(
+      <BurgerMenu
+        {...createProps()}
+        isAuthenticated={true}
+        userEmail="me@averyveryveryverylongdomainexample.com"
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
+
+    expect(screen.getByText('me@averyveryveryverylongdom…')).not.toBeNull();
+  });
+
   it('closes and routes to auth on sign in with returnTo set to the current screen', () => {
     vi.useFakeTimers();
     const props = createProps();

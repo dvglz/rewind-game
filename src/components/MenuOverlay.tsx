@@ -33,6 +33,7 @@ export interface MenuOverlayProps {
 
 const CLUTCH_PLAY_HREF = 'https://play.clutchpoints.com';
 const CLOSE_ANIMATION_MS = 160;
+const MAX_TRUNCATED_EMAIL_LENGTH = 28;
 const FOCUSABLE_SELECTOR = [
   'button:not([disabled])',
   'a[href]',
@@ -47,14 +48,22 @@ function truncateEmail(email: string | null): string {
     return 'Signed in';
   }
 
-  if (email.length <= 28) {
+  if (email.length <= MAX_TRUNCATED_EMAIL_LENGTH) {
     return email;
   }
 
   const [localPart, domain = ''] = email.split('@');
-  const shortenedLocal = localPart.length > 12 ? `${localPart.slice(0, 12)}…` : localPart;
 
-  return domain ? `${shortenedLocal}@${domain}` : `${email.slice(0, 24)}…`;
+  if (!domain) {
+    return `${email.slice(0, MAX_TRUNCATED_EMAIL_LENGTH - 1)}…`;
+  }
+
+  const availableDomainLength = MAX_TRUNCATED_EMAIL_LENGTH - localPart.length - 2;
+  if (availableDomainLength <= 0) {
+    return `${email.slice(0, MAX_TRUNCATED_EMAIL_LENGTH - 1)}…`;
+  }
+
+  return `${localPart}@${domain.slice(0, availableDomainLength)}…`;
 }
 
 export function MenuOverlay({
