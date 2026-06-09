@@ -1,6 +1,6 @@
 const CACHE_NAME = 'rewind-v2';
 const ASSETS = [
-  '/manifest.json',
+  '/site.webmanifest',
 ];
 
 self.addEventListener('install', (event) => {
