@@ -1,4 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useMemo, useState } from 'react';
+import type { ThemePreference } from '../lib/theme';
+import { MenuOverlay, type TopLevelMenuScreen } from './MenuOverlay';
 import styles from './BurgerMenu.module.css';
 
 interface MenuItem {
@@ -6,27 +8,70 @@ interface MenuItem {
   onClick: () => void;
 }
 
-interface BurgerMenuProps {
+interface LegacyBurgerMenuProps {
   items: MenuItem[];
 }
 
-export function BurgerMenu({ items }: BurgerMenuProps) {
-  const [open, setOpen] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement>(null);
+interface OverlayBurgerMenuProps {
+  currentScreen: TopLevelMenuScreen;
+  hasInProgressGame: boolean;
+  feedbackHref: string;
+  clutchPlayHref?: string;
+  hapticsEnabled: boolean;
+  themePreference: ThemePreference;
+  isAuthenticated: boolean;
+  isAuthLoading?: boolean;
+  userEmail: string | null;
+  onNavigateHome: () => void;
+  onNavigateGame: () => void;
+  onNavigateResults: () => void;
+  onNavigateGroups: () => void;
+  onNavigateAuth: () => void;
+  onSignOut: () => void;
+  onToggleHaptics: (next: boolean) => void;
+  onThemeChange: (value: ThemePreference) => void;
+}
 
-  useEffect(() => {
-    if (!open) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+export type BurgerMenuProps = LegacyBurgerMenuProps | OverlayBurgerMenuProps;
+
+const noop = () => {};
+
+function hasLegacyItems(props: BurgerMenuProps): props is LegacyBurgerMenuProps {
+  return 'items' in props;
+}
+
+export function BurgerMenu(props: BurgerMenuProps) {
+  const [open, setOpen] = useState(false);
+  const overlayProps = useMemo(() => {
+    if (!hasLegacyItems(props)) {
+      return props;
+    }
+
+    const groupsItem = props.items.find((item) => item.label.toLowerCase() === 'groups');
+
+    return {
+      currentScreen: 'home' as const,
+      hasInProgressGame: false,
+      feedbackHref: 'mailto:feedback@example.com',
+      clutchPlayHref: 'https://play.clutchpoints.com',
+      hapticsEnabled: true,
+      themePreference: 'system' as const,
+      isAuthenticated: false,
+      isAuthLoading: false,
+      userEmail: null,
+      onNavigateHome: noop,
+      onNavigateGame: noop,
+      onNavigateResults: noop,
+      onNavigateGroups: groupsItem?.onClick ?? noop,
+      onNavigateAuth: noop,
+      onSignOut: noop,
+      onToggleHaptics: noop,
+      onThemeChange: noop,
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [open]);
+  }, [props]);
 
   return (
-    <div className={styles.wrapper} ref={wrapperRef}>
+    <div className={styles.wrapper}>
       <button
         className={styles.trigger}
         onClick={() => setOpen((prev) => !prev)}
@@ -39,21 +84,10 @@ export function BurgerMenu({ items }: BurgerMenuProps) {
       </button>
 
       {open && (
-        <div className={styles.dropdown}>
-          {items.map((item) => (
-            <button
-              key={item.label}
-              className={styles.item}
-              onClick={() => {
-                setOpen(false);
-                item.onClick();
-              }}
-              type="button"
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
+        <MenuOverlay
+          {...overlayProps}
+          onClose={() => setOpen(false)}
+        />
       )}
     </div>
   );

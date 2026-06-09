@@ -1,0 +1,165 @@
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--color-bg);
+  color: var(--color-text);
+  animation: overlayFade 200ms ease;
+}
+
+.surface {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-lg);
+  gap: var(--space-xl);
+  animation: surfaceScale 200ms ease;
+}
+
+.header {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.closeButton {
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  padding: 8px;
+  cursor: pointer;
+}
+
+.navSection,
+.settingsSection,
+.metaSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.navSection {
+  margin-top: var(--space-lg);
+}
+
+.navButton,
+.navButtonCurrent,
+.metaLink,
+.authAction {
+  font: inherit;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 4vw, 2.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  text-decoration: none;
+  text-align: left;
+  color: var(--color-text);
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+.navButton,
+.metaLink,
+.authAction {
+  cursor: pointer;
+}
+
+.navButtonCurrent {
+  color: var(--color-muted);
+}
+
+.settingRow,
+.themeRow,
+.authRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.themeRow {
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.settingLabel,
+.authStatus {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--color-muted);
+}
+
+.divider {
+  height: 1px;
+  width: 100%;
+  background: var(--color-border);
+}
+
+.switch,
+.switchEnabled {
+  width: 52px;
+  height: 32px;
+  border-radius: 999px;
+  border: 0;
+  padding: 4px;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.switch {
+  background: var(--color-border);
+}
+
+.switchEnabled {
+  background: var(--color-text);
+}
+
+.switchThumb {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-bg);
+  transform: translateX(0);
+  transition: transform 150ms ease;
+}
+
+.switchEnabled .switchThumb {
+  transform: translateX(20px);
+}
+
+.authAction {
+  font-size: 1.2rem;
+}
+
+.closeButton:focus-visible,
+.navButton:focus-visible,
+.metaLink:focus-visible,
+.authAction:focus-visible,
+.switch:focus-visible,
+.switchEnabled:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 4px;
+}
+
+@keyframes overlayFade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes surfaceScale {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
