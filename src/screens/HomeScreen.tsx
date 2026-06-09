@@ -61,8 +61,6 @@ export function HomeScreen({
         currentScreen="home"
         hasInProgressGame={hasInProgressGame}
         feedbackHref="mailto:feedback@example.com"
-        hapticsEnabled={true}
-        themePreference="system"
         isAuthenticated={false}
         isAuthLoading={false}
         userEmail={null}
@@ -72,8 +70,6 @@ export function HomeScreen({
         onNavigateGroups={onGroups}
         onNavigateAuth={noop}
         onSignOut={noop}
-        onToggleHaptics={noop}
-        onThemeChange={noop}
       />
       <div className={styles.top}>
         <h1 className={styles.wordmark}>Rewind</h1>

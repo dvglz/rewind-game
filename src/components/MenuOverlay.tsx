@@ -1,8 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
-import type { ThemePreference } from '../lib/theme';
-import { ThemeSwitch } from './ThemeSwitch';
 import { Close } from './icons';
 import styles from './MenuOverlay.module.css';
 
@@ -14,8 +12,6 @@ export interface MenuOverlayProps {
   hasInProgressGame: boolean;
   feedbackHref: string;
   clutchPlayHref?: string;
-  hapticsEnabled: boolean;
-  themePreference: ThemePreference;
   isAuthenticated: boolean;
   isAuthLoading?: boolean;
   userEmail: string | null;
@@ -27,8 +23,6 @@ export interface MenuOverlayProps {
   onNavigateGroups: () => void;
   onNavigateAuth: (returnTo: TopLevelMenuScreen) => void;
   onSignOut: () => void;
-  onToggleHaptics: (next: boolean) => void;
-  onThemeChange: (value: ThemePreference) => void;
 }
 
 const CLUTCH_PLAY_HREF = 'https://play.clutchpoints.com';
@@ -72,8 +66,6 @@ export function MenuOverlay({
   hasInProgressGame,
   feedbackHref,
   clutchPlayHref = CLUTCH_PLAY_HREF,
-  hapticsEnabled,
-  themePreference,
   isAuthenticated,
   isAuthLoading = false,
   userEmail,
@@ -85,8 +77,6 @@ export function MenuOverlay({
   onNavigateGroups,
   onNavigateAuth,
   onSignOut,
-  onToggleHaptics,
-  onThemeChange,
 }: MenuOverlayProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -277,35 +267,12 @@ export function MenuOverlay({
 
         <div className={styles.bottomSection}>
           <div className={styles.divider} />
-          <div className={styles.settingsSection}>
-            <div className={`${styles.settingRow} ${styles.menuItem}`} style={{ '--stagger-index': 4 } as CSSProperties}>
-              <span className={styles.settingLabel}>Sound &amp; Haptics</span>
-              <button
-                type="button"
-                role="switch"
-                aria-label="Sound & Haptics"
-                aria-checked={hapticsEnabled}
-                className={hapticsEnabled ? styles.switchEnabled : styles.switch}
-                onClick={() => onToggleHaptics(!hapticsEnabled)}
-              >
-                <span className={styles.switchThumb} />
-              </button>
-            </div>
-
-            <div className={`${styles.themeRow} ${styles.menuItem}`} style={{ '--stagger-index': 5 } as CSSProperties}>
-              <span className={styles.settingLabel}>Appearance</span>
-              <ThemeSwitch value={themePreference} onChange={onThemeChange} />
-            </div>
-          </div>
-
-          <div className={styles.sectionDivider} />
-
           <div className={styles.metaSection}>
             <a
               href={feedbackHref}
               className={`${styles.metaLink} ${styles.menuItem}`}
               onClick={onClose}
-              style={{ '--stagger-index': 6 } as CSSProperties}
+              style={{ '--stagger-index': 4 } as CSSProperties}
             >
               Share Feedback
             </a>
@@ -315,24 +282,24 @@ export function MenuOverlay({
               rel="noreferrer"
               className={`${styles.metaLink} ${styles.menuItem}`}
               onClick={onClose}
-              style={{ '--stagger-index': 7 } as CSSProperties}
+              style={{ '--stagger-index': 5 } as CSSProperties}
             >
               Check Clutch Play
             </a>
 
             {isAuthLoading ? (
-              <div className={`${styles.authRow} ${styles.menuItem}`} style={{ '--stagger-index': 8 } as CSSProperties}>
+              <div className={`${styles.authRow} ${styles.menuItem}`} style={{ '--stagger-index': 6 } as CSSProperties}>
                 <span className={styles.authStatus}>Checking account…</span>
               </div>
             ) : isAuthenticated ? (
-              <div className={`${styles.authRow} ${styles.menuItem}`} style={{ '--stagger-index': 8 } as CSSProperties}>
+              <div className={`${styles.authRow} ${styles.menuItem}`} style={{ '--stagger-index': 6 } as CSSProperties}>
                 <span className={styles.authStatus}>{truncateEmail(userEmail)}</span>
                 <button type="button" className={styles.authAction} onClick={handleSignOut}>
                   Sign Out
                 </button>
               </div>
             ) : (
-              <div className={`${styles.authRow} ${styles.menuItem}`} style={{ '--stagger-index': 8 } as CSSProperties}>
+              <div className={`${styles.authRow} ${styles.menuItem}`} style={{ '--stagger-index': 6 } as CSSProperties}>
                 <button type="button" className={styles.authAction} onClick={handleAuthNavigation}>
                   Sign In
                 </button>

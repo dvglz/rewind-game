@@ -1,5 +1,4 @@
 import { useRef, useState } from 'react';
-import type { ThemePreference } from '../lib/theme';
 import { MenuOverlay, type TopLevelMenuScreen } from './MenuOverlay';
 import styles from './BurgerMenu.module.css';
 
@@ -8,8 +7,6 @@ export interface BurgerMenuProps {
   hasInProgressGame: boolean;
   feedbackHref: string;
   clutchPlayHref?: string;
-  hapticsEnabled: boolean;
-  themePreference: ThemePreference;
   isAuthenticated: boolean;
   isAuthLoading?: boolean;
   userEmail: string | null;
@@ -19,8 +16,6 @@ export interface BurgerMenuProps {
   onNavigateGroups: () => void;
   onNavigateAuth: (returnTo: TopLevelMenuScreen) => void;
   onSignOut: () => void;
-  onToggleHaptics: (next: boolean) => void;
-  onThemeChange: (value: ThemePreference) => void;
 }
 
 export function BurgerMenu(props: BurgerMenuProps) {

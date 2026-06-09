@@ -7,8 +7,6 @@ function createProps() {
     currentScreen: 'home' as const,
     hasInProgressGame: false,
     feedbackHref: 'mailto:feedback@example.com',
-    hapticsEnabled: true,
-    themePreference: 'system' as const,
     isAuthenticated: false,
     isAuthLoading: false,
     userEmail: null,
@@ -18,8 +16,6 @@ function createProps() {
     onNavigateGroups: vi.fn(),
     onNavigateAuth: vi.fn(),
     onSignOut: vi.fn(),
-    onToggleHaptics: vi.fn(),
-    onThemeChange: vi.fn(),
   };
 }
 
@@ -44,6 +40,8 @@ describe('BurgerMenu', () => {
     expect(screen.getByRole('button', { name: 'Leaderboard' })).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Groups' })).not.toBeNull();
     expect(screen.getByRole('button', { name: 'How to Play' })).not.toBeNull();
+    expect(screen.queryByText('Sound & Haptics')).toBeNull();
+    expect(screen.queryByText('Appearance')).toBeNull();
     expect(screen.getByRole('button', { name: 'Close menu' }) === document.activeElement).toBe(true);
     expect(container.contains(dialog)).toBe(false);
     expect(document.body.style.overflow).toBe('hidden');
@@ -112,17 +110,6 @@ describe('BurgerMenu', () => {
 
     expect(screen.queryByRole('dialog', { name: 'Menu' })).toBeNull();
     vi.useRealTimers();
-  });
-
-  it('keeps the menu open when toggling haptics', () => {
-    const props = createProps();
-    render(<BurgerMenu {...props} />);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
-    fireEvent.click(screen.getByRole('switch', { name: 'Sound & Haptics' }));
-
-    expect(props.onToggleHaptics).toHaveBeenCalledWith(false);
-    expect(screen.getByRole('dialog', { name: 'Menu' })).not.toBeNull();
   });
 
   it('cycles focus within the dialog while open', () => {
