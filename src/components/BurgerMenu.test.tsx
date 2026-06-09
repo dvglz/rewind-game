@@ -26,23 +26,43 @@ function createProps() {
 describe('BurgerMenu', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    document.body.style.overflow = '';
   });
 
   it('opens a full-screen overlay from the trigger', () => {
-    render(<BurgerMenu {...createProps()} />);
+    const { container } = render(<BurgerMenu {...createProps()} />);
 
     const trigger = screen.getByRole('button', { name: 'Menu' });
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
 
     fireEvent.click(trigger);
 
+    const dialog = screen.getByRole('dialog', { name: 'Menu' });
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
-    expect(screen.getByRole('dialog', { name: 'Menu' })).not.toBeNull();
+    expect(dialog).not.toBeNull();
     expect(screen.getByRole('button', { name: "Today's Game" })).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Leaderboard' })).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Groups' })).not.toBeNull();
     expect(screen.getByRole('button', { name: 'How to Play' })).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Close menu' }) === document.activeElement).toBe(true);
+    expect(container.contains(dialog)).toBe(false);
+    expect(document.body.style.overflow).toBe('hidden');
+  });
+
+  it("marks Today's Game as current and non-interactive when Home is the active destination", () => {
+    const props = createProps();
+    render(<BurgerMenu {...props} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
+
+    const currentDestination = screen.getByRole('button', { name: "Today's Game" });
+    expect(currentDestination.hasAttribute('disabled')).toBe(true);
+    expect(currentDestination.getAttribute('aria-current')).toBe('page');
+
+    fireEvent.click(currentDestination);
+
+    expect(props.onNavigateHome).not.toHaveBeenCalled();
+    expect(props.onNavigateGame).not.toHaveBeenCalled();
   });
 
   it('marks Home instructional entry as current and non-interactive', () => {
@@ -105,6 +125,21 @@ describe('BurgerMenu', () => {
     expect(screen.getByRole('dialog', { name: 'Menu' })).not.toBeNull();
   });
 
+  it('cycles focus within the dialog while open', () => {
+    render(<BurgerMenu {...createProps()} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
+
+    const closeButton = screen.getByRole('button', { name: 'Close menu' });
+    const signInButton = screen.getByRole('button', { name: 'Sign In' });
+
+    fireEvent.keyDown(document, { key: 'Tab', shiftKey: true });
+    expect(document.activeElement).toBe(signInButton);
+
+    fireEvent.keyDown(document, { key: 'Tab' });
+    expect(document.activeElement).toBe(closeButton);
+  });
+
   it('closes and routes to auth on sign in with returnTo set to the current screen', () => {
     vi.useFakeTimers();
     const props = createProps();
@@ -136,6 +171,7 @@ describe('BurgerMenu', () => {
     });
 
     expect(screen.queryByRole('dialog', { name: 'Menu' })).toBeNull();
+    expect(document.body.style.overflow).toBe('');
     vi.useRealTimers();
   });
 });

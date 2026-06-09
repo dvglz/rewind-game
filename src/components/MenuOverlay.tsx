@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
 import type { ThemePreference } from '../lib/theme';
 import { ThemeSwitch } from './ThemeSwitch';
 import { Close } from './icons';
@@ -32,6 +33,14 @@ export interface MenuOverlayProps {
 
 const CLUTCH_PLAY_HREF = 'https://play.clutchpoints.com';
 const CLOSE_ANIMATION_MS = 160;
+const FOCUSABLE_SELECTOR = [
+  'button:not([disabled])',
+  'a[href]',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(',');
 
 function truncateEmail(email: string | null): string {
   if (!email) {
@@ -71,11 +80,50 @@ export function MenuOverlay({
   onThemeChange,
 }: MenuOverlayProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  const getFocusableElements = () => {
+    const dialog = dialogRef.current;
+    if (!dialog) {
+      return [];
+    }
+
+    return Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+      (element) => !element.hasAttribute('disabled') && element.tabIndex !== -1,
+    );
+  };
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         onClose();
+        return;
+      }
+
+      if (event.key !== 'Tab') {
+        return;
+      }
+
+      const focusable = getFocusableElements();
+      if (focusable.length === 0) {
+        event.preventDefault();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey) {
+        if (document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        }
+        return;
+      }
+
+      if (document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
       }
     };
 
@@ -89,6 +137,19 @@ export function MenuOverlay({
     if (open) {
       closeButtonRef.current?.focus();
     }
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
   }, [open]);
 
   useEffect(() => {
@@ -147,9 +208,9 @@ export function MenuOverlay({
   const isGroupsActive = currentScreen === 'groups';
   const isHowToPlayActive = currentScreen === 'home';
 
-  return (
+  const overlay = (
     <div className={open ? styles.root : styles.rootClosing}>
-      <div className={styles.surface} role="dialog" aria-modal="true" aria-label="Menu">
+      <div className={styles.surface} role="dialog" aria-modal="true" aria-label="Menu" ref={dialogRef}>
         <div className={styles.header}>
           <button
             type="button"
@@ -168,6 +229,7 @@ export function MenuOverlay({
             onClick={handleGameNavigation}
             disabled={isTodayActive}
             className={`${isTodayActive ? styles.navButtonCurrent : styles.navButton} ${styles.menuItem}`}
+            aria-current={isTodayActive ? 'page' : undefined}
             style={{ '--stagger-index': 0 } as CSSProperties}
           >
             Today's Game
@@ -228,6 +290,8 @@ export function MenuOverlay({
             </div>
           </div>
 
+          <div className={styles.sectionDivider} />
+
           <div className={styles.metaSection}>
             <a
               href={feedbackHref}
@@ -271,4 +335,6 @@ export function MenuOverlay({
       </div>
     </div>
   );
+
+  return createPortal(overlay, document.body);
 }
