@@ -56,3 +56,5 @@ export interface GroupLeaderboardEntry {
   score: number | null;
   isCurrentUser: boolean;
 }
+
+export type { AuthUser } from './types/auth';
