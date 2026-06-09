@@ -3,6 +3,7 @@
  * Provides stronger, more reliable haptics across iOS + Android.
  */
 import { useWebHaptics } from 'web-haptics/react';
+import { getStoredHapticsEnabled } from '../hooks/useHapticsEnabled';
 
 type TriggerInput =
   | string
@@ -25,7 +26,15 @@ export function initHaptics(trigger: (input?: TriggerInput, options?: { intensit
   _trigger = trigger;
 }
 
+function canPlayHaptics(): boolean {
+  return getStoredHapticsEnabled();
+}
+
 function playImmediate(input: TriggerInput, fallback: number | number[]): void {
+  if (!canPlayHaptics()) {
+    return;
+  }
+
   if (_trigger) {
     void _trigger(input);
   } else {
@@ -48,6 +57,10 @@ function drainQueue(): void {
 }
 
 function enqueue(input: TriggerInput, fallback: number | number[], durationMs: number): void {
+  if (!canPlayHaptics()) {
+    return;
+  }
+
   queue.push({ input, fallback, durationMs });
   drainQueue();
 }
