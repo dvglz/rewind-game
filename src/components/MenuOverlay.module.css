@@ -5,6 +5,8 @@
   background: var(--color-bg);
   color: var(--color-text);
   animation: overlayFade 200ms ease;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .rootClosing {
@@ -14,6 +16,8 @@
   background: var(--color-bg);
   color: var(--color-text);
   animation: overlayFadeOut 160ms ease forwards;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .surface {
@@ -23,6 +27,7 @@
   padding: var(--space-lg);
   gap: var(--space-xl);
   animation: surfaceScale 200ms ease;
+  box-sizing: border-box;
 }
 
 .header {
@@ -211,5 +216,20 @@
 
   to {
     opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root,
+  .rootClosing,
+  .surface,
+  .menuItem {
+    animation: none;
+  }
+
+  .switch,
+  .switchEnabled,
+  .switchThumb {
+    transition: none;
   }
 }

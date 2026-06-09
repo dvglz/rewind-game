@@ -9,6 +9,8 @@ import {
 import { BurgerMenu } from '../components/BurgerMenu';
 import styles from './HomeScreen.module.css';
 
+const noop = () => {};
+
 interface HomeScreenProps {
   onPlay: () => void;
   hasInProgressGame: boolean;
@@ -55,7 +57,24 @@ export function HomeScreen({
 
   return (
     <div className={styles.container}>
-      <BurgerMenu items={[{ label: 'Groups', onClick: onGroups }]} />
+      <BurgerMenu
+        currentScreen="home"
+        hasInProgressGame={hasInProgressGame}
+        feedbackHref="mailto:feedback@example.com"
+        hapticsEnabled={true}
+        themePreference="system"
+        isAuthenticated={false}
+        isAuthLoading={false}
+        userEmail={null}
+        onNavigateHome={noop}
+        onNavigateGame={onPlay}
+        onNavigateResults={onViewResults}
+        onNavigateGroups={onGroups}
+        onNavigateAuth={noop}
+        onSignOut={noop}
+        onToggleHaptics={noop}
+        onThemeChange={noop}
+      />
       <div className={styles.top}>
         <h1 className={styles.wordmark}>Rewind</h1>
 

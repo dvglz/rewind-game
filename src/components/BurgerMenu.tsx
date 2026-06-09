@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { ThemePreference } from '../lib/theme';
 import { MenuOverlay, type TopLevelMenuScreen } from './MenuOverlay';
 import styles from './BurgerMenu.module.css';
@@ -27,12 +27,6 @@ export function BurgerMenu(props: BurgerMenuProps) {
   const [open, setOpen] = useState(false);
   const [renderOverlay, setRenderOverlay] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (open) {
-      setRenderOverlay(true);
-    }
-  }, [open]);
 
   const handleOpen = () => {
     setRenderOverlay(true);

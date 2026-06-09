@@ -15,6 +15,7 @@ test('renders the home screen core actions without the theme switcher', () => {
   );
 
   expect(screen.getByRole('button', { name: 'Start' })).not.toBeNull();
+  expect(screen.getByRole('button', { name: 'Menu' })).not.toBeNull();
   expect(screen.queryByRole('button', { name: 'Debug' })).toBeNull();
   expect(screen.queryByRole('group', { name: 'Theme' })).toBeNull();
 });
