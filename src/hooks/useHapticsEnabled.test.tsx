@@ -29,6 +29,16 @@ describe('useHapticsEnabled', () => {
     expect(result.current.enabled).toBe(false);
   });
 
+  it('observes later localStorage changes after an earlier read', async () => {
+    const { getStoredHapticsEnabled } = await import('./useHapticsEnabled');
+
+    expect(getStoredHapticsEnabled()).toBe(true);
+
+    localStorage.setItem('rewind_haptics_enabled', 'false');
+
+    expect(getStoredHapticsEnabled()).toBe(false);
+  });
+
   it('persists changes when toggled through the hook', async () => {
     const { useHapticsEnabled } = await import('./useHapticsEnabled');
     const { result } = renderHook(() => useHapticsEnabled());
@@ -105,5 +115,17 @@ describe('haptics guards', () => {
     vibrateConfirm();
 
     expect(vibrateSpy).toHaveBeenCalledWith([30, 40, 45]);
+  });
+
+  it('skips the web-haptics trigger when haptics are disabled', async () => {
+    localStorage.setItem('rewind_haptics_enabled', 'false');
+
+    const triggerSpy = vi.fn();
+    const { initHaptics, vibrateConfirm } = await import('../lib/haptics');
+
+    initHaptics(triggerSpy);
+    vibrateConfirm();
+
+    expect(triggerSpy).not.toHaveBeenCalled();
   });
 });
