@@ -4,6 +4,7 @@
  */
 import { useWebHaptics } from 'web-haptics/react';
 import { getStoredHapticsEnabled } from '../hooks/useHapticsEnabled';
+import { soundLight, soundMedium, soundHeavy, soundConfirm, soundError } from './sounds';
 
 type TriggerInput =
   | string
@@ -28,6 +29,10 @@ export function initHaptics(trigger: (input?: TriggerInput, options?: { intensit
 
 function canPlayHaptics(): boolean {
   return getStoredHapticsEnabled();
+}
+
+function needsSoundFallback(): boolean {
+  return !('ontouchstart' in window) && navigator.maxTouchPoints === 0;
 }
 
 function playImmediate(input: TriggerInput, fallback: number | number[]): void {
@@ -74,26 +79,51 @@ export function clearHaptics(): void {
 }
 
 export function vibrateLight(): void {
-  enqueue('selection', 8, 14);
+  if (!canPlayHaptics()) return;
+  if (needsSoundFallback()) {
+    soundLight();
+  } else {
+    enqueue('selection', 8, 14);
+  }
 }
 
 export function vibrateMedium(): void {
-  enqueue('light', 14, 20);
+  if (!canPlayHaptics()) return;
+  if (needsSoundFallback()) {
+    soundMedium();
+  } else {
+    enqueue('light', 14, 20);
+  }
 }
 
 export function vibrateHeavy(): void {
-  clearHaptics();
-  playImmediate('heavy', 35);
+  if (!canPlayHaptics()) return;
+  if (needsSoundFallback()) {
+    soundHeavy();
+  } else {
+    clearHaptics();
+    playImmediate('heavy', 35);
+  }
 }
 
 export function vibrateConfirm(): void {
-  clearHaptics();
-  playImmediate('success', [30, 40, 45]);
+  if (!canPlayHaptics()) return;
+  if (needsSoundFallback()) {
+    soundConfirm();
+  } else {
+    clearHaptics();
+    playImmediate('success', [30, 40, 45]);
+  }
 }
 
 export function vibrateError(): void {
-  clearHaptics();
-  playImmediate('error', [35, 30, 35, 30, 35]);
+  if (!canPlayHaptics()) return;
+  if (needsSoundFallback()) {
+    soundError();
+  } else {
+    clearHaptics();
+    playImmediate('error', [35, 30, 35, 30, 35]);
+  }
 }
 
 export { useWebHaptics };
