@@ -56,7 +56,8 @@
   font-size: 48px;
   text-align: center;
   line-height: 1;
-  animation: revealUp 0.5s ease both;
+  white-space: pre-line;
+  animation: fadeIn 0.4s ease both;
 }
 
 .subtitle {
@@ -65,7 +66,7 @@
   text-align: center;
   color: var(--color-muted);
   line-height: 1.4;
-  animation: revealUp 0.5s ease 0.15s both;
+  animation: fadeIn 0.4s ease 0.1s both;
 }
 
 .providers {
@@ -75,13 +76,14 @@
   gap: var(--space-lg);
   width: 100%;
   max-width: 280px;
-  animation: revealUp 0.5s ease 0.3s both;
+  animation: fadeIn 0.4s ease 0.2s both;
 }
 
 .googleButton {
   width: 100%;
   display: flex;
   justify-content: center;
+  min-height: 44px;
 }
 
 .divider {
@@ -167,9 +169,9 @@
   text-underline-offset: 2px;
 }
 
-@keyframes revealUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @media (min-width: 900px) {

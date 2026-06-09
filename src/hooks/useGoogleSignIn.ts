@@ -1,7 +1,9 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 
 const GSI_SCRIPT_SRC = 'https://accounts.google.com/gsi/client';
-const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string;
+const CLIENT_ID =
+  import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+  '182717589161-edketn4i47i5dl5oms8oke6o9bodg7ep.apps.googleusercontent.com';
 
 interface UseGoogleSignInOptions {
   onCredential: (credential: string) => void;

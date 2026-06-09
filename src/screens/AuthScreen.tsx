@@ -6,6 +6,8 @@ import { ArrowLeft } from '../components/icons';
 import { Toast } from '../components/Toast';
 import styles from './AuthScreen.module.css';
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 interface AuthScreenProps {
   onBack: () => void;
   onSuccess: () => void;
@@ -18,6 +20,8 @@ export function AuthScreen({ onBack, onSuccess, returnTo }: AuthScreenProps) {
   const [emailSent, setEmailSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState('');
+
+  const isValidEmail = EMAIL_RE.test(email.trim());
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -84,7 +88,7 @@ export function AuthScreen({ onBack, onSuccess, returnTo }: AuthScreenProps) {
           </div>
         ) : (
           <>
-            <h1 className={styles.heading}>Sign in</h1>
+            <h1 className={styles.heading}>{'Sign in\nto Clutch Play'}</h1>
             <p className={styles.subtitle}>Play with friends, track your scores</p>
 
             <div className={styles.providers}>
@@ -100,14 +104,15 @@ export function AuthScreen({ onBack, onSuccess, returnTo }: AuthScreenProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="email"
+                  required
                   disabled={loading}
                 />
                 <button
                   className={styles.sendButton}
                   type="submit"
-                  disabled={loading || !email.trim()}
+                  disabled={loading || !isValidEmail}
                 >
-                  {loading ? 'Sending…' : 'Send link'}
+                  {loading ? 'Sending…' : 'Send Link'}
                 </button>
               </form>
             </div>
