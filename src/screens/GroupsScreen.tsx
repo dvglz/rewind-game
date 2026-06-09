@@ -11,9 +11,11 @@ import styles from './GroupsScreen.module.css';
 
 interface GroupsScreenProps {
   onBack: () => void;
+  onRequireAuth: () => void;
+  isAuthenticated: boolean;
 }
 
-export function GroupsScreen({ onBack }: GroupsScreenProps) {
+export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated }: GroupsScreenProps) {
   const [group, setGroup] = useState<PlayhubGroup | null>(null);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -160,6 +162,10 @@ export function GroupsScreen({ onBack }: GroupsScreenProps) {
             <GroupLeaderboard
               entries={leaderboardEntries}
               emptySeed={`day-${dayOffset}`}
+              authCta={!isAuthenticated ? {
+                text: 'Sign in to see your rank',
+                onPress: onRequireAuth,
+              } : undefined}
             />
           </div>
 
@@ -183,14 +189,14 @@ export function GroupsScreen({ onBack }: GroupsScreenProps) {
             <div className={styles.emptyActions}>
               <button
                 className={styles.emptyButtonPrimary}
-                onClick={() => setShowJoin(true)}
+                onClick={() => isAuthenticated ? setShowJoin(true) : onRequireAuth()}
                 type="button"
               >
                 Join by Code
               </button>
               <button
                 className={styles.emptyButtonSecondary}
-                onClick={() => setShowCreate(true)}
+                onClick={() => isAuthenticated ? setShowCreate(true) : onRequireAuth()}
                 type="button"
               >
                 Create Group

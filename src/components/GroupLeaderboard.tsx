@@ -22,9 +22,11 @@ interface GroupLeaderboardProps {
   entries: GroupLeaderboardEntry[];
   /** Seed string for deterministic random empty message (e.g. date string) */
   emptySeed?: string;
+  /** Show sign-in CTA for unauthenticated users */
+  authCta?: { text: string; onPress: () => void };
 }
 
-export function GroupLeaderboard({ entries, emptySeed }: GroupLeaderboardProps) {
+export function GroupLeaderboard({ entries, emptySeed, authCta }: GroupLeaderboardProps) {
   if (entries.length === 0) {
     return (
       <p className={styles.empty}>
@@ -59,6 +61,11 @@ export function GroupLeaderboard({ entries, emptySeed }: GroupLeaderboardProps) 
           </div>
         );
       })}
+      {authCta && (
+        <button className={styles.ctaRow} onClick={authCta.onPress} type="button">
+          {authCta.text}
+        </button>
+      )}
     </div>
   );
 }
