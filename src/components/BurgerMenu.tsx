@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ThemePreference } from '../lib/theme';
 import { MenuOverlay, type TopLevelMenuScreen } from './MenuOverlay';
 import styles from './BurgerMenu.module.css';
@@ -26,7 +26,7 @@ interface OverlayBurgerMenuProps {
   onNavigateGame: () => void;
   onNavigateResults: () => void;
   onNavigateGroups: () => void;
-  onNavigateAuth: () => void;
+  onNavigateAuth: (returnTo: TopLevelMenuScreen) => void;
   onSignOut: () => void;
   onToggleHaptics: (next: boolean) => void;
   onThemeChange: (value: ThemePreference) => void;
@@ -34,59 +34,84 @@ interface OverlayBurgerMenuProps {
 
 export type BurgerMenuProps = LegacyBurgerMenuProps | OverlayBurgerMenuProps;
 
-const noop = () => {};
-
 function hasLegacyItems(props: BurgerMenuProps): props is LegacyBurgerMenuProps {
   return 'items' in props;
 }
 
 export function BurgerMenu(props: BurgerMenuProps) {
   const [open, setOpen] = useState(false);
-  const overlayProps = useMemo(() => {
-    if (!hasLegacyItems(props)) {
-      return props;
+  const [renderOverlay, setRenderOverlay] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      setRenderOverlay(true);
     }
+  }, [open]);
 
-    const groupsItem = props.items.find((item) => item.label.toLowerCase() === 'groups');
+  const overlayProps = hasLegacyItems(props)
+    ? {
+        currentScreen: 'home' as const,
+        hasInProgressGame: false,
+        feedbackHref: 'mailto:feedback@example.com',
+        hapticsEnabled: true,
+        themePreference: 'system' as const,
+        isAuthenticated: false,
+        isAuthLoading: false,
+        userEmail: null,
+        onNavigateHome: props.items.find((item) => item.label === 'How to Play')?.onClick ?? (() => {}),
+        onNavigateGame: props.items.find((item) => item.label === "Today's Game")?.onClick ?? (() => {}),
+        onNavigateResults: props.items.find((item) => item.label === 'Leaderboard')?.onClick ?? (() => {}),
+        onNavigateGroups: props.items.find((item) => item.label === 'Groups')?.onClick ?? (() => {}),
+        onNavigateAuth: () => {},
+        onSignOut: () => {},
+        onToggleHaptics: () => {},
+        onThemeChange: () => {},
+      }
+    : props;
 
-    return {
-      currentScreen: 'home' as const,
-      hasInProgressGame: false,
-      feedbackHref: 'mailto:feedback@example.com',
-      clutchPlayHref: 'https://play.clutchpoints.com',
-      hapticsEnabled: true,
-      themePreference: 'system' as const,
-      isAuthenticated: false,
-      isAuthLoading: false,
-      userEmail: null,
-      onNavigateHome: noop,
-      onNavigateGame: noop,
-      onNavigateResults: noop,
-      onNavigateGroups: groupsItem?.onClick ?? noop,
-      onNavigateAuth: noop,
-      onSignOut: noop,
-      onToggleHaptics: noop,
-      onThemeChange: noop,
-    };
-  }, [props]);
+  const handleOpen = () => {
+    setRenderOverlay(true);
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleExited = () => {
+    setRenderOverlay(false);
+    triggerRef.current?.focus();
+  };
 
   return (
     <div className={styles.wrapper}>
       <button
+        ref={triggerRef}
         className={styles.trigger}
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={() => {
+          if (open) {
+            handleClose();
+            return;
+          }
+
+          handleOpen();
+        }}
         type="button"
         aria-label="Menu"
+        aria-expanded={open ? 'true' : 'false'}
       >
         <span className={styles.bar} />
         <span className={styles.bar} />
         <span className={styles.bar} />
       </button>
 
-      {open && (
+      {renderOverlay && (
         <MenuOverlay
           {...overlayProps}
-          onClose={() => setOpen(false)}
+          open={open}
+          onClose={handleClose}
+          onExited={handleExited}
         />
       )}
     </div>

@@ -7,6 +7,15 @@
   animation: overlayFade 200ms ease;
 }
 
+.rootClosing {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--color-bg);
+  color: var(--color-text);
+  animation: overlayFadeOut 160ms ease forwards;
+}
+
 .surface {
   min-height: 100dvh;
   display: flex;
@@ -64,17 +73,32 @@
   cursor: pointer;
 }
 
+.menuItem {
+  opacity: 0;
+  animation: itemFadeIn 180ms ease forwards;
+  animation-delay: calc(var(--stagger-index, 0) * 35ms);
+}
+
 .navButtonCurrent {
   color: var(--color-muted);
 }
 
 .settingRow,
 .themeRow,
-.authRow {
+.authRow,
+.bottomSection {
   display: flex;
+  gap: var(--space-md);
+}
+
+.settingRow,
+.authRow {
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-md);
+}
+
+.bottomSection {
+  flex-direction: column;
 }
 
 .themeRow {
@@ -152,6 +176,16 @@
   }
 }
 
+@keyframes overlayFadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes surfaceScale {
   from {
     opacity: 0;
@@ -161,5 +195,15 @@
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes itemFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
