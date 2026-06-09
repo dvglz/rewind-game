@@ -24,6 +24,7 @@ dist-ssr
 *.sw?
 .claude/
 .superpowers/
+.worktrees/
 .tmp
 docs/
 test-results/
