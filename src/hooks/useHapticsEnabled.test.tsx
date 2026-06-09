@@ -40,6 +40,32 @@ describe('useHapticsEnabled', () => {
     expect(result.current.enabled).toBe(false);
     expect(localStorage.getItem('rewind_haptics_enabled')).toBe('false');
   });
+
+  it('keeps haptics disabled in memory when storage writes fail', async () => {
+    const setItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('storage unavailable');
+    });
+    const vibrateSpy = vi.fn();
+
+    Object.defineProperty(navigator, 'vibrate', {
+      configurable: true,
+      value: vibrateSpy,
+    });
+
+    const { useHapticsEnabled } = await import('./useHapticsEnabled');
+    const { vibrateHeavy } = await import('../lib/haptics');
+    const { result } = renderHook(() => useHapticsEnabled());
+
+    act(() => {
+      result.current.setEnabled(false);
+    });
+
+    vibrateHeavy();
+
+    expect(result.current.enabled).toBe(false);
+    expect(setItemSpy).toHaveBeenCalledWith('rewind_haptics_enabled', 'false');
+    expect(vibrateSpy).not.toHaveBeenCalled();
+  });
 });
 
 describe('haptics guards', () => {
