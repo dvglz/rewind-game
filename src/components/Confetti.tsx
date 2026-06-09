@@ -24,6 +24,11 @@ export function Confetti({ active, onComplete }: ConfettiProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number>(0);
   const completionTimerRef = useRef<number>(0);
+  const onCompleteRef = useRef(onComplete);
+
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     if (!active) return;
@@ -133,14 +138,14 @@ export function Confetti({ active, onComplete }: ConfettiProps) {
 
     rafRef.current = window.requestAnimationFrame(frame);
     completionTimerRef.current = window.setTimeout(() => {
-      onComplete?.();
+      onCompleteRef.current?.();
     }, DURATION);
 
     return () => {
       window.cancelAnimationFrame(rafRef.current);
       window.clearTimeout(completionTimerRef.current);
     };
-  }, [active, onComplete]);
+  }, [active]);
 
   if (!active) return null;
 
