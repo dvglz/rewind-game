@@ -46,25 +46,26 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
 
   useEffect(() => {
     let cancelled = false;
-    fetchGroup()
-      .then((g) => {
-        if (cancelled) return;
-        setGroup(g);
-        if (pendingInvite && !g) {
-          joinGroup(pendingInvite)
-            .then(() => fetchGroup())
-            .then((joined) => { if (!cancelled) setGroup(joined); })
-            .catch((err) => {
-              if (!cancelled) showToast(err instanceof Error ? err.message : 'Failed to join group');
-            })
-            .finally(() => { if (!cancelled) onInviteHandled?.(); });
-        } else if (pendingInvite && g) {
-          showToast("You're already in a group");
+    if (pendingInvite) {
+      joinGroup(pendingInvite)
+        .then(() => fetchGroup())
+        .then((g) => { if (!cancelled) setGroup(g); })
+        .catch((err) => {
+          if (cancelled) return;
+          showToast(err instanceof Error ? err.message : 'Failed to join group');
+          return fetchGroup().then((g) => { if (!cancelled) setGroup(g); });
+        })
+        .finally(() => {
+          if (cancelled) return;
+          setLoading(false);
           onInviteHandled?.();
-        }
-      })
-      .catch(() => { if (!cancelled) setGroup(null); })
-      .finally(() => { if (!cancelled) setLoading(false); });
+        });
+    } else {
+      fetchGroup()
+        .then((g) => { if (!cancelled) setGroup(g); })
+        .catch(() => { if (!cancelled) setGroup(null); })
+        .finally(() => { if (!cancelled) setLoading(false); });
+    }
     return () => { cancelled = true; };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
