@@ -1,7 +1,7 @@
 .wrapper {
   position: absolute;
   top: var(--space-lg);
-  right: var(--space-lg);
+  right: max(var(--space-lg), calc(50vw - 18rem + var(--space-lg)));
   z-index: 10;
 }
 
