@@ -159,6 +159,8 @@ function AppInner() {
           onViewResults={() => navigate('results')}
           showDebugTools={allowReplay}
           onGroups={() => navigate('groups')}
+          onNavigateAuth={(returnTo) => navigateToAuth(returnTo as Screen)}
+          onSignOut={() => navigate('home')}
         />
       )}
       {screen === 'game' && <GameScreen onFinish={() => navigate('results')} onHome={() => navigate('home')} />}

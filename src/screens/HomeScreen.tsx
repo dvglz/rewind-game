@@ -7,9 +7,8 @@ import {
   type Sport,
 } from '../data/puzzles';
 import { BurgerMenu } from '../components/BurgerMenu';
+import { useAuth } from '../context/AuthContext';
 import styles from './HomeScreen.module.css';
-
-const noop = () => {};
 
 interface HomeScreenProps {
   onPlay: () => void;
@@ -18,6 +17,8 @@ interface HomeScreenProps {
   onViewResults: () => void;
   showDebugTools: boolean;
   onGroups: () => void;
+  onNavigateAuth: (returnTo: string) => void;
+  onSignOut: () => void;
 }
 
 export function HomeScreen({
@@ -27,7 +28,10 @@ export function HomeScreen({
   onViewResults,
   showDebugTools,
   onGroups,
+  onNavigateAuth,
+  onSignOut,
 }: HomeScreenProps) {
+  const { isAuthenticated, isLoading: isAuthLoading, user: authUser, signOut } = useAuth();
   const currentSport = getSport();
   const [showDebugMenu, setShowDebugMenu] = useState(false);
   const [randomEnabled, setRandomEnabled] = useState(() => isRandomModeEnabled());
@@ -61,15 +65,15 @@ export function HomeScreen({
         currentScreen="home"
         hasInProgressGame={hasInProgressGame}
         feedbackHref="mailto:feedback@example.com"
-        isAuthenticated={false}
-        isAuthLoading={false}
-        userEmail={null}
-        onNavigateHome={noop}
+        isAuthenticated={isAuthenticated}
+        isAuthLoading={isAuthLoading}
+        userEmail={authUser?.email ?? null}
+        onNavigateHome={() => {}}
         onNavigateGame={onPlay}
         onNavigateResults={onViewResults}
         onNavigateGroups={onGroups}
-        onNavigateAuth={noop}
-        onSignOut={noop}
+        onNavigateAuth={onNavigateAuth}
+        onSignOut={() => { signOut(); onSignOut(); }}
       />
       <div className={styles.top}>
         <h1 className={styles.wordmark}>Rewind</h1>
