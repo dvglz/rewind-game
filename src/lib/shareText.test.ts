@@ -1,5 +1,5 @@
-import { expect, test } from 'vitest';
-import { generateShareText } from './share';
+import { expect, test, vi } from 'vitest';
+import { generateShareText, shareResults } from './share';
 
 test('formats the share text with launch date and score line', () => {
   const text = generateShareText(
@@ -20,14 +20,12 @@ test('formats the share text with launch date and score line', () => {
 
   expect(text).toBe(
     [
-      'Rewind',
-      '#6 / Jun 6, 2026',
-      '',
+      'Rewind #006 / Jun 6, 2026',
       '🟢🟢🟢🟠🟡',
       'Score 790 / 1,000',
       '',
       'rewind.clutchpoints.com',
-      'Guess when this sports event happened.',
+      'Guess 5 sports moments by year.',
     ].join('\n'),
   );
 });
@@ -43,5 +41,23 @@ test('adds the soccer marker only for soccer shares', () => {
     '2026-06-06',
   );
 
-  expect(text.startsWith('Rewind ⚽\n#6 / Jun 6, 2026')).toBe(true);
+  expect(text.startsWith('Rewind ⚽ #006 / Jun 6, 2026')).toBe(true);
+});
+
+test('native share sends only text to avoid duplicating the Rewind title', async () => {
+  const share = vi.fn().mockResolvedValue(undefined);
+  Object.defineProperty(window, 'isSecureContext', {
+    configurable: true,
+    value: true,
+  });
+  Object.defineProperty(navigator, 'share', {
+    configurable: true,
+    value: share,
+  });
+
+  const text = 'Rewind #001 / Jun 6, 2026';
+
+  await shareResults(text);
+
+  expect(share).toHaveBeenCalledWith({ text });
 });

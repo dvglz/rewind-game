@@ -13,6 +13,7 @@ export function generateShareText(
   date?: string,
 ): string {
   const title = sport === 'soccer' ? 'Rewind ⚽' : 'Rewind';
+  const puzzleLabel = String(puzzleNumber).padStart(3, '0');
   const dateStr = new Date(`${date ?? new Date().toISOString().slice(0, 10)}T00:00:00`).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -23,12 +24,11 @@ export function generateShareText(
     .map((r) => getResultEmoji(getResultColor(r.diff)))
     .join('');
 
-  let text = `${title}\n`;
-  text += `#${puzzleNumber} / ${dateStr}\n\n`;
+  let text = `${title} #${puzzleLabel} / ${dateStr}\n`;
   text += `${emojiRow}\n`;
   text += `Score ${totalScore.toLocaleString()} / ${maxScore.toLocaleString()}\n\n`;
   text += `rewind.clutchpoints.com\n`;
-  text += `Guess when this sports event happened.`;
+  text += `Guess 5 sports moments by year.`;
   return text;
 }
 
@@ -55,7 +55,6 @@ function fallbackCopy(text: string): boolean {
 
 export async function shareResults(text: string): Promise<ShareOutcome> {
   const shareData = {
-    title: 'Rewind',
     text,
   };
 
