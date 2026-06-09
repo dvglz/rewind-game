@@ -32,7 +32,11 @@ function canPlayHaptics(): boolean {
 }
 
 function needsSoundFallback(): boolean {
-  return !('ontouchstart' in window) && navigator.maxTouchPoints === 0;
+  // Desktop browsers: no touch support, need audio
+  if (!('ontouchstart' in window) && navigator.maxTouchPoints === 0) return true;
+  // Mobile Safari: no Vibration API, web-haptics label click does nothing audible
+  if (typeof navigator.vibrate !== 'function') return true;
+  return false;
 }
 
 function playImmediate(input: TriggerInput, fallback: number | number[]): void {
