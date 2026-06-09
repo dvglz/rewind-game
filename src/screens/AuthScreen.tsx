@@ -12,9 +12,10 @@ interface AuthScreenProps {
   onBack: () => void;
   onSuccess: () => void;
   returnTo: string | null;
+  contextMessage?: string;
 }
 
-export function AuthScreen({ onBack, onSuccess, returnTo }: AuthScreenProps) {
+export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage }: AuthScreenProps) {
   const { setUser } = useAuth();
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
@@ -89,7 +90,9 @@ export function AuthScreen({ onBack, onSuccess, returnTo }: AuthScreenProps) {
         ) : (
           <>
             <h1 className={styles.heading}>{'Sign in\nto Clutch Play'}</h1>
-            <p className={styles.subtitle}>Play with friends, track your scores</p>
+            <p className={styles.subtitle}>
+              {contextMessage ?? 'Play with friends, track your scores'}
+            </p>
 
             <div className={styles.providers}>
               <div className={styles.googleButton} ref={containerRef} />

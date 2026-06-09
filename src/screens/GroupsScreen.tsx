@@ -6,20 +6,36 @@ import { CreateGroupModal } from '../components/CreateGroupModal';
 import { JoinGroupModal } from '../components/JoinGroupModal';
 import { ArrowLeft, Plus } from '../components/icons';
 import { Toast } from '../components/Toast';
+import { useAuth } from '../context/AuthContext';
+import { loadGameState } from '../engine/storage';
+import { getTodaysPuzzle } from '../data/puzzles';
 import type { PlayhubGroup, GroupLeaderboardEntry, GroupMember } from '../types';
 import styles from './GroupsScreen.module.css';
 
+function extractInviteCode(inviteLink: string): string {
+  const match = inviteLink.match(/invite=([A-Za-z0-9]+)/);
+  if (match) return match[1];
+  return inviteLink.replace(/[^A-Za-z0-9]/g, '');
+}
+
 function getMemberName(m: GroupMember): string {
   return typeof m.user === 'string' ? m.user : m.user.username;
+}
+
+function getMemberId(m: GroupMember): number | null {
+  return typeof m.user === 'string' ? null : m.user.id;
 }
 
 interface GroupsScreenProps {
   onBack: () => void;
   onRequireAuth: () => void;
   isAuthenticated: boolean;
+  pendingInvite?: string;
+  onInviteHandled?: () => void;
 }
 
-export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated }: GroupsScreenProps) {
+export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingInvite, onInviteHandled }: GroupsScreenProps) {
+  const { user: authUser } = useAuth();
   const [group, setGroup] = useState<PlayhubGroup | null>(null);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -31,11 +47,26 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated }: GroupsS
   useEffect(() => {
     let cancelled = false;
     fetchGroup()
-      .then((g) => { if (!cancelled) setGroup(g); })
+      .then((g) => {
+        if (cancelled) return;
+        setGroup(g);
+        if (pendingInvite && !g) {
+          joinGroup(pendingInvite)
+            .then(() => fetchGroup())
+            .then((joined) => { if (!cancelled) setGroup(joined); })
+            .catch((err) => {
+              if (!cancelled) showToast(err instanceof Error ? err.message : 'Failed to join group');
+            })
+            .finally(() => { if (!cancelled) onInviteHandled?.(); });
+        } else if (pendingInvite && g) {
+          showToast("You're already in a group");
+          onInviteHandled?.();
+        }
+      })
       .catch(() => { if (!cancelled) setGroup(null); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -91,15 +122,14 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated }: GroupsS
   const handleInvite = async () => {
     if (!group) return;
 
-    const shareText = `Join us in Rewind Game: Guess when that happened in sports! Use code: ${group.invite_link}`;
-    const shareUrl = window.location.origin;
+    const code = extractInviteCode(group.invite_link);
+    const inviteUrl = `${window.location.origin}/?invite=${code}`;
+    const shareText = `Guess 5 sports moments by year.\n\nJoin my Rewind group!\n\nLink: ${inviteUrl}\n\nUse this code to join: ${code}`;
 
     if (window.isSecureContext && navigator.share) {
       try {
         await navigator.share({
-          title: 'Join my Rewind group',
           text: shareText,
-          url: shareUrl,
         });
         return;
       } catch {
@@ -108,30 +138,37 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated }: GroupsS
     }
 
     try {
-      await navigator.clipboard.writeText(group.invite_link);
+      await navigator.clipboard.writeText(shareText);
       showToast('Copied!');
     } catch {
-      showToast(fallbackCopy(group.invite_link) ? 'Copied!' : 'Copy failed');
+      showToast(fallbackCopy(shareText) ? 'Copied!' : 'Copy failed');
     }
   };
 
   if (loading) return null;
 
-  // TODO: Replace with real leaderboard data when endpoint is ready
   const MOCK_SCORES: Record<string, number | null> = {
     'you': 820, 'Mike': 940, 'Sarah': 670, 'Jordan': null, 'Alex': 750,
   };
   const useMock = import.meta.env.VITE_MOCK_API === 'true';
 
-  // Only show leaderboard data for "Today" (offset 0). Past days show empty.
   const isToday = dayOffset === 0;
+  const myScore = (() => {
+    if (!isToday) return null;
+    const puzzle = getTodaysPuzzle();
+    const saved = loadGameState(puzzle.id);
+    return saved?.completed ? saved.totalScore : null;
+  })();
+
   const leaderboardEntries: GroupLeaderboardEntry[] = isToday
     ? (group?.members ?? []).map((m) => {
         const name = getMemberName(m);
+        const memberId = getMemberId(m);
+        const isMe = memberId != null && authUser != null && memberId === authUser.id;
         return {
-          displayName: name,
-          score: useMock ? (MOCK_SCORES[name] ?? null) : null,
-          isCurrentUser: name === 'you',
+          displayName: isMe ? 'You' : name,
+          score: useMock ? (MOCK_SCORES[name] ?? null) : (isMe ? myScore : null),
+          isCurrentUser: isMe,
         };
       })
     : [];
@@ -169,10 +206,6 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated }: GroupsS
             <GroupLeaderboard
               entries={leaderboardEntries}
               emptySeed={`day-${dayOffset}`}
-              authCta={!isAuthenticated ? {
-                text: 'Sign in to see your rank',
-                onPress: onRequireAuth,
-              } : undefined}
             />
           </div>
 

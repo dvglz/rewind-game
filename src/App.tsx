@@ -48,8 +48,21 @@ function AppInner() {
     }
   }, []);
 
+  const [pendingInvite, setPendingInvite] = useState<string | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('invite');
+  });
+
   const [screen, setScreen] = useState<Screen>(() => {
     const params = new URLSearchParams(window.location.search);
+    if (params.get('invite')) {
+      if (!isAuthenticated) {
+        params.set('returnTo', 'groups');
+        const next = params.toString();
+        window.history.replaceState({}, '', `/?${next}`);
+      }
+      return isAuthenticated ? 'groups' : 'auth';
+    }
     const mode = params.get('mode');
     if (mode === 'auth') return 'auth';
     if (mode === 'ordering') return 'ordering';
@@ -103,6 +116,10 @@ function AppInner() {
   };
 
   const handleAuthSuccess = () => {
+    if (pendingInvite) {
+      navigate('groups');
+      return;
+    }
     const returnTo = getReturnTo();
     if (returnTo && ['home', 'game', 'ordering', 'results', 'groups'].includes(returnTo)) {
       navigate(returnTo as Screen);
@@ -152,6 +169,14 @@ function AppInner() {
           onBack={() => navigate('home')}
           onRequireAuth={() => navigateToAuth('groups')}
           isAuthenticated={isAuthenticated}
+          pendingInvite={pendingInvite ?? undefined}
+          onInviteHandled={() => {
+            setPendingInvite(null);
+            const params = new URLSearchParams(window.location.search);
+            params.delete('invite');
+            const next = params.toString();
+            window.history.replaceState({}, '', next ? `/?${next}` : '/');
+          }}
         />
       )}
       {screen === 'auth' && (
@@ -159,6 +184,7 @@ function AppInner() {
           onBack={() => navigate('home')}
           onSuccess={handleAuthSuccess}
           returnTo={getReturnTo()}
+          contextMessage={pendingInvite ? "You'll join a group right after signing in" : undefined}
         />
       )}
     </>
