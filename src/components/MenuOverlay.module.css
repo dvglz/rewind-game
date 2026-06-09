@@ -24,9 +24,7 @@
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding: var(--space-lg);
-  gap: var(--space-xl);
-  animation: surfaceScale 200ms ease;
+  padding: var(--space-md) var(--space-lg) var(--space-xl);
   box-sizing: border-box;
 }
 
@@ -43,39 +41,33 @@
   cursor: pointer;
 }
 
-.navSection,
-.settingsSection,
-.metaSection {
+.navSection {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
-}
-
-.navSection {
-  margin-top: var(--space-lg);
+  gap: 6px;
+  margin-top: var(--space-xl);
 }
 
 .navButton,
-.navButtonCurrent,
-.metaLink,
-.authAction {
+.navButtonCurrent {
   font: inherit;
   font-family: var(--font-display);
   font-size: clamp(1.6rem, 4vw, 2.25rem);
   line-height: 1.05;
   letter-spacing: -0.03em;
-  text-decoration: none;
   text-align: left;
-  color: var(--color-text);
   background: transparent;
   border: 0;
   padding: 0;
 }
 
-.navButton,
-.metaLink,
-.authAction {
+.navButton {
+  color: var(--color-text);
   cursor: pointer;
+}
+
+.navButtonCurrent {
+  color: var(--color-muted);
 }
 
 .menuItem {
@@ -84,50 +76,42 @@
   animation-delay: calc(var(--stagger-index, 0) * 35ms);
 }
 
-.navButtonCurrent {
-  color: var(--color-muted);
-}
-
-.settingRow,
-.themeRow,
-.authRow,
-.bottomSection {
-  display: flex;
-  gap: var(--space-md);
-}
-
-.settingRow,
-.authRow {
-  align-items: center;
-  justify-content: space-between;
-}
-
-.bottomSection {
-  flex-direction: column;
-}
-
-.themeRow {
-  align-items: flex-start;
-  flex-direction: column;
-}
-
-.settingLabel,
-.authStatus {
-  font-family: var(--font-body);
-  font-size: 1rem;
-  color: var(--color-muted);
-}
-
-.divider {
-  height: 1px;
-  width: 100%;
-  background: var(--color-border);
-}
-
+.divider,
 .sectionDivider {
   height: 1px;
   width: 100%;
   background: var(--color-border);
+}
+
+.bottomSection {
+  display: flex;
+  flex-direction: column;
+  margin-top: auto;
+  gap: var(--space-lg);
+}
+
+.settingsSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.settingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.themeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.settingLabel {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--color-muted);
 }
 
 .switch,
@@ -163,8 +147,37 @@
   transform: translateX(20px);
 }
 
+.metaSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.metaLink,
 .authAction {
-  font-size: 1.2rem;
+  font: inherit;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  text-decoration: none;
+  text-align: left;
+  color: var(--color-text);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.authRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.authStatus {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--color-muted);
 }
 
 .closeButton:focus-visible,
@@ -178,53 +191,30 @@
 }
 
 @keyframes overlayFade {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes overlayFadeOut {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes surfaceScale {
-  from {
-    opacity: 0;
-    transform: scale(0.97);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 @keyframes itemFadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .root,
   .rootClosing,
-  .surface,
+  .surface {
+    animation: none;
+  }
+
   .menuItem {
     animation: none;
+    opacity: 1;
   }
 
   .switch,

@@ -275,9 +275,8 @@ export function MenuOverlay({
           </button>
         </nav>
 
-        <div className={styles.divider} />
-
         <div className={styles.bottomSection}>
+          <div className={styles.divider} />
           <div className={styles.settingsSection}>
             <div className={`${styles.settingRow} ${styles.menuItem}`} style={{ '--stagger-index': 4 } as CSSProperties}>
               <span className={styles.settingLabel}>Sound &amp; Haptics</span>
