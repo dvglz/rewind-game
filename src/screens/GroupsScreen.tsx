@@ -6,8 +6,12 @@ import { CreateGroupModal } from '../components/CreateGroupModal';
 import { JoinGroupModal } from '../components/JoinGroupModal';
 import { ArrowLeft, Plus } from '../components/icons';
 import { Toast } from '../components/Toast';
-import type { PlayhubGroup, GroupLeaderboardEntry } from '../types';
+import type { PlayhubGroup, GroupLeaderboardEntry, GroupMember } from '../types';
 import styles from './GroupsScreen.module.css';
+
+function getMemberName(m: GroupMember): string {
+  return typeof m.user === 'string' ? m.user : m.user.username;
+}
 
 interface GroupsScreenProps {
   onBack: () => void;
@@ -122,11 +126,14 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated }: GroupsS
   // Only show leaderboard data for "Today" (offset 0). Past days show empty.
   const isToday = dayOffset === 0;
   const leaderboardEntries: GroupLeaderboardEntry[] = isToday
-    ? (group?.members ?? []).map((m) => ({
-        displayName: m.user,
-        score: useMock ? (MOCK_SCORES[m.user] ?? null) : null,
-        isCurrentUser: m.user === 'you',
-      }))
+    ? (group?.members ?? []).map((m) => {
+        const name = getMemberName(m);
+        return {
+          displayName: name,
+          score: useMock ? (MOCK_SCORES[name] ?? null) : null,
+          isCurrentUser: name === 'you',
+        };
+      })
     : [];
 
   const memberCount = group?.members.length ?? 0;

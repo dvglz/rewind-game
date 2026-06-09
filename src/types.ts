@@ -38,9 +38,15 @@ export interface PlayerStats {
   lastPlayedDate: string | null;
 }
 
+export interface GroupMemberUser {
+  id: number;
+  username: string;
+  email: string;
+}
+
 export interface GroupMember {
   group: number;
-  user: string;
+  user: string | GroupMemberUser;
   joined_at: string;
 }
 
