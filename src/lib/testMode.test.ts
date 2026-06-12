@@ -12,8 +12,8 @@ test('disables the completed-game lock only when test=1 is present', () => {
   expect(hidesCompletedGameLock('?test=0')).toBe(false);
 });
 
-test('enables haptics debug only in test mode on devices without vibrate support', () => {
+test('keeps haptics debug disabled regardless of test mode or vibrate support', () => {
   expect(shouldEnableHapticsDebug('', false)).toBe(false);
   expect(shouldEnableHapticsDebug('?test=1', true)).toBe(false);
-  expect(shouldEnableHapticsDebug('?test=1', false)).toBe(true);
+  expect(shouldEnableHapticsDebug('?test=1', false)).toBe(false);
 });
