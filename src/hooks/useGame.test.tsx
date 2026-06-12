@@ -9,6 +9,8 @@ vi.mock('../engine/storage', () => ({
   updateStatsAfterGame: vi.fn(),
 }));
 
+const { saveGameState } = await import('../engine/storage');
+
 const puzzle: Puzzle = {
   id: 'rewind-001',
   number: 1,
@@ -24,6 +26,7 @@ const puzzle: Puzzle = {
 };
 
 beforeEach(() => {
+  vi.restoreAllMocks();
   vi.clearAllMocks();
 });
 
@@ -69,4 +72,42 @@ test('drops points sharply even when the guess is only one year off', () => {
   });
 
   expect(firstRoundScore).toBe(82);
+});
+
+test('stamps startedAt when creating a fresh game state', () => {
+  vi.spyOn(Date, 'now').mockReturnValue(1_700_000_000_000);
+
+  const { result } = renderHook(() => useGame(puzzle));
+
+  expect(result.current.state.startedAt).toBe(1_700_000_000_000);
+});
+
+test('persists elapsedMs when the final guess completes the game', () => {
+  vi.spyOn(Date, 'now')
+    .mockReturnValueOnce(1_700_000_000_000)
+    .mockReturnValue(1_700_000_125_000);
+
+  const { result } = renderHook(() => useGame(puzzle));
+
+  act(() => {
+    result.current.submitGuess(2001);
+  });
+  act(() => {
+    result.current.submitGuess(2002);
+  });
+  act(() => {
+    result.current.submitGuess(2003);
+  });
+  act(() => {
+    result.current.submitGuess(2004);
+  });
+  act(() => {
+    result.current.submitGuess(2005);
+  });
+
+  expect(vi.mocked(saveGameState).mock.calls.at(-1)?.[0]).toMatchObject({
+    completed: true,
+    startedAt: 1_700_000_000_000,
+    elapsedMs: 125000,
+  });
 });

@@ -1,50 +1,62 @@
 import type { RoundResult } from '../types';
-import { getResultColor, getResultEmoji, getAccuracyLabel, getScoreTierLabel } from '../engine/scoring';
+import { getResultColor, getResultColorVar, getResultEmoji, getAccuracyLabel } from '../engine/scoring';
+import { formatTime } from '../lib/formatTime';
 import styles from './ShareCard.module.css';
 
 interface ShareCardProps {
   results: RoundResult[];
   totalScore: number;
   maxScore: number;
+  dateLabel?: string;
+  elapsedMs?: number;
 }
 
 export function ShareCard({
   results,
   totalScore,
   maxScore,
+  dateLabel,
+  elapsedMs,
 }: ShareCardProps) {
-  const tierLabel = getScoreTierLabel(totalScore, maxScore)
-    .replace(/!/g, '')
-    .toLowerCase()
-    .replace(/^./, (char) => char.toUpperCase());
-
   return (
     <div className={styles.card}>
-      <div className={styles.scoreBlock} style={{ animationDelay: '0ms' }}>
-        <span className={styles.score}>
-          {totalScore.toLocaleString()}
-          <span className={styles.scoreMax}>/ {maxScore.toLocaleString()}</span>
-        </span>
-        <span className={styles.tierLabel}>{tierLabel}</span>
+      <div className={styles.header} style={{ animationDelay: '0ms' }}>
+        {dateLabel ? <p className={styles.date}>{dateLabel}</p> : null}
+        <div className={styles.scoreRow}>
+          <span className={styles.score}>
+            {totalScore.toLocaleString()}
+            <span className={styles.scoreMax}> / {maxScore.toLocaleString()}</span>
+            {elapsedMs !== undefined ? (
+              <span className={styles.timePill}>{formatTime(elapsedMs)}</span>
+            ) : null}
+          </span>
+        </div>
+        <div className={styles.tierDots} aria-label="Round tiers">
+          {results.map((result, index) => (
+            <span key={`${index}-${result.event.text}`} data-testid="tier-dot">
+              {getResultEmoji(getResultColor(result.diff))}
+            </span>
+          ))}
+        </div>
       </div>
 
-      <div className={styles.questionList}>
-        {results.map((r, i) => (
+      <div className={styles.roundList} data-testid="round-list">
+        {results.map((result, index) => (
           <div
-            key={i}
-            className={styles.questionRow}
-            style={{ animationDelay: `${200 + i * 80}ms` }}
+            key={`${index}-${result.event.text}`}
+            className={styles.roundRow}
+            style={{ animationDelay: `${180 + index * 80}ms` }}
           >
-            <span className={styles.questionEmoji}>
-              {getResultEmoji(getResultColor(r.diff))}
-            </span>
-            <div className={styles.questionText}>
-              <span className={styles.questionLabel}>Question {i + 1}</span>
-              <span className={styles.questionAccuracy}>
-                {getAccuracyLabel(r.diff)}
+            <div className={styles.roundInfo}>
+              <span className={styles.roundLabel}>Round {index + 1}</span>
+              <span
+                className={styles.roundAccuracy}
+                style={{ color: getResultColorVar(getResultColor(result.diff)) }}
+              >
+                {getAccuracyLabel(result.diff)}
               </span>
             </div>
-            <span className={styles.questionScore}>{r.score}</span>
+            <span className={styles.roundScore}>{result.score.toLocaleString()}</span>
           </div>
         ))}
       </div>

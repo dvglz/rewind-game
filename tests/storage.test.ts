@@ -21,6 +21,22 @@ describe('game state persistence', () => {
     saveGameState(state);
     expect(loadGameState('2026-06-03')).toEqual(state);
   });
+
+  it('round-trips timing fields on completed games', () => {
+    const state = {
+      puzzleId: '2026-06-11-american',
+      currentRound: 5,
+      results: [],
+      totalScore: 820,
+      completed: true,
+      startedAt: 1_700_000_000_000,
+      elapsedMs: 125000,
+    };
+
+    saveGameState(state);
+
+    expect(loadGameState('2026-06-11-american')).toEqual(state);
+  });
 });
 
 describe('resume detection', () => {

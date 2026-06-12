@@ -69,13 +69,13 @@ export function getAccuracyLabel(diff: number): string {
 }
 
 export function getScoreTierLabel(totalScore: number, maxScore: number): string {
-  if (maxScore <= 0) return 'NOT BAD';
+  if (maxScore <= 0) return 'Not bad';
   const pct = totalScore / maxScore;
-  if (pct >= 1) return 'PERFECT!';
-  if (pct >= 0.8) return 'INCREDIBLE!';
-  if (pct >= 0.6) return 'IMPRESSIVE!';
-  if (pct >= 0.4) return 'NOT BAD';
-  return 'BETTER LUCK TOMORROW';
+  if (pct >= 1) return 'Perfect!';
+  if (pct >= 0.8) return 'Incredible!';
+  if (pct >= 0.6) return 'Impressive!';
+  if (pct >= 0.4) return 'Not bad';
+  return 'Better luck tomorrow';
 }
 
 export function getResultColorVar(color: ResultColor): string {

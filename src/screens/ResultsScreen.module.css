@@ -4,6 +4,17 @@
   flex-direction: column;
   align-items: center;
   overflow: auto;
+  background: #f9f9f9;
+}
+
+/* Dark theme override */
+@media (prefers-color-scheme: dark) {
+  .screen {
+    background: var(--color-bg);
+  }
+}
+[data-theme="dark"] .screen {
+  background: var(--color-bg);
 }
 
 .topBar {
@@ -27,7 +38,7 @@
 
 .wordmark {
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 20px;
   line-height: 1;
   text-transform: uppercase;
   letter-spacing: -0.4px;
@@ -46,75 +57,68 @@
   gap: 12px;
   overflow-y: auto;
   touch-action: pan-y;
+  scrollbar-width: none;
+}
+
+.content::-webkit-scrollbar {
+  display: none;
 }
 
 .shareButton,
-.motivational {
+.descriptionLine,
+.contextLine,
+.footer {
   opacity: 0;
   animation: fadeInUp 0.35s ease forwards;
 }
 
 .shareButton {
+  flex-shrink: 0;
   width: var(--results-action-width);
   height: 58px;
-  border: 2px solid var(--color-text);
-  border-radius: 999px;
+  border: none;
+  border-radius: 46px;
   background: var(--color-text);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 400;
-  line-height: 1;
+  line-height: 1.3;
   color: var(--color-bg);
   cursor: pointer;
   transition: transform 0.1s ease, opacity 0.15s ease;
-  margin-top: 10px;
+  margin-top: 16px;
 }
 
 .shareButton:active {
   transform: scale(0.95);
 }
 
-.motivational {
-  text-align: center;
-  font-family: var(--font-body);
-  font-size: 16px;
-  line-height: 1.3;
-  color: var(--color-muted);
-  max-width: 28ch;
-  margin-top: 6px;
-}
-
-.groupCta {
-  opacity: 0;
-  animation: fadeInUp 0.35s ease forwards;
+/* Footer section — rewind glyph + daily message */
+.footer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-sm);
-  width: 100%;
+  gap: 10px;
+  margin-top: 24px;
 }
 
-.friendsButton {
-  width: var(--results-action-width);
-  padding: 14px 40px;
-  border: 0;
-  border-radius: 46px;
-  background: var(--color-surface-elevated);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-display);
-  font-size: 20px;
+.rewindGlyph {
+  width: 64px;
+  height: 35px;
   color: var(--color-text);
-  cursor: pointer;
-  transition: transform 0.1s ease;
 }
 
-.friendsButton:active {
-  transform: scale(0.95);
+.motivational {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 32px;
+  line-height: 1.1;
+  color: var(--color-text);
+  max-width: 28ch;
+  margin-top: 6px;
 }
 
 @keyframes fadeInUp {
@@ -138,7 +142,7 @@
   }
 
   .wordmark {
-    font-size: 28px;
+    font-size: 24px;
   }
 
   .content {
@@ -148,13 +152,73 @@
   }
 
   .shareButton {
-    height: 58px;
-    font-size: 20px;
+    height: 62px;
+    font-size: 24px;
     margin-top: 12px;
   }
+}
 
-  .motivational {
-    font-size: 16px;
-    max-width: 32ch;
-  }
+/* Secondary pill — Create an account (logged out) / See Friends' Scores (logged in). */
+.secondaryButton {
+  flex-shrink: 0;
+  opacity: 0;
+  animation: fadeInUp 0.35s ease forwards;
+  width: var(--results-action-width);
+  height: 58px;
+  padding: 0 24px;
+  border: none;
+  border-radius: 46px;
+  background: color-mix(in srgb, var(--color-text) 8%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 24px;
+  line-height: 1.3;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.secondaryButton:active {
+  transform: scale(0.95);
+}
+
+/* Non-auth description — Lora body, per Figma "Non-member description" */
+.descriptionLine {
+  width: var(--results-action-width);
+  margin: 12px 0;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 1.3;
+  color: var(--color-text);
+}
+
+/* Context line + inline links — Special Gothic 20px, half-opacity text per Figma */
+.contextLine {
+  width: var(--results-action-width);
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 1.1;
+  color: color-mix(in srgb, var(--color-text) 50%, transparent);
+}
+
+.inlineLink {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--color-text);
+  text-decoration: underline;
+  text-decoration-skip-ink: none;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.inlineLink:hover {
+  opacity: 0.7;
 }

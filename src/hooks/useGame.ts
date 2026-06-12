@@ -15,6 +15,7 @@ export function useGame(puzzle: Puzzle) {
       results: [],
       totalScore: 0,
       completed: false,
+      startedAt: Date.now(),
     };
   });
 
@@ -40,6 +41,8 @@ export function useGame(puzzle: Puzzle) {
 
       const nextRound = state.currentRound + 1;
       const completed = nextRound >= TOTAL_ROUNDS;
+      const startedAt = state.startedAt ?? Date.now();
+      const elapsedMs = completed ? Math.max(0, Date.now() - startedAt) : state.elapsedMs;
 
       const newState: GameState = {
         ...state,
@@ -47,6 +50,8 @@ export function useGame(puzzle: Puzzle) {
         results: [...state.results, result],
         totalScore: state.totalScore + score,
         completed,
+        startedAt,
+        elapsedMs,
       };
 
       setState(newState);
