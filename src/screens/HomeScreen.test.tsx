@@ -1,17 +1,23 @@
 import { render, screen } from '@testing-library/react';
 import { expect, test } from 'vitest';
 import { HomeScreen } from './HomeScreen';
+import { AuthProvider } from '../context/AuthContext';
 
 test('renders the home screen core actions without the theme switcher', () => {
   render(
+    <AuthProvider>
     <HomeScreen
       onPlay={() => {}}
       hasInProgressGame={false}
       hasCompletedGame={false}
       onViewResults={() => {}}
+      onLeaderboard={() => {}}
       showDebugTools={false}
       onGroups={() => {}}
+      onNavigateAuth={() => {}}
+      onSignOut={() => {}}
     />
+    </AuthProvider>
   );
 
   expect(screen.getByRole('button', { name: 'Start' })).not.toBeNull();
@@ -22,14 +28,19 @@ test('renders the home screen core actions without the theme switcher', () => {
 
 test('shows only see results when todays game is already completed', () => {
   render(
+    <AuthProvider>
     <HomeScreen
       onPlay={() => {}}
       hasInProgressGame={false}
       hasCompletedGame={true}
       onViewResults={() => {}}
+      onLeaderboard={() => {}}
       showDebugTools={false}
       onGroups={() => {}}
+      onNavigateAuth={() => {}}
+      onSignOut={() => {}}
     />
+    </AuthProvider>
   );
 
   expect(screen.queryByRole('button', { name: 'Start' })).toBeNull();

@@ -5,6 +5,7 @@ import { GameScreen } from './screens/GameScreen';
 import { OrderingScreen } from './screens/OrderingScreen';
 import { ResultsScreen } from './screens/ResultsScreen';
 import { GroupsScreen } from './screens/GroupsScreen';
+import { LeaderboardScreen } from './screens/LeaderboardScreen';
 import { AuthScreen } from './screens/AuthScreen';
 import { clearGameState, loadGameState, pruneOldGameStates } from './engine/storage';
 import { beginPuzzleSession, getSport, getTodaysPuzzle } from './data/puzzles';
@@ -15,7 +16,11 @@ import { useThemePreference } from './hooks/useThemePreference';
 import { setAccessToken } from './lib/auth';
 import './styles/global.css';
 
-type Screen = 'home' | 'game' | 'ordering' | 'results' | 'groups' | 'auth';
+type Screen = 'home' | 'game' | 'ordering' | 'results' | 'groups' | 'auth' | 'leaderboard';
+
+// In mock mode (local dev) the auth gate is bypassed so screens that normally
+// require a token — e.g. the global leaderboard — can be tested without one.
+const USE_MOCK = import.meta.env.VITE_MOCK_API === 'true';
 
 function AppInner() {
   const allowReplay = hidesCompletedGameLock(window.location.search);
@@ -121,7 +126,7 @@ function AppInner() {
       return;
     }
     const returnTo = getReturnTo();
-    if (returnTo && ['home', 'game', 'ordering', 'results', 'groups'].includes(returnTo)) {
+    if (returnTo && ['home', 'game', 'ordering', 'results', 'groups', 'leaderboard'].includes(returnTo)) {
       navigate(returnTo as Screen);
     } else {
       navigate('home');
@@ -157,6 +162,7 @@ function AppInner() {
             return !!saved && saved.completed && !allowReplay;
           })()}
           onViewResults={() => navigate('results')}
+          onLeaderboard={() => (isAuthenticated || USE_MOCK) ? navigate('leaderboard') : navigateToAuth('leaderboard')}
           showDebugTools={allowReplay}
           onGroups={() => navigate('groups')}
           onNavigateAuth={(returnTo) => navigateToAuth(returnTo as Screen)}
@@ -165,7 +171,14 @@ function AppInner() {
       )}
       {screen === 'game' && <GameScreen onFinish={() => navigate('results')} onHome={() => navigate('home')} />}
       {screen === 'ordering' && <OrderingScreen onFinish={() => navigate('results')} />}
-      {screen === 'results' && <ResultsScreen onHome={() => navigate('home')} onGroups={() => navigate('groups')} />}
+      {screen === 'results' && (
+        <ResultsScreen
+          onHome={() => navigate('home')}
+          onGroups={() => navigate('groups')}
+          onLeaderboard={() => navigate('leaderboard')}
+          onRequireAuth={() => navigateToAuth('results')}
+        />
+      )}
       {screen === 'groups' && (
         <GroupsScreen
           onBack={() => navigate('home')}
@@ -180,6 +193,9 @@ function AppInner() {
             window.history.replaceState({}, '', next ? `/?${next}` : '/');
           }}
         />
+      )}
+      {screen === 'leaderboard' && (
+        <LeaderboardScreen onBack={() => navigate('home')} />
       )}
       {screen === 'auth' && (
         <AuthScreen

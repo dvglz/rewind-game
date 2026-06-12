@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { Close } from './icons';
 import styles from './MenuOverlay.module.css';
 
-export type TopLevelMenuScreen = 'home' | 'results' | 'groups' | 'auth';
+export type TopLevelMenuScreen = 'home' | 'results' | 'groups' | 'auth' | 'leaderboard';
 
 export interface MenuOverlayProps {
   open: boolean;
@@ -19,7 +19,7 @@ export interface MenuOverlayProps {
   onExited?: () => void;
   onNavigateHome: () => void;
   onNavigateGame: () => void;
-  onNavigateResults: () => void;
+  onNavigateLeaderboard: () => void;
   onNavigateGroups: () => void;
   onNavigateAuth: (returnTo: TopLevelMenuScreen) => void;
   onSignOut: () => void;
@@ -73,7 +73,7 @@ export function MenuOverlay({
   onExited,
   onNavigateHome,
   onNavigateGame,
-  onNavigateResults,
+  onNavigateLeaderboard,
   onNavigateGroups,
   onNavigateAuth,
   onSignOut,
@@ -181,9 +181,9 @@ export function MenuOverlay({
     onNavigateHome();
   };
 
-  const handleResultsNavigation = () => {
+  const handleLeaderboardNavigation = () => {
     onClose();
-    onNavigateResults();
+    onNavigateLeaderboard();
   };
 
   const handleGroupsNavigation = () => {
@@ -203,7 +203,7 @@ export function MenuOverlay({
 
   const isTodayResumeAction = currentScreen === 'home' && hasInProgressGame;
   const isTodayActive = currentScreen === 'home' && !isTodayResumeAction;
-  const isResultsActive = currentScreen === 'results';
+  const isLeaderboardActive = currentScreen === 'leaderboard';
   const isGroupsActive = currentScreen === 'groups';
   const isHowToPlayActive = currentScreen === 'home';
 
@@ -235,10 +235,10 @@ export function MenuOverlay({
           </button>
           <button
             type="button"
-            className={`${isResultsActive ? styles.navButtonCurrent : styles.navButton} ${styles.menuItem}`}
-            onClick={handleResultsNavigation}
-            disabled={isResultsActive}
-            aria-current={isResultsActive ? 'page' : undefined}
+            className={`${isLeaderboardActive ? styles.navButtonCurrent : styles.navButton} ${styles.menuItem}`}
+            onClick={handleLeaderboardNavigation}
+            disabled={isLeaderboardActive}
+            aria-current={isLeaderboardActive ? 'page' : undefined}
             style={{ '--stagger-index': 1 } as CSSProperties}
           >
             Leaderboard

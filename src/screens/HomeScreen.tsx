@@ -15,6 +15,7 @@ interface HomeScreenProps {
   hasInProgressGame: boolean;
   hasCompletedGame: boolean;
   onViewResults: () => void;
+  onLeaderboard: () => void;
   showDebugTools: boolean;
   onGroups: () => void;
   onNavigateAuth: (returnTo: string) => void;
@@ -26,12 +27,13 @@ export function HomeScreen({
   hasInProgressGame,
   hasCompletedGame,
   onViewResults,
+  onLeaderboard,
   showDebugTools,
   onGroups,
   onNavigateAuth,
   onSignOut,
 }: HomeScreenProps) {
-  const { isAuthenticated, isLoading: isAuthLoading, user: authUser, signOut } = useAuth();
+  const { isAuthenticated, loading: isAuthLoading, user: authUser, signOut } = useAuth();
   const currentSport = getSport();
   const [showDebugMenu, setShowDebugMenu] = useState(false);
   const [randomEnabled, setRandomEnabled] = useState(() => isRandomModeEnabled());
@@ -70,7 +72,7 @@ export function HomeScreen({
         userEmail={authUser?.email ?? null}
         onNavigateHome={() => {}}
         onNavigateGame={onPlay}
-        onNavigateResults={onViewResults}
+        onNavigateLeaderboard={onLeaderboard}
         onNavigateGroups={onGroups}
         onNavigateAuth={onNavigateAuth}
         onSignOut={() => { signOut(); onSignOut(); }}

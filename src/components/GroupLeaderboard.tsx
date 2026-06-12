@@ -24,9 +24,11 @@ interface GroupLeaderboardProps {
   emptySeed?: string;
   /** Show sign-in CTA for unauthenticated users */
   authCta?: { text: string; onPress: () => void };
+  /** A row pinned above the table (e.g. the current user when ranked outside the page). */
+  pinnedEntry?: { rank: number; displayName: string; score: number; time?: string };
 }
 
-export function GroupLeaderboard({ entries, emptySeed, authCta }: GroupLeaderboardProps) {
+export function GroupLeaderboard({ entries, emptySeed, authCta, pinnedEntry }: GroupLeaderboardProps) {
   if (entries.length === 0) {
     return (
       <p className={styles.empty}>
@@ -44,6 +46,19 @@ export function GroupLeaderboard({ entries, emptySeed, authCta }: GroupLeaderboa
 
   return (
     <div className={styles.list}>
+      {pinnedEntry && (
+        <>
+          <div className={`${styles.row} ${styles.pinnedRow}`}>
+            <div className={styles.userInfo}>
+              <span className={styles.rank}>{pinnedEntry.rank}</span>
+              <span className={styles.name}>{pinnedEntry.displayName}</span>
+              {pinnedEntry.time && <span className={styles.meta}>{pinnedEntry.time}</span>}
+            </div>
+            <span className={styles.score}>{pinnedEntry.score.toLocaleString()}</span>
+          </div>
+          <div className={styles.pinnedGap} aria-hidden="true" />
+        </>
+      )}
       {sorted.map((entry, i) => {
         const rank = entry.score !== null ? i + 1 : null;
         return (
@@ -54,6 +69,7 @@ export function GroupLeaderboard({ entries, emptySeed, authCta }: GroupLeaderboa
             <div className={styles.userInfo}>
               <span className={`${styles.rank} ${rank === null ? styles.rankMuted : ''}`}>{rank ?? '––'}</span>
               <span className={styles.name}>{entry.displayName}</span>
+              {entry.time && <span className={styles.meta}>{entry.time}</span>}
             </div>
             <span className={`${styles.score} ${entry.score === null ? styles.notPlayed : ''}`}>
               {entry.score !== null ? entry.score.toLocaleString() : 'DNP'}

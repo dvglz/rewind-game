@@ -12,7 +12,7 @@ function createProps() {
     userEmail: null,
     onNavigateHome: vi.fn(),
     onNavigateGame: vi.fn(),
-    onNavigateResults: vi.fn(),
+    onNavigateLeaderboard: vi.fn(),
     onNavigateGroups: vi.fn(),
     onNavigateAuth: vi.fn(),
     onSignOut: vi.fn(),

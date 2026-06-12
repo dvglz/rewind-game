@@ -96,3 +96,23 @@
     padding: 12px 16px;
   }
 }
+
+.meta {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-muted);
+  flex-shrink: 0;
+}
+
+/* The current user's row pinned above the table when ranked outside the page. */
+.pinnedRow {
+  background: color-mix(in srgb, var(--color-text) 6%, transparent);
+  border-bottom: 0;
+  border-radius: 12px;
+}
+
+/* Pure spacing (no divider line) between the pinned row and the main table. */
+.pinnedGap {
+  height: 14px;
+  flex-shrink: 0;
+}

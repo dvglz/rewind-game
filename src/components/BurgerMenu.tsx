@@ -12,7 +12,7 @@ export interface BurgerMenuProps {
   userEmail: string | null;
   onNavigateHome: () => void;
   onNavigateGame: () => void;
-  onNavigateResults: () => void;
+  onNavigateLeaderboard: () => void;
   onNavigateGroups: () => void;
   onNavigateAuth: (returnTo: TopLevelMenuScreen) => void;
   onSignOut: () => void;

@@ -29,6 +29,8 @@ export interface GameState {
   results: RoundResult[];
   totalScore: number;
   completed: boolean;
+  startedAt?: number;
+  elapsedMs?: number;
 }
 
 export interface PlayerStats {
@@ -60,7 +62,28 @@ export interface PlayhubGroup {
 export interface GroupLeaderboardEntry {
   displayName: string;
   score: number | null;
+  /** Optional formatted run time (e.g. "2m 39s") shown beside the name. */
+  time?: string;
   isCurrentUser: boolean;
+}
+
+export interface GlobalLeaderboardEntry {
+  /** Server-assigned global rank (1-based). */
+  rank: number;
+  displayName: string;
+  score: number;
+  /** Total completion time in milliseconds (tiebreaker + displayed per row). */
+  timeMs: number;
+  isCurrentUser: boolean;
+}
+
+export interface GlobalLeaderboard {
+  /** ISO `YYYY-MM-DD` day this board is for. */
+  date: string;
+  /** Top-N rows, length <= LEADERBOARD_PAGE_LIMIT. */
+  entries: GlobalLeaderboardEntry[];
+  /** The signed-in user's own row, or null if not authed / no score that day. */
+  currentUser: GlobalLeaderboardEntry | null;
 }
 
 export type { AuthUser } from './types/auth';
