@@ -81,10 +81,11 @@ function AppInner() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
-    if (token && params.get('mode') === 'auth') {
+    if (token) {
       setAccessToken(token);
-      // Clean token from URL and reload to let AuthProvider pick it up
+      // Strip sensitive params, keep mode for navigation
       params.delete('token');
+      params.delete('email');
       const nextSearch = params.toString();
       window.location.replace(nextSearch ? `/?${nextSearch}` : '/');
     }
