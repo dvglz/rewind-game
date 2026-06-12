@@ -94,17 +94,49 @@ export async function fetchMyScore(date: string): Promise<MyScoreResponse | null
   return body[0] as MyScoreResponse;
 }
 
-export async function fetchLeaderboardApi(date: string, groupId?: number): Promise<unknown> {
+export interface LeaderboardMeta {
+  id: number;
+  start_date: string;
+  end_date: string;
+  previous_leaderboard_id: number | null;
+}
+
+export interface LeaderboardApiResponse {
+  leaderboard: LeaderboardMeta;
+  top_20: Array<Record<string, unknown>>;
+  me: Record<string, unknown> | null;
+}
+
+export async function fetchLeaderboardApi(groupId?: number): Promise<LeaderboardApiResponse> {
   const params = new URLSearchParams({
     game_type: GAME_TYPE,
     game_mode: GAME_MODE,
-    date,
   });
   if (groupId != null) {
     params.set('group_id', String(groupId));
   }
 
   const res = await fetch(`${BASE_URL}/playhub/leaderboard/daily/scores/?${params.toString()}`, {
+    headers: getHeaders(),
+  });
+
+  if (!res.ok) {
+    const detail = await parseDetail(res);
+    throw new Error(detail || 'Failed to fetch leaderboard');
+  }
+
+  return res.json();
+}
+
+export async function fetchLeaderboardById(id: number, groupId?: number): Promise<LeaderboardApiResponse> {
+  const params = new URLSearchParams({
+    game_type: GAME_TYPE,
+  });
+  if (groupId != null) {
+    params.set('group_id', String(groupId));
+  }
+
+  const res = await fetch(`${BASE_URL}/playhub/leaderboard/${id}/?${params.toString()}`, {
     headers: getHeaders(),
   });
 

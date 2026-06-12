@@ -1,6 +1,7 @@
 import type { GlobalLeaderboard, GlobalLeaderboardEntry } from '../types';
 import { LEADERBOARD_PAGE_LIMIT } from '../config/leaderboard';
-import { fetchLeaderboardApi } from './api';
+import { fetchLeaderboardApi, fetchLeaderboardById } from './api';
+import type { LeaderboardApiResponse } from './api';
 
 const USE_MOCK = import.meta.env.VITE_MOCK_API === 'true';
 
@@ -83,6 +84,67 @@ function mockBoard(dayOffset: number): GlobalLeaderboard {
   return { date, entries, currentUser };
 }
 
+// ── Leaderboard ID cache ──────────────────────────────────
+// Key: "global:{dayOffset}" or "group:{groupId}:{dayOffset}"
+// Value: leaderboard ID from the backend.
+// Populated as the user navigates days: offset 0 comes from the daily
+// endpoint, offset N comes from previous_leaderboard_id of offset N-1.
+const leaderboardIdCache = new Map<string, number>();
+
+function cacheKey(dayOffset: number, groupId?: number): string {
+  return groupId != null ? `group:${groupId}:${dayOffset}` : `global:${dayOffset}`;
+}
+
+// ── Response mapping ──────────────────────────────────────
+
+function mapRow(row: Record<string, unknown>, index: number, isCurrent: boolean): GlobalLeaderboardEntry {
+  return {
+    rank: typeof row.place_scores === 'number'
+      ? row.place_scores
+      : typeof row.rank === 'number'
+        ? row.rank
+        : index + 1,
+    displayName: typeof row.username === 'string'
+      ? row.username
+      : typeof row.display_name === 'string'
+        ? row.display_name
+        : isCurrent ? 'You' : `Player ${index + 1}`,
+    score: typeof row.score === 'number'
+      ? row.score
+      : typeof row.scores === 'number'
+        ? row.scores
+        : 0,
+    timeMs: typeof row.time === 'number'
+      ? row.time
+      : typeof row.time_ms === 'number'
+        ? row.time_ms
+        : typeof row.metadata === 'object' && row.metadata !== null && typeof (row.metadata as { total_time?: unknown }).total_time === 'number'
+          ? ((row.metadata as { total_time: number }).total_time * 1000)
+          : 0,
+    isCurrentUser: isCurrent,
+  };
+}
+
+function mapResponse(raw: LeaderboardApiResponse): GlobalLeaderboard {
+  const entries = (raw.top_20 ?? [])
+    .slice(0, LEADERBOARD_PAGE_LIMIT)
+    .map((row, i) => mapRow(row, i, false));
+
+  const currentUser = raw.me ? mapRow(raw.me, 0, true) : null;
+  const date = raw.leaderboard?.start_date ?? dateForOffset(0);
+
+  return { date, entries, currentUser };
+}
+
+/** Cache the leaderboard ID at `offset` and its previous pointer at `offset+1`. */
+function cacheFromResponse(raw: LeaderboardApiResponse, offset: number, groupId?: number): void {
+  if (!raw.leaderboard) return;
+  leaderboardIdCache.set(cacheKey(offset, groupId), raw.leaderboard.id);
+  if (raw.leaderboard.previous_leaderboard_id != null) {
+    leaderboardIdCache.set(cacheKey(offset + 1, groupId), raw.leaderboard.previous_leaderboard_id);
+  }
+}
+
 // ── Public API ─────────────────────────────────────────────
 
 export async function fetchLeaderboard(dayOffset: number, groupId?: number): Promise<GlobalLeaderboard> {
@@ -91,68 +153,42 @@ export async function fetchLeaderboard(dayOffset: number, groupId?: number): Pro
     return mockBoard(dayOffset);
   }
 
-  const date = dateForOffset(dayOffset);
-  const raw = await fetchLeaderboardApi(date, groupId) as {
-    top_20?: Array<Record<string, unknown>>;
-    me?: Record<string, unknown> | null;
-  };
+  // dayOffset 0 → current daily leaderboard
+  if (dayOffset === 0) {
+    const raw = await fetchLeaderboardApi(groupId);
+    cacheFromResponse(raw, 0, groupId);
+    return mapResponse(raw);
+  }
 
-  const entries: GlobalLeaderboardEntry[] = (raw.top_20 ?? [])
-    .slice(0, LEADERBOARD_PAGE_LIMIT)
-    .map((row, index) => ({
-      rank: typeof row.place_scores === 'number'
-        ? row.place_scores
-        : typeof row.rank === 'number'
-          ? row.rank
-          : index + 1,
-      displayName: typeof row.username === 'string'
-        ? row.username
-        : typeof row.display_name === 'string'
-          ? row.display_name
-          : `Player ${index + 1}`,
-      score: typeof row.score === 'number'
-        ? row.score
-        : typeof row.scores === 'number'
-          ? row.scores
-          : 0,
-      timeMs: typeof row.time === 'number'
-        ? row.time
-        : typeof row.time_ms === 'number'
-          ? row.time_ms
-          : typeof row.metadata === 'object' && row.metadata !== null && typeof (row.metadata as { total_time?: unknown }).total_time === 'number'
-            ? ((row.metadata as { total_time: number }).total_time * 1000)
-            : 0,
-      isCurrentUser: false,
-    }));
+  // dayOffset > 0 → walk the chain via previous_leaderboard_id
+  if (!leaderboardIdCache.has(cacheKey(dayOffset, groupId))) {
+    // Fill the chain from the closest cached offset
+    let closest = dayOffset - 1;
+    while (closest >= 0 && !leaderboardIdCache.has(cacheKey(closest, groupId))) {
+      closest--;
+    }
+    // If nothing is cached, fetch today first
+    if (closest < 0) {
+      const todayRaw = await fetchLeaderboardApi(groupId);
+      cacheFromResponse(todayRaw, 0, groupId);
+      closest = 0;
+    }
+    // Walk forward from closest cached to fill up to dayOffset
+    for (let i = closest + 1; i <= dayOffset; i++) {
+      const prevId = leaderboardIdCache.get(cacheKey(i, groupId));
+      if (!prevId) break; // no further history
+      const prevRaw = await fetchLeaderboardById(prevId, groupId);
+      cacheFromResponse(prevRaw, i, groupId);
+    }
+  }
 
-  const currentRaw = raw.me;
-  const currentUser: GlobalLeaderboardEntry | null = currentRaw
-    ? {
-        rank: typeof currentRaw.place_scores === 'number'
-          ? currentRaw.place_scores
-          : typeof currentRaw.rank === 'number'
-            ? currentRaw.rank
-            : 0,
-        displayName: typeof currentRaw.username === 'string'
-          ? currentRaw.username
-          : typeof currentRaw.display_name === 'string'
-            ? currentRaw.display_name
-            : 'You',
-        score: typeof currentRaw.score === 'number'
-          ? currentRaw.score
-          : typeof currentRaw.scores === 'number'
-            ? currentRaw.scores
-            : 0,
-        timeMs: typeof currentRaw.time === 'number'
-          ? currentRaw.time
-          : typeof currentRaw.time_ms === 'number'
-            ? currentRaw.time_ms
-            : typeof currentRaw.metadata === 'object' && currentRaw.metadata !== null && typeof (currentRaw.metadata as { total_time?: unknown }).total_time === 'number'
-              ? ((currentRaw.metadata as { total_time: number }).total_time * 1000)
-              : 0,
-        isCurrentUser: true,
-      }
-    : null;
+  const targetId = leaderboardIdCache.get(cacheKey(dayOffset, groupId));
+  if (!targetId) {
+    // No leaderboard exists that far back
+    return { date: dateForOffset(dayOffset), entries: [], currentUser: null };
+  }
 
-  return { date, entries, currentUser };
+  const raw = await fetchLeaderboardById(targetId, groupId);
+  cacheFromResponse(raw, dayOffset, groupId);
+  return mapResponse(raw);
 }

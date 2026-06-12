@@ -110,18 +110,18 @@ describe('fetchMyScore', () => {
 });
 
 describe('fetchLeaderboardApi', () => {
-  it('fetches global leaderboard for a date', async () => {
+  it('fetches current daily leaderboard with auth', async () => {
     document.cookie = 'cp_access_token=tok123';
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ top_20: [{ rank: 1, username: 'Mike', score: 950, time: 80000 }], me: null }),
+      json: async () => ({ leaderboard: { id: 1 }, top_20: [{ rank: 1, username: 'Mike', score: 950 }], me: null }),
     });
 
     const { fetchLeaderboardApi } = await import('./api');
-    await fetchLeaderboardApi('2026-06-12');
+    await fetchLeaderboardApi();
 
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('/playhub/leaderboard/daily/scores/?game_type=REWIND&game_mode=rewind_nba&date=2026-06-12'),
+      expect.stringContaining('/playhub/leaderboard/daily/scores/?game_type=REWIND&game_mode=rewind_nba'),
       expect.objectContaining({
         headers: expect.objectContaining({ Authorization: 'Token tok123' }),
       }),
@@ -130,13 +130,47 @@ describe('fetchLeaderboardApi', () => {
 
   it('passes group_id when provided', async () => {
     document.cookie = 'cp_access_token=tok123';
-    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ top_20: [], me: null }) });
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ leaderboard: { id: 1 }, top_20: [], me: null }) });
 
     const { fetchLeaderboardApi } = await import('./api');
-    await fetchLeaderboardApi('2026-06-12', 42);
+    await fetchLeaderboardApi(42);
 
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('group_id=42'),
+      expect.any(Object),
+    );
+  });
+});
+
+describe('fetchLeaderboardById', () => {
+  it('fetches a specific leaderboard by ID', async () => {
+    document.cookie = 'cp_access_token=tok123';
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ leaderboard: { id: 10, start_date: '2026-06-11' }, top_20: [], me: null }),
+    });
+
+    const { fetchLeaderboardById } = await import('./api');
+    await fetchLeaderboardById(10);
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('/playhub/leaderboard/10/?game_type=REWIND'),
+      expect.any(Object),
+    );
+  });
+
+  it('passes group_id when provided', async () => {
+    document.cookie = 'cp_access_token=tok123';
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ leaderboard: { id: 10 }, top_20: [], me: null }),
+    });
+
+    const { fetchLeaderboardById } = await import('./api');
+    await fetchLeaderboardById(10, 5);
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining('group_id=5'),
       expect.any(Object),
     );
   });

@@ -54,7 +54,7 @@ describe('fetchLeaderboard (mock)', () => {
 });
 
 describe('fetchLeaderboard (real response mapping)', () => {
-  test('maps top_20 and me from the backend response', async () => {
+  test('maps top_20 and me from the backend response (dayOffset=0)', async () => {
     vi.stubEnv('VITE_MOCK_API', 'false');
     vi.stubEnv('VITE_BASE_URL', 'https://test.4taps.me');
     vi.resetModules();
@@ -63,7 +63,7 @@ describe('fetchLeaderboard (real response mapping)', () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
-        leaderboard: { id: 11, start_date: '2026-06-12', end_date: '2026-06-12' },
+        leaderboard: { id: 11, start_date: '2026-06-12', end_date: '2026-06-12', previous_leaderboard_id: 10 },
         top_20: [
           { place_scores: 1, username: 'Mike', scores: 950, time: 80000 },
           { place_scores: 2, username: 'Sarah', scores: 870, time: 91000 },
@@ -75,6 +75,7 @@ describe('fetchLeaderboard (real response mapping)', () => {
     const { fetchLeaderboard: fetchRealLeaderboard } = await import('./leaderboard');
     const board = await fetchRealLeaderboard(0);
 
+    expect(board.date).toBe('2026-06-12');
     expect(board.entries).toHaveLength(2);
     expect(board.entries[0]).toMatchObject({
       rank: 1,
@@ -90,5 +91,68 @@ describe('fetchLeaderboard (real response mapping)', () => {
       timeMs: 83000,
       isCurrentUser: true,
     });
+  });
+
+  test('uses previous_leaderboard_id chain for dayOffset>0', async () => {
+    vi.stubEnv('VITE_MOCK_API', 'false');
+    vi.stubEnv('VITE_BASE_URL', 'https://test.4taps.me');
+    vi.resetModules();
+    document.cookie = 'cp_access_token=tok123';
+
+    // First call: fetch today (dayOffset=0 to prime the cache)
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        leaderboard: { id: 11, start_date: '2026-06-12', end_date: '2026-06-12', previous_leaderboard_id: 10 },
+        top_20: [{ place_scores: 1, username: 'Today', scores: 950 }],
+        me: null,
+      }),
+    });
+
+    const { fetchLeaderboard: fetchRealLeaderboard } = await import('./leaderboard');
+    await fetchRealLeaderboard(0);
+
+    // Second call: fetch yesterday (dayOffset=1) → should hit /leaderboard/10/
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        leaderboard: { id: 10, start_date: '2026-06-11', end_date: '2026-06-11', previous_leaderboard_id: 9 },
+        top_20: [{ place_scores: 1, username: 'Yesterday', scores: 800 }],
+        me: null,
+      }),
+    });
+
+    const board = await fetchRealLeaderboard(1);
+
+    expect(board.date).toBe('2026-06-11');
+    expect(board.entries[0].displayName).toBe('Yesterday');
+    // Verify it called the /leaderboard/10/ endpoint
+    expect(mockFetch).toHaveBeenLastCalledWith(
+      expect.stringContaining('/playhub/leaderboard/10/'),
+      expect.any(Object),
+    );
+  });
+
+  test('returns empty board when no previous leaderboard exists', async () => {
+    vi.stubEnv('VITE_MOCK_API', 'false');
+    vi.stubEnv('VITE_BASE_URL', 'https://test.4taps.me');
+    vi.resetModules();
+    document.cookie = 'cp_access_token=tok123';
+
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        leaderboard: { id: 11, start_date: '2026-06-12', end_date: '2026-06-12', previous_leaderboard_id: null },
+        top_20: [{ place_scores: 1, username: 'Only', scores: 500 }],
+        me: null,
+      }),
+    });
+
+    const { fetchLeaderboard: fetchRealLeaderboard } = await import('./leaderboard');
+    await fetchRealLeaderboard(0);
+
+    const board = await fetchRealLeaderboard(1);
+    expect(board.entries).toHaveLength(0);
+    expect(board.currentUser).toBeNull();
   });
 });
