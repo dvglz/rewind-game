@@ -67,11 +67,7 @@ export async function loginWithGoogle(credential: string): Promise<AuthUser> {
 }
 
 export async function loginWithEmail(email: string, redirectUri: string): Promise<void> {
-  const params = new URLSearchParams({
-    email,
-    redirect_uri: redirectUri,
-    app: 'false',
-  });
+  const params = new URLSearchParams({ email, redirect_uri: redirectUri });
   const res = await fetch(`${BASE_URL}/user/auth/email/?${params.toString()}`, {
     method: 'POST',
     headers: authHeaders(),

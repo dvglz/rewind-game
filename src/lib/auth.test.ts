@@ -133,7 +133,7 @@ describe('loginWithEmail', () => {
     loginWithEmail = mod.loginWithEmail;
   });
 
-  it('posts email and redirect URI as query params', async () => {
+  it('posts email and redirect URI as query params without app param', async () => {
     mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({}) });
 
     await loginWithEmail('user@example.com', 'https://app.com/?mode=auth&returnTo=groups');
@@ -143,7 +143,7 @@ describe('loginWithEmail', () => {
     expect(url.pathname).toBe('/user/auth/email/');
     expect(url.searchParams.get('email')).toBe('user@example.com');
     expect(url.searchParams.get('redirect_uri')).toBe('https://app.com/?mode=auth&returnTo=groups');
-    expect(url.searchParams.get('app')).toBe('false');
+    expect(url.searchParams.has('app')).toBe(false);
     expect((mockFetch.mock.calls[0] as [string, RequestInit])[1].method).toBe('POST');
   });
 
