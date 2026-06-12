@@ -51,8 +51,11 @@ export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage }: Auth
     if (!email.trim()) return;
     setLoading(true);
     try {
-      const returnParam = returnTo ? `&returnTo=${returnTo}` : '';
-      const redirectUri = `${window.location.origin}/?mode=auth${returnParam}`;
+      // Preserve current query params (invite, returnTo) through the magic link redirect
+      const currentParams = new URLSearchParams(window.location.search);
+      currentParams.set('mode', 'auth');
+      if (returnTo) currentParams.set('returnTo', returnTo);
+      const redirectUri = `${window.location.origin}/?${currentParams.toString()}`;
       await loginWithEmail(email.trim(), redirectUri);
       setEmailSent(true);
     } catch (err) {
