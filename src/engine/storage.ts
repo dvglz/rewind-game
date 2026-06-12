@@ -20,6 +20,10 @@ export function clearGameState(puzzleId: string): void {
   localStorage.setItem(GAME_STATE_KEY, JSON.stringify(all));
 }
 
+export function clearAllGameStates(): void {
+  localStorage.removeItem(GAME_STATE_KEY);
+}
+
 export function pruneOldGameStates(currentPuzzleId: string): void {
   const all = JSON.parse(localStorage.getItem(GAME_STATE_KEY) || '{}');
   const keys = Object.keys(all);

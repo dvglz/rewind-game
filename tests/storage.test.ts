@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { saveGameState, loadGameState, pruneOldGameStates, saveStats, loadStats } from '../src/engine/storage';
+import { saveGameState, loadGameState, pruneOldGameStates, saveStats, loadStats, clearAllGameStates } from '../src/engine/storage';
 
 beforeEach(() => {
   localStorage.clear();
@@ -94,6 +94,16 @@ describe('pruneOldGameStates', () => {
     pruneOldGameStates('current');
 
     expect(loadGameState('current')).not.toBeNull();
+  });
+
+  it('clears all saved game states', () => {
+    saveGameState({ puzzleId: 'current', currentRound: 2, results: [], totalScore: 200, completed: false });
+    saveGameState({ puzzleId: 'old', currentRound: 5, results: [], totalScore: 900, completed: true });
+
+    clearAllGameStates();
+
+    expect(loadGameState('current')).toBeNull();
+    expect(loadGameState('old')).toBeNull();
   });
 });
 

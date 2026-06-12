@@ -8,7 +8,7 @@ import { GroupsScreen } from './screens/GroupsScreen';
 import { LeaderboardScreen } from './screens/LeaderboardScreen';
 import { AuthScreen } from './screens/AuthScreen';
 import { clearGameState, loadGameState, pruneOldGameStates } from './engine/storage';
-import { beginPuzzleSession, getSport, getTodaysPuzzle } from './data/puzzles';
+import { beginPuzzleSession, getDateOverride, getSport, getTodaysPuzzle } from './data/puzzles';
 import { useWebHaptics } from 'web-haptics/react';
 import { initHaptics } from './lib/haptics';
 import { hidesCompletedGameLock, shouldEnableHapticsDebug } from './lib/testMode';
@@ -32,7 +32,8 @@ function AppInner() {
   const { isAuthenticated } = useAuth();
   useThemePreference();
   const [remoteCompleted, setRemoteCompleted] = useState(false);
-  const [remoteLoading, setRemoteLoading] = useState(false);
+  const [_remoteLoading, setRemoteLoading] = useState(false);
+  void _remoteLoading; // TODO: use for loading indicator
 
   useEffect(() => {
     initHaptics(trigger);

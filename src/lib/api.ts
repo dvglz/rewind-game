@@ -128,6 +128,17 @@ export function isScoreSubmitted(puzzleId: string): boolean {
   return localStorage.getItem(`${SUBMITTED_PREFIX}${puzzleId}`) === 'true';
 }
 
+export function clearScoreSyncState(): void {
+  localStorage.removeItem(PENDING_SCORE_KEY);
+
+  for (let i = localStorage.length - 1; i >= 0; i -= 1) {
+    const key = localStorage.key(i);
+    if (key?.startsWith(SUBMITTED_PREFIX)) {
+      localStorage.removeItem(key);
+    }
+  }
+}
+
 export async function flushPendingScore(): Promise<void> {
   const raw = localStorage.getItem(PENDING_SCORE_KEY);
   if (!raw || !getAccessToken()) return;

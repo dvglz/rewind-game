@@ -147,7 +147,6 @@ describe('flushPendingScore', () => {
     document.cookie = 'cp_access_token=tok123';
     const { flushPendingScore, PENDING_SCORE_KEY } = await import('./api');
     localStorage.setItem(PENDING_SCORE_KEY, JSON.stringify({
-      game_type: 'rewind',
       game_type: 'REWIND',
       game_mode: 'rewind_nba',
       scores: 500,
@@ -175,7 +174,6 @@ describe('flushPendingScore', () => {
     document.cookie = 'cp_access_token=tok123';
     const { flushPendingScore, PENDING_SCORE_KEY } = await import('./api');
     localStorage.setItem(PENDING_SCORE_KEY, JSON.stringify({
-      game_type: 'rewind',
       game_type: 'REWIND',
       game_mode: 'rewind_nba',
       scores: 100,
@@ -193,7 +191,6 @@ describe('flushPendingScore', () => {
     document.cookie = 'cp_access_token=tok123';
     const { flushPendingScore, PENDING_SCORE_KEY } = await import('./api');
     localStorage.setItem(PENDING_SCORE_KEY, JSON.stringify({
-      game_type: 'rewind',
       game_type: 'REWIND',
       game_mode: 'rewind_nba',
       scores: 100,
@@ -211,7 +208,6 @@ describe('flushPendingScore', () => {
     document.cookie = 'cp_access_token=tok123';
     const { flushPendingScore, PENDING_SCORE_KEY } = await import('./api');
     localStorage.setItem(PENDING_SCORE_KEY, JSON.stringify({
-      game_type: 'rewind',
       game_type: 'REWIND',
       game_mode: 'rewind_nba',
       scores: 100,
@@ -223,5 +219,22 @@ describe('flushPendingScore', () => {
     await flushPendingScore();
 
     expect(localStorage.getItem(PENDING_SCORE_KEY)).not.toBeNull();
+  });
+});
+
+describe('clearScoreSyncState', () => {
+  it('removes pending score and submitted flags', async () => {
+    const { clearScoreSyncState, PENDING_SCORE_KEY, SUBMITTED_PREFIX } = await import('./api');
+    localStorage.setItem(PENDING_SCORE_KEY, '{"scores":777}');
+    localStorage.setItem(`${SUBMITTED_PREFIX}2026-06-12-american`, 'true');
+    localStorage.setItem(`${SUBMITTED_PREFIX}2026-06-11-american`, 'true');
+    localStorage.setItem('unrelated_key', 'keep');
+
+    clearScoreSyncState();
+
+    expect(localStorage.getItem(PENDING_SCORE_KEY)).toBeNull();
+    expect(localStorage.getItem(`${SUBMITTED_PREFIX}2026-06-12-american`)).toBeNull();
+    expect(localStorage.getItem(`${SUBMITTED_PREFIX}2026-06-11-american`)).toBeNull();
+    expect(localStorage.getItem('unrelated_key')).toBe('keep');
   });
 });

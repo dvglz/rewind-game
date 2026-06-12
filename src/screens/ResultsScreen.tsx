@@ -169,9 +169,7 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }
               Create an Account
             </button>
             <p className={styles.descriptionLine} style={{ animationDelay: '700ms' }}>
-              …to see where you rank worldwide,
-              <br />
-              invite group chat and more
+              …to see where you rank worldwide, invite group chat and more
             </p>
             <p className={styles.contextLine} style={{ animationDelay: '740ms' }}>
               Already member?{' '}

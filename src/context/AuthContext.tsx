@@ -2,6 +2,8 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import type { ReactNode } from 'react';
 import type { AuthUser } from '../types/auth';
 import { fetchProfile, setAccessToken as storeToken, clearAccessToken } from '../lib/auth';
+import { clearAllGameStates } from '../engine/storage';
+import { clearScoreSyncState } from '../lib/api';
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -30,6 +32,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(() => {
     clearAccessToken();
+    clearAllGameStates();
+    clearScoreSyncState();
     setUserState(null);
   }, []);
 
