@@ -5,6 +5,9 @@ const CLIENT_ID =
   import.meta.env.VITE_GOOGLE_CLIENT_ID ||
   '182717589161-edketn4i47i5dl5oms8oke6o9bodg7ep.apps.googleusercontent.com';
 
+// Module-level flag — GSI should only be initialized once per page load.
+let gsiInitialized = false;
+
 interface UseGoogleSignInOptions {
   onCredential: (credential: string) => void;
 }
@@ -40,14 +43,17 @@ export function useGoogleSignIn({ onCredential }: UseGoogleSignInOptions) {
     loadScript().then(() => {
       if (cancelled || !containerRef.current) return;
 
-      window.google.accounts.id.initialize({
-        client_id: CLIENT_ID,
-        callback: (response: { credential: string }) => {
-          callbackRef.current(response.credential);
-        },
-        use_fedcm_for_button: true,
-        use_fedcm_for_prompt: true,
-      });
+      if (!gsiInitialized) {
+        window.google.accounts.id.initialize({
+          client_id: CLIENT_ID,
+          callback: (response: { credential: string }) => {
+            callbackRef.current(response.credential);
+          },
+          use_fedcm_for_button: true,
+          use_fedcm_for_prompt: true,
+        });
+        gsiInitialized = true;
+      }
 
       window.google.accounts.id.renderButton(containerRef.current, {
         type: 'standard',
