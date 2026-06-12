@@ -10,6 +10,7 @@ function createProps() {
     isAuthenticated: false,
     isAuthLoading: false,
     userEmail: null,
+    userName: null,
     onNavigateHome: vi.fn(),
     onNavigateGame: vi.fn(),
     onNavigateLeaderboard: vi.fn(),
@@ -39,7 +40,6 @@ describe('BurgerMenu', () => {
     expect(screen.getByRole('button', { name: "Today's Game" })).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Leaderboard' })).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Groups' })).not.toBeNull();
-    expect(screen.getByRole('button', { name: 'How to Play' })).not.toBeNull();
     expect(screen.queryByText('Sound & Haptics')).toBeNull();
     expect(screen.queryByText('Appearance')).toBeNull();
     expect(screen.getByRole('button', { name: 'Close menu' }) === document.activeElement).toBe(true);
@@ -61,21 +61,6 @@ describe('BurgerMenu', () => {
 
     expect(props.onNavigateHome).not.toHaveBeenCalled();
     expect(props.onNavigateGame).not.toHaveBeenCalled();
-  });
-
-  it('marks Home instructional entry as current and non-interactive', () => {
-    const props = createProps();
-    render(<BurgerMenu {...props} />);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
-
-    const currentDestination = screen.getByRole('button', { name: 'How to Play' });
-    expect(currentDestination.hasAttribute('disabled')).toBe(true);
-    expect(currentDestination.getAttribute('aria-current')).toBe('page');
-
-    fireEvent.click(currentDestination);
-
-    expect(props.onNavigateHome).not.toHaveBeenCalled();
   });
 
   it("keeps Today's Game actionable as a resume action on Home", () => {
@@ -139,6 +124,21 @@ describe('BurgerMenu', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
 
     expect(screen.getByText('me@averyveryveryverylongdom…')).not.toBeNull();
+  });
+
+  it('shows username when email is null (Google sign-in)', () => {
+    render(
+      <BurgerMenu
+        {...createProps()}
+        isAuthenticated={true}
+        userEmail={null}
+        userName="Allies"
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
+
+    expect(screen.getByText('Allies')).not.toBeNull();
   });
 
   it('closes and routes to auth on sign in with returnTo set to the current screen', () => {

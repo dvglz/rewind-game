@@ -10,11 +10,12 @@ export interface MenuOverlayProps {
   open: boolean;
   currentScreen: TopLevelMenuScreen;
   hasInProgressGame: boolean;
-  feedbackHref: string;
+  feedbackHref?: string;
   clutchPlayHref?: string;
   isAuthenticated: boolean;
   isAuthLoading?: boolean;
   userEmail: string | null;
+  userName: string | null;
   onClose: () => void;
   onExited?: () => void;
   onNavigateHome: () => void;
@@ -25,7 +26,6 @@ export interface MenuOverlayProps {
   onSignOut: () => void;
 }
 
-const CLUTCH_PLAY_HREF = 'https://play.clutchpoints.com';
 const CLOSE_ANIMATION_MS = 160;
 const MAX_TRUNCATED_EMAIL_LENGTH = 28;
 const FOCUSABLE_SELECTOR = [
@@ -37,41 +37,34 @@ const FOCUSABLE_SELECTOR = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(',');
 
-function truncateEmail(email: string | null): string {
-  if (!email) {
-    return 'Signed in';
+function displayIdentity(email: string | null, name: string | null): string {
+  if (email) {
+    if (email.length <= MAX_TRUNCATED_EMAIL_LENGTH) return email;
+
+    const [localPart, domain = ''] = email.split('@');
+    if (!domain) return `${email.slice(0, MAX_TRUNCATED_EMAIL_LENGTH - 1)}…`;
+
+    const availableDomainLength = MAX_TRUNCATED_EMAIL_LENGTH - localPart.length - 2;
+    if (availableDomainLength <= 0) return `${email.slice(0, MAX_TRUNCATED_EMAIL_LENGTH - 1)}…`;
+
+    return `${localPart}@${domain.slice(0, availableDomainLength)}…`;
   }
 
-  if (email.length <= MAX_TRUNCATED_EMAIL_LENGTH) {
-    return email;
-  }
+  if (name) return name;
 
-  const [localPart, domain = ''] = email.split('@');
-
-  if (!domain) {
-    return `${email.slice(0, MAX_TRUNCATED_EMAIL_LENGTH - 1)}…`;
-  }
-
-  const availableDomainLength = MAX_TRUNCATED_EMAIL_LENGTH - localPart.length - 2;
-  if (availableDomainLength <= 0) {
-    return `${email.slice(0, MAX_TRUNCATED_EMAIL_LENGTH - 1)}…`;
-  }
-
-  return `${localPart}@${domain.slice(0, availableDomainLength)}…`;
+  return 'Signed in';
 }
 
 export function MenuOverlay({
   open,
   currentScreen,
   hasInProgressGame,
-  feedbackHref,
-  clutchPlayHref = CLUTCH_PLAY_HREF,
   isAuthenticated,
   isAuthLoading = false,
   userEmail,
+  userName,
   onClose,
   onExited,
-  onNavigateHome,
   onNavigateGame,
   onNavigateLeaderboard,
   onNavigateGroups,
@@ -167,18 +160,7 @@ export function MenuOverlay({
 
   const handleGameNavigation = () => {
     onClose();
-
-    if (hasInProgressGame) {
-      onNavigateGame();
-      return;
-    }
-
-    onNavigateHome();
-  };
-
-  const handleHomeNavigation = () => {
-    onClose();
-    onNavigateHome();
+    onNavigateGame();
   };
 
   const handleLeaderboardNavigation = () => {
@@ -205,8 +187,6 @@ export function MenuOverlay({
   const isTodayActive = currentScreen === 'home' && !isTodayResumeAction;
   const isLeaderboardActive = currentScreen === 'leaderboard';
   const isGroupsActive = currentScreen === 'groups';
-  const isHowToPlayActive = currentScreen === 'home';
-
   const overlay = (
     <div className={open ? styles.root : styles.rootClosing} data-theme-invert>
       <div className={styles.surface} role="dialog" aria-modal="true" aria-label="Menu" ref={dialogRef}>
@@ -253,53 +233,24 @@ export function MenuOverlay({
           >
             Groups
           </button>
-          <button
-            type="button"
-            className={`${isHowToPlayActive ? styles.navButtonCurrent : styles.navButton} ${styles.menuItem}`}
-            onClick={handleHomeNavigation}
-            disabled={isHowToPlayActive}
-            aria-current={isHowToPlayActive ? 'page' : undefined}
-            style={{ '--stagger-index': 3 } as CSSProperties}
-          >
-            How to Play
-          </button>
         </nav>
 
         <div className={styles.bottomSection}>
           <div className={styles.divider} />
           <div className={styles.metaSection}>
-            <a
-              href={feedbackHref}
-              className={`${styles.metaLink} ${styles.menuItem}`}
-              onClick={onClose}
-              style={{ '--stagger-index': 4 } as CSSProperties}
-            >
-              Share Feedback
-            </a>
-            <a
-              href={clutchPlayHref}
-              target="_blank"
-              rel="noreferrer"
-              className={`${styles.metaLink} ${styles.menuItem}`}
-              onClick={onClose}
-              style={{ '--stagger-index': 5 } as CSSProperties}
-            >
-              Check Clutch Play
-            </a>
-
             {isAuthLoading ? (
-              <div className={`${styles.authRow} ${styles.menuItem}`} style={{ '--stagger-index': 6 } as CSSProperties}>
+              <div className={`${styles.authRow} ${styles.menuItem}`} style={{ '--stagger-index': 3 } as CSSProperties}>
                 <span className={styles.authStatus}>Checking account…</span>
               </div>
             ) : isAuthenticated ? (
-              <div className={`${styles.authRow} ${styles.menuItem}`} style={{ '--stagger-index': 6 } as CSSProperties}>
-                <span className={styles.authStatus}>{truncateEmail(userEmail)}</span>
+              <div className={`${styles.authRow} ${styles.menuItem}`} style={{ '--stagger-index': 3 } as CSSProperties}>
+                <span className={styles.authStatus}>{displayIdentity(userEmail, userName)}</span>
                 <button type="button" className={styles.authAction} onClick={handleSignOut}>
                   Sign Out
                 </button>
               </div>
             ) : (
-              <div className={`${styles.authRow} ${styles.menuItem}`} style={{ '--stagger-index': 6 } as CSSProperties}>
+              <div className={`${styles.authRow} ${styles.menuItem}`} style={{ '--stagger-index': 3 } as CSSProperties}>
                 <button type="button" className={styles.authAction} onClick={handleAuthNavigation}>
                   Sign In
                 </button>

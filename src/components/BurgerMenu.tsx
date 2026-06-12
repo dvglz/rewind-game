@@ -10,6 +10,7 @@ export interface BurgerMenuProps {
   isAuthenticated: boolean;
   isAuthLoading?: boolean;
   userEmail: string | null;
+  userName: string | null;
   onNavigateHome: () => void;
   onNavigateGame: () => void;
   onNavigateLeaderboard: () => void;
