@@ -65,10 +65,10 @@ describe('fetchLeaderboard (real response mapping)', () => {
       json: async () => ({
         leaderboard: { id: 11, start_date: '2026-06-12', end_date: '2026-06-12' },
         top_20: [
-          { rank: 1, username: 'Mike', score: 950, time: 80000 },
-          { rank: 2, username: 'Sarah', score: 870, time: 91000 },
+          { place_scores: 1, username: 'Mike', scores: 950, time: 80000 },
+          { place_scores: 2, username: 'Sarah', scores: 870, time: 91000 },
         ],
-        me: { rank: 21, username: 'You', score: 777, time: 83000 },
+        me: { place_scores: 21, username: 'You', scores: 777, time: 83000 },
       }),
     });
 

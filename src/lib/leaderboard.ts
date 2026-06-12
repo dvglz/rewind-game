@@ -100,7 +100,11 @@ export async function fetchLeaderboard(dayOffset: number, groupId?: number): Pro
   const entries: GlobalLeaderboardEntry[] = (raw.top_20 ?? [])
     .slice(0, LEADERBOARD_PAGE_LIMIT)
     .map((row, index) => ({
-      rank: typeof row.rank === 'number' ? row.rank : index + 1,
+      rank: typeof row.place_scores === 'number'
+        ? row.place_scores
+        : typeof row.rank === 'number'
+          ? row.rank
+          : index + 1,
       displayName: typeof row.username === 'string'
         ? row.username
         : typeof row.display_name === 'string'
@@ -124,7 +128,11 @@ export async function fetchLeaderboard(dayOffset: number, groupId?: number): Pro
   const currentRaw = raw.me;
   const currentUser: GlobalLeaderboardEntry | null = currentRaw
     ? {
-        rank: typeof currentRaw.rank === 'number' ? currentRaw.rank : 0,
+        rank: typeof currentRaw.place_scores === 'number'
+          ? currentRaw.place_scores
+          : typeof currentRaw.rank === 'number'
+            ? currentRaw.rank
+            : 0,
         displayName: typeof currentRaw.username === 'string'
           ? currentRaw.username
           : typeof currentRaw.display_name === 'string'
