@@ -4,9 +4,11 @@ import { loadGameState, loadStats } from '../engine/storage';
 import { getTodaysPuzzle, getSport, getDateOverride } from '../data/puzzles';
 import { getMaxPossibleScore, getScoreTierLabel } from '../engine/scoring';
 import { generateShareText, shareResults, type ShareOutcome } from '../lib/share';
+import { fetchMyScore } from '../lib/api';
 import { Toast } from '../components/Toast';
 import { RewindGlyph } from '../components/icons';
 import { useAuth } from '../context/AuthContext';
+import type { RoundResult } from '../types';
 import styles from './ResultsScreen.module.css';
 
 interface ResultsScreenProps {
@@ -24,6 +26,12 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }
   const stats = useMemo(() => loadStats(), []);
   const [shareState, setShareState] = useState<ShareOutcome | null>(null);
   const [showMotivational, setShowMotivational] = useState(false);
+  const [remoteState, setRemoteState] = useState<{
+    totalScore: number;
+    elapsedMs: number;
+    results: RoundResult[];
+  } | null>(null);
+  const [remoteChecked, setRemoteChecked] = useState(false);
   const maxScore = getMaxPossibleScore(5);
   const dateLabel = new Date(`${getDateOverride()}T00:00:00Z`).toLocaleDateString('en-US', {
     month: 'long',
@@ -32,7 +40,48 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }
     timeZone: 'UTC',
   });
 
-  const motivationalLabel = state ? getScoreTierLabel(state.totalScore, maxScore) : '';
+  const displayState = state?.completed
+    ? { totalScore: state.totalScore, elapsedMs: state.elapsedMs ?? 0, results: state.results }
+    : remoteState;
+
+  const motivationalLabel = displayState ? getScoreTierLabel(displayState.totalScore, maxScore) : '';
+
+  useEffect(() => {
+    if (state?.completed) {
+      setRemoteChecked(true);
+      return;
+    }
+    if (!isAuthenticated) return;
+
+    let cancelled = false;
+    setRemoteChecked(false);
+
+    fetchMyScore(getDateOverride())
+      .then((resp) => {
+        if (cancelled) return;
+        if (resp) {
+          setRemoteState({
+            totalScore: resp.scores,
+            elapsedMs: resp.metadata.total_time * 1000,
+            results: resp.metadata.rounds.map((round) => ({
+              event: { text: round.event_text, year: round.actual_year },
+              guessedYear: round.guessed_year,
+              actualYear: round.actual_year,
+              diff: round.diff,
+              score: round.score,
+            })),
+          });
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setRemoteChecked(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, state?.completed]);
 
   useEffect(() => {
     // Show the motivational toast after the card animation settles
@@ -41,17 +90,19 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }
     return () => { clearTimeout(showTimer); clearTimeout(hideTimer); };
   }, []);
 
-  if (!state || !state.completed) {
+  if (!displayState) {
+    if (isAuthenticated && !remoteChecked) {
+      return null;
+    }
     onHome();
     return null;
   }
 
   const handleShare = async () => {
-    if (!state) return;
     const text = generateShareText(
       puzzle.number,
-      state.results,
-      state.totalScore,
+      displayState.results,
+      displayState.totalScore,
       maxScore,
       stats.currentStreak,
       sport,
@@ -75,11 +126,11 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }
       </header>
       <div className={styles.content}>
         <ShareCard
-          results={state.results}
-          totalScore={state.totalScore}
+          results={displayState.results}
+          totalScore={displayState.totalScore}
           maxScore={maxScore}
           dateLabel={dateLabel}
-          elapsedMs={state.elapsedMs}
+          elapsedMs={displayState.elapsedMs}
         />
 
         <button

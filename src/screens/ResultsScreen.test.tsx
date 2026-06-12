@@ -2,6 +2,11 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { ResultsScreen } from './ResultsScreen';
 
+const { fetchMyScore } = vi.hoisted(() => ({
+  fetchMyScore: vi.fn(),
+}));
+
+let currentState: typeof completedState | null;
 const completedState = {
   puzzleId: 'p1',
   currentRound: 5,
@@ -18,8 +23,12 @@ const completedState = {
 };
 
 vi.mock('../engine/storage', () => ({
-  loadGameState: () => completedState,
+  loadGameState: () => currentState,
   loadStats: () => ({ currentStreak: 1, maxStreak: 1, gamesPlayed: 1, lastPlayedDate: null }),
+}));
+
+vi.mock('../lib/api', () => ({
+  fetchMyScore,
 }));
 
 let mockAuthed = false;
@@ -28,7 +37,9 @@ vi.mock('../context/AuthContext', () => ({
 }));
 
 beforeEach(() => {
+  currentState = completedState;
   mockAuthed = false;
+  fetchMyScore.mockReset();
 });
 
 test('logged-in users get friends CTA plus inline leaderboard link', () => {
@@ -71,4 +82,34 @@ test('logged-out users get account CTA, benefits sentence, and sign-in link', ()
   expect(screen.getByText(/rank worldwide/i)).not.toBeNull();
   expect(screen.getByRole('button', { name: /^Sign in$/i })).not.toBeNull();
   expect(screen.queryByRole('button', { name: /See Friends' Scores/i })).toBeNull();
+});
+
+test('falls back to backend score when local state is missing', async () => {
+  currentState = null;
+  mockAuthed = true;
+  fetchMyScore.mockResolvedValueOnce({
+    scores: 777,
+    created_at: '2026-06-12T00:00:00Z',
+    metadata: {
+      total_time: 83,
+      puzzle_number: 1,
+      sport: 'american',
+      rounds: [
+        { event_text: 'Remote R1', guessed_year: 2010, actual_year: 2012, diff: -2, score: 82, tier: 'great' },
+        { event_text: 'Remote R2', guessed_year: 2014, actual_year: 2012, diff: 2, score: 82, tier: 'great' },
+      ],
+    },
+  });
+
+  render(
+    <ResultsScreen
+      onHome={() => {}}
+      onGroups={() => {}}
+      onLeaderboard={() => {}}
+      onRequireAuth={() => {}}
+    />
+  );
+
+  expect(await screen.findByText('777')).not.toBeNull();
+  expect(await screen.findByText('1m 23s')).not.toBeNull();
 });

@@ -3,6 +3,19 @@ import { beforeEach, expect, test, vi } from 'vitest';
 import { useGame } from './useGame';
 import type { Puzzle } from '../types';
 
+vi.mock('../lib/auth', () => ({
+  getAccessToken: vi.fn(() => null),
+}));
+
+vi.mock('../lib/api', () => ({
+  submitScore: vi.fn(() => Promise.resolve()),
+  savePendingScore: vi.fn(),
+  isScoreSubmitted: vi.fn(() => false),
+  markScoreSubmitted: vi.fn(),
+  GAME_TYPE: 'rewind',
+  GAME_MODE: 'rewind_nba',
+}));
+
 vi.mock('../engine/storage', () => ({
   saveGameState: vi.fn(),
   loadGameState: vi.fn(() => null),
@@ -10,6 +23,8 @@ vi.mock('../engine/storage', () => ({
 }));
 
 const { saveGameState } = await import('../engine/storage');
+const { getAccessToken } = await import('../lib/auth');
+const { savePendingScore, submitScore, markScoreSubmitted } = await import('../lib/api');
 
 const puzzle: Puzzle = {
   id: 'rewind-001',
@@ -110,4 +125,61 @@ test('persists elapsedMs when the final guess completes the game', () => {
     startedAt: 1_700_000_000_000,
     elapsedMs: 125000,
   });
+});
+
+test('stashes a pending score when an anonymous player completes the game', () => {
+  vi.spyOn(Date, 'now')
+    .mockReturnValueOnce(1_700_000_000_000)
+    .mockReturnValue(1_700_000_125_000);
+  vi.mocked(getAccessToken).mockReturnValue(null);
+
+  const { result } = renderHook(() => useGame(puzzle));
+
+  act(() => {
+    result.current.submitGuess(2001);
+  });
+  act(() => {
+    result.current.submitGuess(2002);
+  });
+  act(() => {
+    result.current.submitGuess(2003);
+  });
+  act(() => {
+    result.current.submitGuess(2004);
+  });
+  act(() => {
+    result.current.submitGuess(2005);
+  });
+
+  expect(savePendingScore).toHaveBeenCalledTimes(1);
+  expect(submitScore).not.toHaveBeenCalled();
+});
+
+test('submits a completed score immediately for authenticated players', async () => {
+  vi.spyOn(Date, 'now')
+    .mockReturnValueOnce(1_700_000_000_000)
+    .mockReturnValue(1_700_000_125_000);
+  vi.mocked(getAccessToken).mockReturnValue('tok123');
+
+  const { result } = renderHook(() => useGame(puzzle));
+
+  await act(async () => {
+    result.current.submitGuess(2001);
+  });
+  await act(async () => {
+    result.current.submitGuess(2002);
+  });
+  await act(async () => {
+    result.current.submitGuess(2003);
+  });
+  await act(async () => {
+    result.current.submitGuess(2004);
+  });
+  await act(async () => {
+    result.current.submitGuess(2005);
+    await Promise.resolve();
+  });
+
+  expect(submitScore).toHaveBeenCalledTimes(1);
+  expect(markScoreSubmitted).toHaveBeenCalledWith('rewind-001');
 });

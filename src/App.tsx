@@ -14,6 +14,7 @@ import { initHaptics } from './lib/haptics';
 import { hidesCompletedGameLock, shouldEnableHapticsDebug } from './lib/testMode';
 import { useThemePreference } from './hooks/useThemePreference';
 import { setAccessToken } from './lib/auth';
+import { fetchMyScore, flushPendingScore } from './lib/api';
 import './styles/global.css';
 
 type Screen = 'home' | 'game' | 'ordering' | 'results' | 'groups' | 'auth' | 'leaderboard';
@@ -30,6 +31,8 @@ function AppInner() {
   });
   const { isAuthenticated } = useAuth();
   useThemePreference();
+  const [remoteCompleted, setRemoteCompleted] = useState(false);
+  const [remoteLoading, setRemoteLoading] = useState(false);
 
   useEffect(() => {
     initHaptics(trigger);
@@ -39,6 +42,39 @@ function AppInner() {
     const puzzle = getTodaysPuzzle(getSport());
     pruneOldGameStates(puzzle.id);
   }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setRemoteCompleted(false);
+      setRemoteLoading(false);
+      return;
+    }
+
+    const puzzle = getTodaysPuzzle(getSport());
+    const local = loadGameState(puzzle.id);
+    if (local?.completed) {
+      setRemoteCompleted(true);
+      setRemoteLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setRemoteLoading(true);
+    fetchMyScore(getDateOverride())
+      .then((score) => {
+        if (!cancelled) setRemoteCompleted(Boolean(score));
+      })
+      .catch(() => {
+        if (!cancelled) setRemoteCompleted(false);
+      })
+      .finally(() => {
+        if (!cancelled) setRemoteLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated]);
 
   // Handle email magic-link callback: extract token from URL
   useEffect(() => {
@@ -120,7 +156,9 @@ function AppInner() {
     return params.get('returnTo');
   };
 
-  const handleAuthSuccess = () => {
+  const handleAuthSuccess = async () => {
+    await flushPendingScore().catch(() => {});
+
     if (pendingInvite) {
       navigate('groups');
       return;
@@ -159,9 +197,16 @@ function AppInner() {
             const sport = getSport();
             const puzzle = getTodaysPuzzle(sport);
             const saved = loadGameState(puzzle.id);
-            return !!saved && saved.completed && !allowReplay;
+            return (!!saved && saved.completed && !allowReplay) || remoteCompleted;
           })()}
-          onViewResults={() => navigate('results')}
+          onViewResults={() => {
+            const sport = getSport();
+            const puzzle = getTodaysPuzzle(sport);
+            const saved = loadGameState(puzzle.id);
+            if ((saved && saved.completed) || remoteCompleted) {
+              navigate('results');
+            }
+          }}
           onLeaderboard={() => (isAuthenticated || USE_MOCK) ? navigate('leaderboard') : navigateToAuth('leaderboard')}
           showDebugTools={allowReplay}
           onGroups={() => navigate('groups')}
@@ -200,7 +245,9 @@ function AppInner() {
       {screen === 'auth' && (
         <AuthScreen
           onBack={() => navigate('home')}
-          onSuccess={handleAuthSuccess}
+          onSuccess={() => {
+            void handleAuthSuccess();
+          }}
           returnTo={getReturnTo()}
           contextMessage={pendingInvite ? "You'll join a group right after signing in" : undefined}
         />

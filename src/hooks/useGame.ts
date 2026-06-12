@@ -1,7 +1,9 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { GameState, RoundResult, Puzzle } from '../types';
-import { calculateScore } from '../engine/scoring';
+import { calculateScore, getResultColor } from '../engine/scoring';
 import { saveGameState, loadGameState, updateStatsAfterGame } from '../engine/storage';
+import { getAccessToken } from '../lib/auth';
+import { submitScore, savePendingScore, isScoreSubmitted, markScoreSubmitted, GAME_MODE, GAME_TYPE } from '../lib/api';
 
 const TOTAL_ROUNDS = 5;
 
@@ -59,6 +61,35 @@ export function useGame(puzzle: Puzzle) {
 
       if (completed) {
         updateStatsAfterGame(puzzle.id);
+
+        if (!isScoreSubmitted(puzzle.id)) {
+          const payload = {
+            game_type: GAME_TYPE,
+            game_mode: GAME_MODE,
+            scores: newState.totalScore,
+            metadata: {
+              total_time: Math.round((newState.elapsedMs ?? 0) / 1000),
+              puzzle_number: puzzle.number,
+              sport: puzzle.sport,
+              rounds: newState.results.map((round) => ({
+                event_text: round.event.text,
+                guessed_year: round.guessedYear,
+                actual_year: round.actualYear,
+                diff: round.diff,
+                score: round.score,
+                tier: getResultColor(round.diff),
+              })),
+            },
+          };
+
+          if (getAccessToken()) {
+            void submitScore(payload)
+              .then(() => markScoreSubmitted(puzzle.id))
+              .catch(() => savePendingScore(payload));
+          } else {
+            savePendingScore(payload);
+          }
+        }
       }
 
       return result;

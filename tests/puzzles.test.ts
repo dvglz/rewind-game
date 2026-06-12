@@ -1,5 +1,11 @@
-import { describe, it, expect } from 'vitest';
-import { getPuzzleForDate } from '../src/data/puzzles';
+import { afterEach, describe, it, expect, vi } from 'vitest';
+import { getDateOverride, getPuzzleForDate } from '../src/data/puzzles';
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.useRealTimers();
+  window.history.replaceState({}, '', '/');
+});
 
 describe('getPuzzleForDate', () => {
   it('returns a puzzle with 5 events for nba', () => {
@@ -81,5 +87,17 @@ describe('getPuzzleForDate', () => {
     // Q1 is Messi, Q3 should be South Africa (not Saudi)
     expect(puzzle.events[0].text).toContain('Messi');
     expect(puzzle.events[2].text).toContain('South Africa');
+  });
+
+  it('uses the real current date when there is no ?date= override', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-06-12T13:45:00Z'));
+
+    expect(getDateOverride()).toBe('2026-06-12');
+  });
+
+  it('prefers the ?date= override when present', () => {
+    window.history.replaceState({}, '', '/?date=2026-06-03');
+    expect(getDateOverride()).toBe('2026-06-03');
   });
 });

@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { fetchGroup, createGroup, joinGroup, leaveGroup } from '../lib/playhub';
+import { fetchLeaderboard } from '../lib/leaderboard';
+import { formatTime } from '../lib/formatTime';
 import { GroupLeaderboard } from '../components/GroupLeaderboard';
 import { DateSelector } from '../components/DateSelector';
 import { CreateGroupModal } from '../components/CreateGroupModal';
@@ -7,9 +9,7 @@ import { JoinGroupModal } from '../components/JoinGroupModal';
 import { ArrowLeft, Plus } from '../components/icons';
 import { Toast } from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
-import { loadGameState } from '../engine/storage';
-import { getTodaysPuzzle } from '../data/puzzles';
-import type { PlayhubGroup, GroupLeaderboardEntry, GroupMember } from '../types';
+import type { GlobalLeaderboard, PlayhubGroup, GroupLeaderboardEntry, GroupMember } from '../types';
 import styles from './GroupsScreen.module.css';
 
 function extractInviteCode(inviteLink: string): string {
@@ -43,6 +43,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [toast, setToast] = useState('');
   const [dayOffset, setDayOffset] = useState(0);
+  const [groupBoard, setGroupBoard] = useState<GlobalLeaderboard | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -68,6 +69,26 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
     }
     return () => { cancelled = true; };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!group) {
+      setGroupBoard(null);
+      return;
+    }
+
+    let cancelled = false;
+    fetchLeaderboard(dayOffset, group.id)
+      .then((board) => {
+        if (!cancelled) setGroupBoard(board);
+      })
+      .catch(() => {
+        if (!cancelled) setGroupBoard(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dayOffset, group]);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -148,31 +169,25 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
 
   if (loading) return null;
 
-  const MOCK_SCORES: Record<string, number | null> = {
-    'you': 820, 'Mike': 940, 'Sarah': 670, 'Jordan': null, 'Alex': 750,
-  };
-  const useMock = import.meta.env.VITE_MOCK_API === 'true';
+  const scoreByName = new Map(
+    (groupBoard?.entries ?? []).map((entry) => [entry.displayName, entry] as const),
+  );
 
-  const isToday = dayOffset === 0;
-  const myScore = (() => {
-    if (!isToday) return null;
-    const puzzle = getTodaysPuzzle();
-    const saved = loadGameState(puzzle.id);
-    return saved?.completed ? saved.totalScore : null;
-  })();
+  const leaderboardEntries: GroupLeaderboardEntry[] = (group?.members ?? []).map((member) => {
+    const name = getMemberName(member);
+    const memberId = getMemberId(member);
+    const isMe = memberId != null && authUser != null && memberId === authUser.id;
+    const scoreEntry = isMe
+      ? groupBoard?.currentUser ?? groupBoard?.entries.find((entry) => entry.isCurrentUser) ?? scoreByName.get(name)
+      : scoreByName.get(name);
 
-  const leaderboardEntries: GroupLeaderboardEntry[] = isToday
-    ? (group?.members ?? []).map((m) => {
-        const name = getMemberName(m);
-        const memberId = getMemberId(m);
-        const isMe = memberId != null && authUser != null && memberId === authUser.id;
-        return {
-          displayName: isMe ? 'You' : name,
-          score: useMock ? (MOCK_SCORES[name] ?? null) : (isMe ? myScore : null),
-          isCurrentUser: isMe,
-        };
-      })
-    : [];
+    return {
+      displayName: isMe ? 'You' : name,
+      score: scoreEntry?.score ?? null,
+      time: scoreEntry ? formatTime(scoreEntry.timeMs) : undefined,
+      isCurrentUser: isMe,
+    };
+  });
 
   const memberCount = group?.members.length ?? 0;
   const memberLabel = `${memberCount} member${memberCount !== 1 ? 's' : ''}`;

@@ -371,7 +371,7 @@ export function getDateOverride(): string {
   if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
     return dateParam;
   }
-  return DAY_ZERO_DATE;
+  return new Date().toISOString().slice(0, 10);
 }
 
 export function getTodaysPuzzle(sport?: Sport): Puzzle {

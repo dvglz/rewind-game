@@ -1,5 +1,6 @@
 import type { GlobalLeaderboard, GlobalLeaderboardEntry } from '../types';
 import { LEADERBOARD_PAGE_LIMIT } from '../config/leaderboard';
+import { fetchLeaderboardApi } from './api';
 
 const USE_MOCK = import.meta.env.VITE_MOCK_API === 'true';
 
@@ -84,20 +85,62 @@ function mockBoard(dayOffset: number): GlobalLeaderboard {
 
 // ── Public API ─────────────────────────────────────────────
 
-export async function fetchLeaderboard(dayOffset: number): Promise<GlobalLeaderboard> {
+export async function fetchLeaderboard(dayOffset: number, groupId?: number): Promise<GlobalLeaderboard> {
   if (USE_MOCK) {
     await new Promise((r) => setTimeout(r, 300));
     return mockBoard(dayOffset);
   }
-  // Real API wired later (GET /leaderboard/?date=...). See spec "Deferred to Backend".
-  throw new Error('Leaderboard API not wired yet — set VITE_MOCK_API=true for now');
-}
 
-/**
- * Seam for the post-login flush of an anonymous score (localStorage -> POST /scores/).
- * Intentionally a no-op until the backend is wired. See spec "Deferred to Backend".
- */
-export async function flushPendingScore(): Promise<void> {
-  // No-op placeholder. Real implementation reads the stored payload, POSTs it with the
-  // ORIGINAL started_at/total_time, swallows stale-date rejections, then clears storage.
+  const date = dateForOffset(dayOffset);
+  const raw = await fetchLeaderboardApi(date, groupId) as {
+    results?: Array<Record<string, unknown>>;
+    current_user?: Record<string, unknown> | null;
+  };
+
+  const entries: GlobalLeaderboardEntry[] = (raw.results ?? [])
+    .slice(0, LEADERBOARD_PAGE_LIMIT)
+    .map((row, index) => ({
+      rank: typeof row.rank === 'number' ? row.rank : index + 1,
+      displayName: typeof row.username === 'string'
+        ? row.username
+        : typeof row.display_name === 'string'
+          ? row.display_name
+          : `Player ${index + 1}`,
+      score: typeof row.score === 'number'
+        ? row.score
+        : typeof row.scores === 'number'
+          ? row.scores
+          : 0,
+      timeMs: typeof row.time_ms === 'number'
+        ? row.time_ms
+        : typeof row.metadata === 'object' && row.metadata !== null && typeof (row.metadata as { total_time?: unknown }).total_time === 'number'
+          ? ((row.metadata as { total_time: number }).total_time * 1000)
+          : 0,
+      isCurrentUser: row.is_current_user === true,
+    }));
+
+  const currentRaw = raw.current_user;
+  const currentUser: GlobalLeaderboardEntry | null = currentRaw
+    ? {
+        rank: typeof currentRaw.rank === 'number' ? currentRaw.rank : 0,
+        displayName: typeof currentRaw.username === 'string'
+          ? currentRaw.username
+          : typeof currentRaw.display_name === 'string'
+            ? currentRaw.display_name
+            : 'You',
+        score: typeof currentRaw.score === 'number'
+          ? currentRaw.score
+          : typeof currentRaw.scores === 'number'
+            ? currentRaw.scores
+            : 0,
+        timeMs: typeof currentRaw.time_ms === 'number'
+          ? currentRaw.time_ms
+          : typeof currentRaw.metadata === 'object' && currentRaw.metadata !== null && typeof (currentRaw.metadata as { total_time?: unknown }).total_time === 'number'
+            ? ((currentRaw.metadata as { total_time: number }).total_time * 1000)
+            : 0,
+        isCurrentUser: true,
+      }
+    : null;
+
+  return { date, entries, currentUser };
 }
