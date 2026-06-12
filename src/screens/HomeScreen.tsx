@@ -70,7 +70,7 @@ export function HomeScreen({
         isAuthenticated={isAuthenticated}
         isAuthLoading={isAuthLoading}
         userEmail={authUser?.email ?? null}
-        userName={authUser?.firstName ?? authUser?.username ?? null}
+        userName={authUser?.username ?? null}
         onNavigateHome={() => {}}
         onNavigateGame={onPlay}
         onNavigateLeaderboard={onLeaderboard}
