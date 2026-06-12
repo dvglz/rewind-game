@@ -133,22 +133,18 @@ describe('loginWithEmail', () => {
     loginWithEmail = mod.loginWithEmail;
   });
 
-  it('posts email and redirect URI', async () => {
+  it('posts email and redirect URI as query params', async () => {
     mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({}) });
 
     await loginWithEmail('user@example.com', 'https://app.com/?mode=auth&returnTo=groups');
 
-    expect(mockFetch).toHaveBeenCalledWith(
-      'https://clutchpoints-users-test.4taps.me/user/auth/email/',
-      expect.objectContaining({
-        method: 'POST',
-        body: JSON.stringify({
-          email: 'user@example.com',
-          redirect_uri: 'https://app.com/?mode=auth&returnTo=groups',
-          app: 'rewind',
-        }),
-      }),
-    );
+    const calledUrl = (mockFetch.mock.calls[0] as [string, RequestInit])[0];
+    const url = new URL(calledUrl);
+    expect(url.pathname).toBe('/user/auth/email/');
+    expect(url.searchParams.get('email')).toBe('user@example.com');
+    expect(url.searchParams.get('redirect_uri')).toBe('https://app.com/?mode=auth&returnTo=groups');
+    expect(url.searchParams.get('app')).toBe('false');
+    expect((mockFetch.mock.calls[0] as [string, RequestInit])[1].method).toBe('POST');
   });
 
   it('throws on non-ok response', async () => {

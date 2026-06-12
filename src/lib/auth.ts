@@ -2,6 +2,22 @@ import type { AuthUser } from '../types/auth';
 
 const BASE_URL = (import.meta.env.VITE_BASE_URL as string) ?? '';
 const COOKIE_NAME = 'cp_access_token';
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
+
+/** Extract root domain (e.g. "4taps.me" from "clutchpoints-rewind-test.4taps.me"). */
+function getRootDomain(): string {
+  const parts = window.location.hostname.split('.');
+  // localhost / IP → no domain attribute
+  if (parts.length <= 2 || /^\d+$/.test(parts[parts.length - 1])) return '';
+  return `.${parts.slice(-2).join('.')}`;
+}
+
+function cookieOptions(maxAge: number): string {
+  const domain = getRootDomain();
+  const domainAttr = domain ? `; domain=${domain}` : '';
+  const secureAttr = window.location.protocol === 'https:' ? '; Secure' : '';
+  return `path=/${domainAttr}; max-age=${maxAge}; SameSite=None${secureAttr}`;
+}
 
 // ── Cookie helpers ────────────────────────────────────────
 
@@ -16,11 +32,11 @@ export function getAccessToken(): string | null {
 }
 
 export function setAccessToken(token: string): void {
-  document.cookie = `${COOKIE_NAME}=${token}; path=/; max-age=${60 * 60 * 24 * 90}; SameSite=Lax`;
+  document.cookie = `${COOKIE_NAME}=${token}; ${cookieOptions(COOKIE_MAX_AGE)}`;
 }
 
 export function clearAccessToken(): void {
-  document.cookie = `${COOKIE_NAME}=; path=/; max-age=0`;
+  document.cookie = `${COOKIE_NAME}=; ${cookieOptions(0)}`;
 }
 
 // ── API calls ─────────────────────────────────────────────
@@ -51,10 +67,14 @@ export async function loginWithGoogle(credential: string): Promise<AuthUser> {
 }
 
 export async function loginWithEmail(email: string, redirectUri: string): Promise<void> {
-  const res = await fetch(`${BASE_URL}/user/auth/email/`, {
+  const params = new URLSearchParams({
+    email,
+    redirect_uri: redirectUri,
+    app: 'false',
+  });
+  const res = await fetch(`${BASE_URL}/user/auth/email/?${params.toString()}`, {
     method: 'POST',
     headers: authHeaders(),
-    body: JSON.stringify({ email, redirect_uri: redirectUri, app: 'rewind' }),
   });
   if (!res.ok) throw new Error(await parseError(res));
 }
