@@ -93,11 +93,11 @@ export async function fetchLeaderboard(dayOffset: number, groupId?: number): Pro
 
   const date = dateForOffset(dayOffset);
   const raw = await fetchLeaderboardApi(date, groupId) as {
-    results?: Array<Record<string, unknown>>;
-    current_user?: Record<string, unknown> | null;
+    top_20?: Array<Record<string, unknown>>;
+    me?: Record<string, unknown> | null;
   };
 
-  const entries: GlobalLeaderboardEntry[] = (raw.results ?? [])
+  const entries: GlobalLeaderboardEntry[] = (raw.top_20 ?? [])
     .slice(0, LEADERBOARD_PAGE_LIMIT)
     .map((row, index) => ({
       rank: typeof row.rank === 'number' ? row.rank : index + 1,
@@ -111,15 +111,17 @@ export async function fetchLeaderboard(dayOffset: number, groupId?: number): Pro
         : typeof row.scores === 'number'
           ? row.scores
           : 0,
-      timeMs: typeof row.time_ms === 'number'
-        ? row.time_ms
-        : typeof row.metadata === 'object' && row.metadata !== null && typeof (row.metadata as { total_time?: unknown }).total_time === 'number'
-          ? ((row.metadata as { total_time: number }).total_time * 1000)
-          : 0,
-      isCurrentUser: row.is_current_user === true,
+      timeMs: typeof row.time === 'number'
+        ? row.time
+        : typeof row.time_ms === 'number'
+          ? row.time_ms
+          : typeof row.metadata === 'object' && row.metadata !== null && typeof (row.metadata as { total_time?: unknown }).total_time === 'number'
+            ? ((row.metadata as { total_time: number }).total_time * 1000)
+            : 0,
+      isCurrentUser: false,
     }));
 
-  const currentRaw = raw.current_user;
+  const currentRaw = raw.me;
   const currentUser: GlobalLeaderboardEntry | null = currentRaw
     ? {
         rank: typeof currentRaw.rank === 'number' ? currentRaw.rank : 0,
@@ -133,11 +135,13 @@ export async function fetchLeaderboard(dayOffset: number, groupId?: number): Pro
           : typeof currentRaw.scores === 'number'
             ? currentRaw.scores
             : 0,
-        timeMs: typeof currentRaw.time_ms === 'number'
-          ? currentRaw.time_ms
-          : typeof currentRaw.metadata === 'object' && currentRaw.metadata !== null && typeof (currentRaw.metadata as { total_time?: unknown }).total_time === 'number'
-            ? ((currentRaw.metadata as { total_time: number }).total_time * 1000)
-            : 0,
+        timeMs: typeof currentRaw.time === 'number'
+          ? currentRaw.time
+          : typeof currentRaw.time_ms === 'number'
+            ? currentRaw.time_ms
+            : typeof currentRaw.metadata === 'object' && currentRaw.metadata !== null && typeof (currentRaw.metadata as { total_time?: unknown }).total_time === 'number'
+              ? ((currentRaw.metadata as { total_time: number }).total_time * 1000)
+              : 0,
         isCurrentUser: true,
       }
     : null;

@@ -3,7 +3,7 @@ import { getAccessToken } from './auth';
 const BASE_URL = (import.meta.env.VITE_BASE_URL as string) ?? '';
 const DETAIL_STALE_PATTERNS = ['stale', 'already submitted', 'duplicate'];
 
-export const GAME_TYPE = 'rewind';
+export const GAME_TYPE = 'REWIND';
 export const GAME_MODE = 'rewind_nba';
 export const PENDING_SCORE_KEY = 'rewind_pending_score';
 export const SUBMITTED_PREFIX = 'rewind_score_submitted_';
@@ -34,7 +34,8 @@ export interface ScorePayload {
 export interface MyScoreResponse {
   scores: number;
   metadata: ScoreMetadata;
-  created_at: string;
+  created?: string;
+  created_at?: string;
 }
 
 function getHeaders(): Record<string, string> {
@@ -87,7 +88,10 @@ export async function fetchMyScore(date: string): Promise<MyScoreResponse | null
   );
 
   if (!res.ok) return null;
-  return res.json();
+
+  const body = await res.json();
+  if (!Array.isArray(body) || body.length === 0) return null;
+  return body[0] as MyScoreResponse;
 }
 
 export async function fetchLeaderboardApi(date: string, groupId?: number): Promise<unknown> {

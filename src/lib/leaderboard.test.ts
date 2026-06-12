@@ -1,6 +1,15 @@
-import { describe, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { fetchLeaderboard } from './leaderboard';
 import { LEADERBOARD_PAGE_LIMIT } from '../config/leaderboard';
+
+const mockFetch = vi.fn();
+vi.stubGlobal('fetch', mockFetch);
+
+beforeEach(() => {
+  mockFetch.mockReset();
+  vi.unstubAllEnvs();
+  vi.stubEnv('VITE_MOCK_API', 'true');
+});
 
 describe('fetchLeaderboard (mock)', () => {
   test('returns at most LEADERBOARD_PAGE_LIMIT entries', async () => {
@@ -41,5 +50,45 @@ describe('fetchLeaderboard (mock)', () => {
     expect(board.currentUser).not.toBeNull();
     expect(board.currentUser!.rank).toBeGreaterThan(LEADERBOARD_PAGE_LIMIT);
     expect(board.currentUser!.isCurrentUser).toBe(true);
+  });
+});
+
+describe('fetchLeaderboard (real response mapping)', () => {
+  test('maps top_20 and me from the backend response', async () => {
+    vi.stubEnv('VITE_MOCK_API', 'false');
+    vi.stubEnv('VITE_BASE_URL', 'https://test.4taps.me');
+    vi.resetModules();
+    document.cookie = 'cp_access_token=tok123';
+
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        leaderboard: { id: 11, start_date: '2026-06-12', end_date: '2026-06-12' },
+        top_20: [
+          { rank: 1, username: 'Mike', score: 950, time: 80000 },
+          { rank: 2, username: 'Sarah', score: 870, time: 91000 },
+        ],
+        me: { rank: 21, username: 'You', score: 777, time: 83000 },
+      }),
+    });
+
+    const { fetchLeaderboard: fetchRealLeaderboard } = await import('./leaderboard');
+    const board = await fetchRealLeaderboard(0);
+
+    expect(board.entries).toHaveLength(2);
+    expect(board.entries[0]).toMatchObject({
+      rank: 1,
+      displayName: 'Mike',
+      score: 950,
+      timeMs: 80000,
+      isCurrentUser: false,
+    });
+    expect(board.currentUser).toMatchObject({
+      rank: 21,
+      displayName: 'You',
+      score: 777,
+      timeMs: 83000,
+      isCurrentUser: true,
+    });
   });
 });

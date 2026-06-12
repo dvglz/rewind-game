@@ -20,7 +20,7 @@ describe('submitScore', () => {
     const { submitScore } = await import('./api');
 
     await submitScore({
-      game_type: 'rewind',
+      game_type: 'REWIND',
       game_mode: 'rewind_nba',
       scores: 750,
       metadata: {
@@ -57,7 +57,7 @@ describe('submitScore', () => {
     const { submitScore } = await import('./api');
 
     await expect(submitScore({
-      game_type: 'rewind',
+      game_type: 'REWIND',
       game_mode: 'rewind_nba',
       scores: 0,
       metadata: { total_time: 0, puzzle_number: 1, sport: 'american', rounds: [] },
@@ -66,16 +66,16 @@ describe('submitScore', () => {
 });
 
 describe('fetchMyScore', () => {
-  it('fetches score for a given date with auth', async () => {
+  it('fetches the first matching score for a given date with auth', async () => {
     document.cookie = 'cp_access_token=tok123';
     mockFetch.mockResolvedValueOnce({
       ok: true,
       status: 200,
-      json: async () => ({
+      json: async () => ([{
         scores: 820,
         metadata: { total_time: 95, puzzle_number: 1, sport: 'american', rounds: [] },
-        created_at: '2026-06-12T12:00:00Z',
-      }),
+        created: '2026-06-12T12:00:00Z',
+      }]),
     });
 
     const { fetchMyScore } = await import('./api');
@@ -83,7 +83,7 @@ describe('fetchMyScore', () => {
 
     expect(result?.scores).toBe(820);
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('/playhub/scores/?game_type=rewind&game_mode=rewind_nba&date=2026-06-12'),
+      expect.stringContaining('/playhub/scores/?game_type=REWIND&game_mode=rewind_nba&date=2026-06-12'),
       expect.objectContaining({
         headers: expect.objectContaining({ Authorization: 'Token tok123' }),
       }),
@@ -114,14 +114,14 @@ describe('fetchLeaderboardApi', () => {
     document.cookie = 'cp_access_token=tok123';
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ results: [{ rank: 1, username: 'Mike', score: 950, time_ms: 80000, is_current_user: false }], current_user: null }),
+      json: async () => ({ top_20: [{ rank: 1, username: 'Mike', score: 950, time: 80000 }], me: null }),
     });
 
     const { fetchLeaderboardApi } = await import('./api');
     await fetchLeaderboardApi('2026-06-12');
 
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('/playhub/leaderboard/daily/scores/?game_type=rewind&game_mode=rewind_nba&date=2026-06-12'),
+      expect.stringContaining('/playhub/leaderboard/daily/scores/?game_type=REWIND&game_mode=rewind_nba&date=2026-06-12'),
       expect.objectContaining({
         headers: expect.objectContaining({ Authorization: 'Token tok123' }),
       }),
@@ -130,7 +130,7 @@ describe('fetchLeaderboardApi', () => {
 
   it('passes group_id when provided', async () => {
     document.cookie = 'cp_access_token=tok123';
-    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ results: [], current_user: null }) });
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ top_20: [], me: null }) });
 
     const { fetchLeaderboardApi } = await import('./api');
     await fetchLeaderboardApi('2026-06-12', 42);
@@ -148,6 +148,7 @@ describe('flushPendingScore', () => {
     const { flushPendingScore, PENDING_SCORE_KEY } = await import('./api');
     localStorage.setItem(PENDING_SCORE_KEY, JSON.stringify({
       game_type: 'rewind',
+      game_type: 'REWIND',
       game_mode: 'rewind_nba',
       scores: 500,
       metadata: { total_time: 60, puzzle_number: 1, sport: 'american', rounds: [] },
@@ -175,6 +176,7 @@ describe('flushPendingScore', () => {
     const { flushPendingScore, PENDING_SCORE_KEY } = await import('./api');
     localStorage.setItem(PENDING_SCORE_KEY, JSON.stringify({
       game_type: 'rewind',
+      game_type: 'REWIND',
       game_mode: 'rewind_nba',
       scores: 100,
       metadata: { total_time: 30, puzzle_number: 1, sport: 'american', rounds: [] },
@@ -192,6 +194,7 @@ describe('flushPendingScore', () => {
     const { flushPendingScore, PENDING_SCORE_KEY } = await import('./api');
     localStorage.setItem(PENDING_SCORE_KEY, JSON.stringify({
       game_type: 'rewind',
+      game_type: 'REWIND',
       game_mode: 'rewind_nba',
       scores: 100,
       metadata: { total_time: 30, puzzle_number: 1, sport: 'american', rounds: [] },
@@ -209,6 +212,7 @@ describe('flushPendingScore', () => {
     const { flushPendingScore, PENDING_SCORE_KEY } = await import('./api');
     localStorage.setItem(PENDING_SCORE_KEY, JSON.stringify({
       game_type: 'rewind',
+      game_type: 'REWIND',
       game_mode: 'rewind_nba',
       scores: 100,
       metadata: { total_time: 30, puzzle_number: 1, sport: 'american', rounds: [] },
