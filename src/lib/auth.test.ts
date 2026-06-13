@@ -123,27 +123,27 @@ describe('fetchProfile', () => {
   });
 });
 
-describe('loginWithEmail', () => {
-  let loginWithEmail: typeof import('./auth').loginWithEmail;
+describe('requestEmailCode', () => {
+  let requestEmailCode: typeof import('./auth').requestEmailCode;
 
   beforeEach(async () => {
     vi.resetModules();
     mockFetch.mockReset();
     const mod = await import('./auth');
-    loginWithEmail = mod.loginWithEmail;
+    requestEmailCode = mod.requestEmailCode;
   });
 
-  it('posts email and redirect URI as query params without app param', async () => {
+  it('posts email with app=true so the backend emails a code', async () => {
     mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({}) });
 
-    await loginWithEmail('user@example.com', 'https://app.com/?mode=auth&returnTo=groups');
+    await requestEmailCode('user@example.com');
 
     const calledUrl = (mockFetch.mock.calls[0] as [string, RequestInit])[0];
     const url = new URL(calledUrl);
     expect(url.pathname).toBe('/user/auth/email/');
     expect(url.searchParams.get('email')).toBe('user@example.com');
-    expect(url.searchParams.get('redirect_uri')).toBe('https://app.com/?mode=auth&returnTo=groups');
-    expect(url.searchParams.has('app')).toBe(false);
+    expect(url.searchParams.get('app')).toBe('true');
+    expect(url.searchParams.has('redirect_uri')).toBe(true);
     expect((mockFetch.mock.calls[0] as [string, RequestInit])[1].method).toBe('POST');
   });
 
@@ -152,6 +152,42 @@ describe('loginWithEmail', () => {
       ok: false, status: 400,
       json: async () => ({ detail: 'Invalid email' }),
     });
-    await expect(loginWithEmail('bad', 'https://app.com')).rejects.toThrow('Invalid email');
+    await expect(requestEmailCode('bad')).rejects.toThrow('Invalid email');
+  });
+});
+
+describe('validateEmailCode', () => {
+  let validateEmailCode: typeof import('./auth').validateEmailCode;
+
+  beforeEach(async () => {
+    vi.resetModules();
+    mockFetch.mockReset();
+    const mod = await import('./auth');
+    validateEmailCode = mod.validateEmailCode;
+  });
+
+  it('posts email and code, returning the authenticated user', async () => {
+    const fakeUser = {
+      id: 1, objectId: 'abc', username: 'testuser', email: 'user@example.com',
+      firstName: 'Test', lastName: 'User', accessToken: 'tok_456',
+      avatarUrl: null, thumbnailUrl: null,
+    };
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => fakeUser });
+
+    const user = await validateEmailCode('user@example.com', '123456');
+
+    const [calledUrl, init] = mockFetch.mock.calls[0] as [string, RequestInit];
+    expect(new URL(calledUrl).pathname).toBe('/user/email/validate/');
+    expect(init.method).toBe('POST');
+    expect(JSON.parse(init.body as string)).toEqual({ email: 'user@example.com', code: '123456' });
+    expect(user.accessToken).toBe('tok_456');
+  });
+
+  it('throws on non-ok response', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false, status: 400,
+      json: async () => ({ detail: 'Invalid code' }),
+    });
+    await expect(validateEmailCode('user@example.com', '000000')).rejects.toThrow('Invalid code');
   });
 });

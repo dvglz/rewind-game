@@ -1,0 +1,43 @@
+.group {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: center;
+  width: 100%;
+}
+
+.cell {
+  width: 44px;
+  height: 56px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--color-text);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  outline: none;
+  transition: border-color 0.15s ease;
+  -moz-appearance: textfield;
+}
+
+.cell::-webkit-outer-spin-button,
+.cell::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.cell:focus {
+  border-color: var(--color-text);
+}
+
+.cell:disabled {
+  opacity: 0.55;
+}
+
+@media (max-width: 360px) {
+  .cell {
+    width: 38px;
+    height: 50px;
+    font-size: 20px;
+  }
+}

@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useGoogleSignIn } from '../hooks/useGoogleSignIn';
-import { loginWithGoogle, loginWithEmail } from '../lib/auth';
+import { loginWithGoogle, requestEmailCode, validateEmailCode } from '../lib/auth';
 import { ArrowLeft } from '../components/icons';
 import { Toast } from '../components/Toast';
+import { OtpInput } from '../components/OtpInput';
 import styles from './AuthScreen.module.css';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const CODE_LENGTH = 6;
 
 interface AuthScreenProps {
   onBack: () => void;
@@ -16,9 +18,11 @@ interface AuthScreenProps {
 }
 
 export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage }: AuthScreenProps) {
+  void returnTo; // navigation state is handled by the caller via onSuccess
   const { setUser } = useAuth();
   const [email, setEmail] = useState('');
-  const [emailSent, setEmailSent] = useState(false);
+  const [step, setStep] = useState<'email' | 'code'>('email');
+  const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState('');
 
@@ -48,27 +52,60 @@ export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage }: Auth
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!isValidEmail) return;
     setLoading(true);
     try {
-      // Preserve current query params (invite, returnTo) through the magic link redirect
-      const currentParams = new URLSearchParams(window.location.search);
-      currentParams.set('mode', 'auth');
-      if (returnTo) currentParams.set('returnTo', returnTo);
-      const redirectUri = `${window.location.origin}/?${currentParams.toString()}`;
-      await loginWithEmail(email.trim(), redirectUri);
-      setEmailSent(true);
+      await requestEmailCode(email.trim());
+      setCode('');
+      setStep('code');
     } catch (err) {
-      showToast(err instanceof Error ? err.message : 'Failed to send link');
+      showToast(err instanceof Error ? err.message : 'Failed to send code');
     } finally {
       setLoading(false);
     }
   };
 
+  const submitCode = async (fullCode: string) => {
+    setLoading(true);
+    try {
+      const user = await validateEmailCode(email.trim(), fullCode);
+      setUser(user);
+      onSuccess();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Invalid code');
+      setCode('');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setLoading(true);
+    try {
+      await requestEmailCode(email.trim());
+      setCode('');
+      showToast('New code sent');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to resend code');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const backToEmail = () => {
+    setStep('email');
+    setCode('');
+  };
+
   return (
     <div className={styles.screen}>
       <div className={styles.topBar}>
-        <button className={styles.backButton} onClick={onBack} type="button" aria-label="Back">
+        <button
+          className={styles.backButton}
+          onClick={step === 'code' ? backToEmail : onBack}
+          type="button"
+          aria-label="Back"
+        >
           <ArrowLeft />
         </button>
         <span className={styles.wordmark}>REWIND</span>
@@ -76,19 +113,39 @@ export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage }: Auth
       </div>
 
       <div className={styles.content}>
-        {emailSent ? (
-          <div className={styles.emailSent}>
-            <span className={styles.emailSentTitle}>Check your email</span>
-            <p className={styles.emailSentMessage}>
-              We sent a sign-in link to <strong>{email}</strong>
+        {step === 'code' ? (
+          <div className={styles.codeStep}>
+            <h1 className={styles.heading}>Enter code</h1>
+            <p className={styles.subtitle}>
+              We sent a {CODE_LENGTH}-digit code to <strong>{email}</strong>
             </p>
+
+            <OtpInput
+              length={CODE_LENGTH}
+              value={code}
+              onChange={setCode}
+              onComplete={submitCode}
+              disabled={loading}
+              autoFocus
+            />
+
             <button
-              className={styles.resendButton}
-              onClick={() => setEmailSent(false)}
+              className={styles.sendButton}
               type="button"
+              disabled={loading || code.length !== CODE_LENGTH}
+              onClick={() => submitCode(code)}
             >
-              Use a different email
+              {loading ? 'Verifying…' : 'Verify'}
             </button>
+
+            <div className={styles.codeActions}>
+              <button className={styles.resendButton} onClick={handleResend} type="button" disabled={loading}>
+                Resend code
+              </button>
+              <button className={styles.resendButton} onClick={backToEmail} type="button">
+                Use a different email
+              </button>
+            </div>
           </div>
         ) : (
           <>
@@ -118,7 +175,7 @@ export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage }: Auth
                   type="submit"
                   disabled={loading || !isValidEmail}
                 >
-                  {loading ? 'Sending…' : 'Send Link'}
+                  {loading ? 'Sending…' : 'Get Code'}
                 </button>
               </form>
             </div>

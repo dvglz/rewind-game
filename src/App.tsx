@@ -7,13 +7,13 @@ import { ResultsScreen } from './screens/ResultsScreen';
 import { GroupsScreen } from './screens/GroupsScreen';
 import { LeaderboardScreen } from './screens/LeaderboardScreen';
 import { AuthScreen } from './screens/AuthScreen';
+import { Toast } from './components/Toast';
 import { clearGameState, loadGameState, pruneOldGameStates } from './engine/storage';
 import { beginPuzzleSession, getDateOverride, getSport, getTodaysPuzzle } from './data/puzzles';
 import { useWebHaptics } from 'web-haptics/react';
 import { initHaptics } from './lib/haptics';
 import { hidesCompletedGameLock, shouldEnableHapticsDebug } from './lib/testMode';
 import { useThemePreference } from './hooks/useThemePreference';
-import { setAccessToken } from './lib/auth';
 import { fetchMyScore, flushPendingScore } from './lib/api';
 import './styles/global.css';
 
@@ -34,6 +34,7 @@ function AppInner() {
   const [remoteCompleted, setRemoteCompleted] = useState(false);
   const [_remoteLoading, setRemoteLoading] = useState(false);
   void _remoteLoading; // TODO: use for loading indicator
+  const [authToast, setAuthToast] = useState('');
 
   useEffect(() => {
     initHaptics(trigger);
@@ -76,20 +77,6 @@ function AppInner() {
       cancelled = true;
     };
   }, [isAuthenticated]);
-
-  // Handle email magic-link callback: extract token from URL
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('token');
-    if (token) {
-      setAccessToken(token);
-      // Strip sensitive params, keep mode for navigation
-      params.delete('token');
-      params.delete('email');
-      const nextSearch = params.toString();
-      window.location.replace(nextSearch ? `/?${nextSearch}` : '/');
-    }
-  }, []);
 
   const [pendingInvite, setPendingInvite] = useState<string | null>(() => {
     const params = new URLSearchParams(window.location.search);
@@ -158,11 +145,17 @@ function AppInner() {
     return params.get('returnTo');
   };
 
+  const showAuthToast = () => {
+    setAuthToast("You're signed in");
+    setTimeout(() => setAuthToast(''), 3000);
+  };
+
   const handleAuthSuccess = async () => {
     await flushPendingScore().catch(() => {});
 
     if (pendingInvite) {
       navigate('groups');
+      showAuthToast();
       return;
     }
     const returnTo = getReturnTo();
@@ -171,6 +164,7 @@ function AppInner() {
     } else {
       navigate('home');
     }
+    showAuthToast();
   };
 
   return (
@@ -254,6 +248,7 @@ function AppInner() {
           contextMessage={pendingInvite ? "You'll join a group right after signing in" : undefined}
         />
       )}
+      {authToast && <Toast message={authToast} />}
     </>
   );
 }

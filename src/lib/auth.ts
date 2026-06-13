@@ -66,13 +66,32 @@ export async function loginWithGoogle(credential: string): Promise<AuthUser> {
   return res.json();
 }
 
-export async function loginWithEmail(email: string, redirectUri: string): Promise<void> {
-  const params = new URLSearchParams({ email, redirect_uri: redirectUri });
+/**
+ * Request a 6-digit sign-in code by email. `app=true` tells the backend to
+ * email a code instead of a magic link, so there is no redirect dance.
+ */
+export async function requestEmailCode(email: string): Promise<void> {
+  const params = new URLSearchParams({
+    email,
+    redirect_uri: window.location.origin,
+    app: 'true',
+  });
   const res = await fetch(`${BASE_URL}/user/auth/email/?${params.toString()}`, {
     method: 'POST',
     headers: authHeaders(),
   });
   if (!res.ok) throw new Error(await parseError(res));
+}
+
+/** Exchange the emailed code for an authenticated user (includes accessToken). */
+export async function validateEmailCode(email: string, code: string): Promise<AuthUser> {
+  const res = await fetch(`${BASE_URL}/user/email/validate/`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ email, code }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return res.json();
 }
 
 export async function fetchProfile(): Promise<AuthUser | null> {
