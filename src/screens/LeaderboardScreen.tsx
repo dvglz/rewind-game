@@ -5,6 +5,7 @@ import { LEADERBOARD_PAGE_LIMIT } from '../config/leaderboard';
 import { GroupLeaderboard } from '../components/GroupLeaderboard';
 import { DateSelector } from '../components/DateSelector';
 import { ArrowLeft } from '../components/icons';
+import { useAuth } from '../context/AuthContext';
 import type { GlobalLeaderboard, GroupLeaderboardEntry } from '../types';
 import styles from './LeaderboardScreen.module.css';
 
@@ -13,6 +14,7 @@ interface LeaderboardScreenProps {
 }
 
 export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
+  const { user: authUser } = useAuth();
   const [dayOffset, setDayOffset] = useState(0);
   const [board, setBoard] = useState<GlobalLeaderboard | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,7 +40,7 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
     board?.currentUser && board.currentUser.rank > LEADERBOARD_PAGE_LIMIT
       ? {
           rank: board.currentUser.rank,
-          displayName: board.currentUser.displayName,
+          displayName: authUser?.username ?? board.currentUser.displayName,
           score: board.currentUser.score,
           time: formatTime(board.currentUser.timeMs),
         }

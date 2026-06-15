@@ -182,7 +182,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
       : scoreByName.get(name);
 
     return {
-      displayName: isMe ? 'You' : name,
+      displayName: name,
       score: scoreEntry?.score ?? null,
       time: scoreEntry ? formatTime(scoreEntry.timeMs) : undefined,
       isCurrentUser: isMe,

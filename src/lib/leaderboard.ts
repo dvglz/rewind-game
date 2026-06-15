@@ -126,9 +126,14 @@ function mapRow(row: Record<string, unknown>, index: number, isCurrent: boolean)
 }
 
 function mapResponse(raw: LeaderboardApiResponse): GlobalLeaderboard {
+  // Identify the current user's in-page row by matching user_id against `me`,
+  // so their row gets the subtle highlight even when they rank inside top-20.
+  const meId = raw.me ? (raw.me as { user_id?: unknown }).user_id : undefined;
   const entries = (raw.top_20 ?? [])
     .slice(0, LEADERBOARD_PAGE_LIMIT)
-    .map((row, i) => mapRow(row, i, false));
+    .map((row, i) =>
+      mapRow(row, i, meId != null && (row as { user_id?: unknown }).user_id === meId),
+    );
 
   const currentUser = raw.me ? mapRow(raw.me, 0, true) : null;
   const date = raw.leaderboard?.start_date ?? dateForOffset(0);

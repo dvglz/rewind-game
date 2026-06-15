@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { expect, test, vi } from 'vitest';
 import { LeaderboardScreen } from './LeaderboardScreen';
+import { AuthProvider } from '../context/AuthContext';
 
 vi.mock('../lib/leaderboard', () => ({
   fetchLeaderboard: vi.fn(async () => ({
@@ -14,7 +15,11 @@ vi.mock('../lib/leaderboard', () => ({
 }));
 
 test('renders the title and a pinned row for an out-of-page user', async () => {
-  render(<LeaderboardScreen onBack={() => {}} />);
+  render(
+    <AuthProvider>
+      <LeaderboardScreen onBack={() => {}} />
+    </AuthProvider>,
+  );
 
   expect(await screen.findByRole('heading', { name: 'Leaderboard' })).not.toBeNull();
   // Pinned "You" row (rank 34 is outside the 2-row mock page).

@@ -93,6 +93,31 @@ describe('fetchLeaderboard (real response mapping)', () => {
     });
   });
 
+  test('flags the in-page row as the current user when user_id matches me', async () => {
+    vi.stubEnv('VITE_MOCK_API', 'false');
+    vi.stubEnv('VITE_BASE_URL', 'https://test.4taps.me');
+    vi.resetModules();
+    document.cookie = 'cp_access_token=tok123';
+
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        leaderboard: { id: 11, start_date: '2026-06-12', end_date: '2026-06-12', previous_leaderboard_id: 10 },
+        top_20: [
+          { place_scores: 1, username: 'Mike', scores: 950, user_id: 111 },
+          { place_scores: 2, username: 'Allies', scores: 870, user_id: 222 },
+        ],
+        me: { place_scores: 2, username: 'Allies', scores: 870, user_id: 222 },
+      }),
+    });
+
+    const { fetchLeaderboard: fetchRealLeaderboard } = await import('./leaderboard');
+    const board = await fetchRealLeaderboard(0);
+
+    expect(board.entries[0].isCurrentUser).toBe(false);
+    expect(board.entries[1]).toMatchObject({ displayName: 'Allies', isCurrentUser: true });
+  });
+
   test('uses previous_leaderboard_id chain for dayOffset>0', async () => {
     vi.stubEnv('VITE_MOCK_API', 'false');
     vi.stubEnv('VITE_BASE_URL', 'https://test.4taps.me');
