@@ -2,6 +2,8 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
+const publicAppUrl = (process.env.VITE_PUBLIC_APP_URL || 'https://clutchpoints-rewind-test.4taps.me').replace(/\/+$/, '');
+
 const previewAllowedHosts = [
   'rewind-game-dqkul.ondigitalocean.app',
   'clutchpoints-rewind-test.4taps.me',
@@ -15,7 +17,15 @@ const previewAllowedHosts = [
 
 export default defineConfig(() => ({
   base: process.env.VITE_BASE_PATH || '/',
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: 'rewind-public-app-url',
+      transformIndexHtml(html) {
+        return html.replaceAll('__PUBLIC_APP_URL__', publicAppUrl);
+      },
+    },
+  ],
   preview: {
     allowedHosts: previewAllowedHosts,
   },
