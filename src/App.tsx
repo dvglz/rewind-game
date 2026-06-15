@@ -42,12 +42,6 @@ function AppInner() {
   }, [trigger]);
 
   useEffect(() => {
-    initAnalytics();
-    trackPageView(screen);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
     const puzzle = getTodaysPuzzle(getSport());
     pruneOldGameStates(puzzle.id);
   }, []);
@@ -119,6 +113,12 @@ function AppInner() {
     }
     return 'home';
   });
+
+  useEffect(() => {
+    initAnalytics();
+    trackPageView(screen);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const navigate = (s: Screen) => {
     setScreen(s);
