@@ -38,7 +38,7 @@
 .score {
   position: relative;
   font-family: var(--font-display);
-  font-size: 64px;
+  font-size: 52px;
   line-height: 1;
   text-align: center;
 }

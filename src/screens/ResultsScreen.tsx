@@ -191,7 +191,6 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }
       </div>
       {showMotivational && <Toast message={motivationalLabel} />}
       {shareState === 'copied' && <Toast message="Copied to clipboard" />}
-      {shareState === 'failed' && <Toast message="Copy failed" variant="error" />}
     </div>
   );
 }
