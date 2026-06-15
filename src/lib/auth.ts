@@ -2,6 +2,8 @@ import type { AuthUser } from '../types/auth';
 
 const BASE_URL = (import.meta.env.VITE_BASE_URL as string) ?? '';
 const COOKIE_NAME = 'cp_access_token';
+const LEGACY_COOKIE_NAME = 'sbc_access_token';
+const COOKIE_NAMES = [COOKIE_NAME, LEGACY_COOKIE_NAME] as const;
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
 /** Extract root domain (e.g. "4taps.me" from "clutchpoints-rewind-test.4taps.me"). */
@@ -30,8 +32,10 @@ export function getAccessToken(): string | null {
   const cookies = document.cookie.split(';').map((c) => c.trim());
   for (let i = cookies.length - 1; i >= 0; i -= 1) {
     const cookie = cookies[i];
-    if (cookie.startsWith(`${COOKIE_NAME}=`)) {
-      return cookie.slice(COOKIE_NAME.length + 1);
+    for (const name of COOKIE_NAMES) {
+      if (cookie.startsWith(`${name}=`)) {
+        return cookie.slice(name.length + 1);
+      }
     }
   }
   return null;
@@ -42,8 +46,10 @@ export function setAccessToken(token: string): void {
 }
 
 export function clearAccessToken(): void {
-  document.cookie = `${COOKIE_NAME}=; ${cookieOptions(0)}`;
-  document.cookie = `${COOKIE_NAME}=; ${hostOnlyCookieOptions(0)}`;
+  for (const name of COOKIE_NAMES) {
+    document.cookie = `${name}=; ${cookieOptions(0)}`;
+    document.cookie = `${name}=; ${hostOnlyCookieOptions(0)}`;
+  }
 }
 
 // ── API calls ─────────────────────────────────────────────

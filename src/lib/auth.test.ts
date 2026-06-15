@@ -62,6 +62,8 @@ describe('cookie helpers', () => {
       clearAccessToken();
 
       expect(writes.length).toBeGreaterThan(1);
+      expect(writes.some((value) => value.startsWith('cp_access_token='))).toBe(true);
+      expect(writes.some((value) => value.startsWith('sbc_access_token='))).toBe(true);
       expect(writes.some((value) => !value.includes('domain='))).toBe(true);
     } finally {
       if (original) {
