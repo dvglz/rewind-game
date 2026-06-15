@@ -13,59 +13,59 @@ interface RawEvent {
 const AMERICAN_SPORTS_DAYS: RawEvent[][] = [
   // Day 1
   [
-    { id: "evt_lebron_drafted", title: "LeBron is drafted first overall by Cleveland", date: "2003-06-26", reveal: "In 2003, Cleveland selected LeBron straight out of high school as the most hyped prospect in decades." },
-    { id: "evt_brady_first_sb", title: "Brady and the Patriots win their first Super Bowl", date: "2002-02-03", reveal: "In 2002, New England upset the Rams to launch one of the greatest dynasties in sports." },
-    { id: "evt_kobe_81", title: "Kobe scores 81 against the Raptors", date: "2006-01-22", reveal: "In 2006, Kobe's 81 against Toronto became the second-highest single-game scoring performance in NBA history." },
-    { id: "evt_red_sox_3_0", title: "The Red Sox come back from 3–0 down against the Yankees in the ALCS", date: "2004-10-20", reveal: "In 2004, Boston became the first MLB team to overcome a 3–0 deficit, then swept the Cardinals to break the Curse." },
-    { id: "evt_we_believe", title: "The \"We Believe\" Warriors upset the #1 seed Mavericks", date: "2007-05-03", reveal: "In 2007, Golden State became only the second 8-seed to win a first-round series in NBA history." },
+    { id: "evt_lebron_drafted", title: "LeBron is drafted first overall by Cleveland", date: "2003-06-26", reveal: "In 2003, Cleveland selected LeBron straight out of high school as the NBA’s next superstar." },
+    { id: "evt_brady_first_sb", title: "Brady and the Patriots win their first Super Bowl", date: "2002-02-03", reveal: "In 2002, New England upset the Rams and launched the Brady-Belichick dynasty." },
+    { id: "evt_rose_youngest_mvp", title: "Derrick Rose becomes the youngest MVP in NBA history", date: "2011-05-03", reveal: "In 2011, Rose won MVP at 22, still the youngest winner in NBA history." },
+    { id: "evt_red_sox_3_0", title: "The Red Sox come back from 3–0 down against the Yankees", date: "2004-10-20", reveal: "In 2004, Boston became the first MLB team to erase a 3–0 series deficit." },
+    { id: "evt_nova_knicks_ncaa", title: "Brunson, Hart and Bridges win their first title together", date: "2016-04-04", reveal: "The Knicks’ Nova trio first won together at Villanova, taking the 2016 NCAA title." },
   ],
   // Day 2
   [
     { id: "evt_jordan_last_shot", title: "Jordan hits his last shot as a Bull to win the Finals", date: "1998-06-14", reveal: "In 1998, Jordan's jumper over Bryon Russell sealed Chicago's sixth title in eight years." },
-    { id: "evt_cubs_ws", title: "The Cubs win the World Series after 108 years", date: "2016-11-02", reveal: "In 2016, Chicago beat Cleveland in a legendary Game 7 that went to extra innings." },
-    { id: "evt_giants_upset_pats", title: "Eli Manning's Giants upset the undefeated Patriots in the Super Bowl", date: "2008-02-03", reveal: "In 2008, the Giants ruined New England's 18–0 run behind the Helmet Catch and Manning's late drive." },
-    { id: "evt_umbc_upset", title: "UMBC becomes the first 16-seed to beat a 1-seed in March Madness", date: "2018-03-16", reveal: "In 2018, UMBC destroyed Virginia 74–54 in the first 16-over-1 upset in tournament history." },
-    { id: "evt_caps_first_cup", title: "Ovechkin and the Capitals win their first Stanley Cup", date: "2018-06-07", reveal: "In 2018, Ovechkin finally broke through after years of playoff heartbreak, beating Vegas in the Finals." },
+    { id: "evt_eagles_first_sb", title: "The Eagles win their first Super Bowl with the Philly Special", date: "2018-02-04", reveal: "In 2018, Nick Foles caught the Philly Special TD and outdueled Tom Brady." },
+    { id: "evt_vince_dunk_contest", title: "Vince Carter takes over the Slam Dunk Contest", date: "2000-02-12", reveal: "In 2000, Vince delivered the most iconic dunk contest ever, including the elbow dunk." },
+    { id: "evt_cubs_ws", title: "The Cubs win the World Series after 108 years", date: "2016-11-02", reveal: "In 2016, Chicago beat Cleveland in a legendary extra-innings Game 7." },
+    { id: "evt_ray_allen_game6", title: "Ray Allen hits the corner three to save Miami in Game 6", date: "2013-06-18", reveal: "In 2013, Ray Allen’s corner three forced overtime and saved Miami in Game 6." },
   ],
   // Day 3
   [
-    { id: "evt_the_decision", title: "LeBron announces The Decision on live TV", date: "2010-07-08", reveal: "In 2010, LeBron left Cleveland to join Wade and Bosh in Miami, changing the NBA landscape." },
-    { id: "evt_manning_last_sb", title: "Peyton Manning wins the Super Bowl in his final game", date: "2016-02-07", reveal: "In 2016, Denver's defense carried Manning to his second ring before he retired." },
-    { id: "evt_jeter_walkoff", title: "Jeter plays his last game at Yankee Stadium with a walk-off single", date: "2014-09-25", reveal: "In 2014, Jeter singled in the winning run in the 9th of his final home game, a storybook ending." },
-    { id: "evt_kawhi_bounce", title: "Kawhi hits the bouncing Game 7 buzzer-beater against Philly", date: "2019-05-12", reveal: "In 2019, Kawhi's shot bounced four times on the rim before falling to send Toronto past Philadelphia." },
-    { id: "evt_fab_five", title: "The Fab Five freshmen take Michigan to the NCAA championship game", date: "1993-04-05", reveal: "In 1993, Michigan's all-freshman starting lineup changed college basketball culture — their baggy shorts and swagger influenced a generation." },
+    { id: "evt_kawhi_bounce", title: "Kawhi’s shot bounces in to beat Philly in Game 7", date: "2019-05-12", reveal: "In 2019, Kawhi’s shot bounced four times before sending Toronto past Philly." },
+    { id: "evt_the_decision", title: "LeBron announces The Decision on live TV", date: "2010-07-08", reveal: "In 2010, LeBron left Cleveland to join Wade and Bosh in Miami." },
+    { id: "evt_curry_3pt_record", title: "Curry breaks the all-time three-point record at MSG", date: "2021-12-14", reveal: "In 2021, Curry passed Ray Allen’s career record on the road in New York." },
+    { id: "evt_manning_last_sb", title: "Peyton Manning wins the Super Bowl in his final game", date: "2016-02-07", reveal: "In 2016, Denver’s defense carried Manning to his second ring before retirement." },
+    { id: "evt_iverson_stepover", title: "Iverson drops 48 and creates the iconic step-over Finals image", date: "2001-06-06", reveal: "In 2001, Iverson stunned the Lakers in Game 1 and stepped over Tyronn Lue." },
   ],
   // Day 4
   [
-    { id: "evt_warriors_first_title", title: "Curry and the Warriors win their first title together", date: "2015-06-16", reveal: "In 2015, Golden State beat Cleveland to launch the Warriors dynasty." },
-    { id: "evt_mahomes_first_sb", title: "Mahomes wins his first Super Bowl with the Chiefs", date: "2020-02-02", reveal: "In 2020, Kansas City came back from 10 down in the fourth quarter to beat San Francisco." },
-    { id: "evt_cavs_3_1_comeback", title: "The Cavs come back from 3–1 to beat the Warriors in the Finals", date: "2016-06-19", reveal: "In 2016, LeBron's block and Kyrie's three in Game 7 completed the greatest Finals comeback." },
-    { id: "evt_marlins_upset_yankees", title: "The wild card Marlins upset the Yankees in the World Series", date: "2003-10-25", reveal: "In 2003, Florida shocked New York behind 23-year-old Josh Beckett's dominant pitching." },
-    { id: "evt_golden_knights_finals", title: "The Golden Knights reach the Cup Finals in their first ever season", date: "2018-05-28", reveal: "In 2018, Vegas made one of the most improbable expansion-team runs in sports history." },
+    { id: "evt_kobe_drafted", title: "Kobe is drafted by Charlotte before being traded to the Lakers", date: "1996-06-26", reveal: "In 1996, Charlotte took Kobe at No. 13 before sending him to Los Angeles." },
+    { id: "evt_mahomes_first_sb", title: "Mahomes wins his first Super Bowl with the Chiefs", date: "2020-02-02", reveal: "In 2020, Kansas City came back late to beat San Francisco." },
+    { id: "evt_kd_joins_warriors", title: "Kevin Durant joins the Warriors in free agency", date: "2016-07-04", reveal: "In 2016, Durant’s move to Golden State reshaped the NBA." },
+    { id: "evt_giannis_50_title", title: "Giannis drops 50 to win the Bucks their first title in 50 years", date: "2021-07-20", reveal: "In 2021, Giannis scored 50 in Game 6 to end Milwaukee’s title drought." },
+    { id: "evt_phil_lakers_hired", title: "Phil Jackson takes over the Lakers before the three-peat", date: "1999-06-16", reveal: "In 1999, the Lakers hired Phil Jackson before winning three straight titles." },
   ],
   // Day 5
   [
-    { id: "evt_kd_joins_warriors", title: "Kevin Durant joins the Warriors in free agency", date: "2016-07-04", reveal: "In 2016, Durant's July 4th move to Golden State instantly reshuffled the NBA's balance of power." },
-    { id: "evt_eagles_first_sb", title: "The Eagles win their first Super Bowl with the Philly Special", date: "2018-02-04", reveal: "In 2018, backup QB Nick Foles caught a touchdown and outdueled Tom Brady." },
-    { id: "evt_vince_dunk_contest", title: "Vince Carter takes over the Slam Dunk Contest", date: "2000-02-12", reveal: "In 2000, Vince delivered the most iconic dunk contest ever, including the elbow dunk." },
-    { id: "evt_villanova_buzzer", title: "Villanova wins on a buzzer-beater three by Kris Jenkins", date: "2016-04-04", reveal: "In 2016, Jenkins hit a deep three at the buzzer to beat UNC in one of the greatest title game endings." },
-    { id: "evt_judge_62", title: "Aaron Judge hits 62 homers breaking the AL single-season record", date: "2022-10-04", reveal: "In 2022, Judge passed Roger Maris's 61-year-old American League record." },
+    { id: "evt_lebron_scoring_record", title: "LeBron passes Kareem as the all-time scoring leader", date: "2023-02-07", reveal: "In 2023, LeBron became the NBA’s all-time scoring leader in LA." },
+    { id: "evt_giants_upset_pats", title: "Eli Manning’s Giants end the Patriots’ 18-0 run in the Super Bowl", date: "2008-02-03", reveal: "In 2008, the Giants ruined New England’s perfect 18-0 season." },
+    { id: "evt_linsanity", title: "Linsanity takes over New York", date: "2012-02-04", reveal: "In 2012, Jeremy Lin went from benchwarmer to Knicks sensation." },
+    { id: "evt_judge_62", title: "Aaron Judge hits 62 homers breaking the AL single-season record", date: "2022-10-04", reveal: "In 2022, Judge broke Roger Maris’s American League home run record." },
+    { id: "evt_dirk_upsets_heat", title: "The Mavs spoil Miami’s first Big Three Finals run", date: "2011-06-12", reveal: "In 2011, Dallas beat Miami’s new superteam in Dirk’s title run." },
   ],
   // Day 6
   [
     { id: "evt_ohtani_dodgers", title: "Ohtani signs the richest contract in sports history with the Dodgers", date: "2023-12-09", reveal: "In 2023, Ohtani's 10-year, $700 million deal became the largest in professional sports." },
     { id: "evt_brady_tampa", title: "Brady leaves the Patriots and signs with Tampa Bay", date: "2020-03-20", reveal: "In 2020, Brady ended his 20-year New England era, then won the Super Bowl with Tampa in year one." },
-    { id: "evt_giannis_50_title", title: "Giannis drops 50 in the clincher to win Milwaukee's first title in 50 years", date: "2021-07-20", reveal: "In 2021, Giannis dominated Game 6 against Phoenix to end Milwaukee's championship drought." },
-    { id: "evt_miracle_on_ice", title: "The Miracle on Ice — US hockey beats the Soviets at the Olympics", date: "1980-02-22", reveal: "In 1980, a team of American college players stunned the four-time defending gold medalists in Lake Placid." },
+    { id: "evt_harden_rockets_trade", title: "James Harden is traded to the Rockets", date: "2012-10-27", reveal: "In 2012, Oklahoma City sent Harden to Houston, changing his career and the West." },
+    { id: "evt_malice_palace", title: "The Malice at the Palace turns an NBA game into chaos", date: "2004-11-19", reveal: "In 2004, the Pacers-Pistons brawl became the NBA’s most infamous fight." },
     { id: "evt_ripken_streak", title: "Ripken plays his 2,131st straight game, breaking Gehrig's record", date: "1995-09-06", reveal: "In 1995, Ripken's consecutive games streak became one of baseball's most celebrated achievements." },
   ],
   // Day 7
   [
     { id: "evt_shaq_kobe_first", title: "Shaq and Kobe win their first title together", date: "2000-06-19", reveal: "In 2000, Los Angeles beat Indiana to start the Lakers' three-peat run." },
     { id: "evt_dream_team", title: "The Dream Team wins Olympic gold in Barcelona", date: "1992-08-08", reveal: "In 1992, the first US team with NBA players dominated the Olympics and changed basketball globally." },
-    { id: "evt_rose_mvp", title: "Derrick Rose becomes the youngest MVP at age 22", date: "2011-05-03", reveal: "In 2011, Rose led Chicago to the league's best record before injuries changed his career trajectory." },
+    { id: "evt_tmac_13_35", title: "T-Mac scores 13 points in 35 seconds", date: "2004-12-09", reveal: "In 2004, McGrady stunned the Spurs with one of the wildest NBA comebacks ever." },
     { id: "evt_saints_first_sb", title: "The Saints win their first Super Bowl four years after Katrina", date: "2010-02-07", reveal: "In 2010, New Orleans' first championship became a symbol of the city's recovery." },
-    { id: "evt_valvano_nc_state", title: "Valvano runs around looking for someone to hug after NC State upsets Houston", date: "1983-04-04", reveal: "In 1983, Lorenzo Charles dunked the buzzer-beater and Valvano's celebration became an iconic sports image." },
+    { id: "evt_magic_center_finals", title: "Rookie Magic starts at center and wins Finals MVP", date: "1980-05-16", reveal: "In 1980, Magic started at center in Game 6 and led the Lakers to the title." },
   ],
   // Day 8
   [
@@ -77,19 +77,19 @@ const AMERICAN_SPORTS_DAYS: RawEvent[][] = [
   ],
   // Day 9
   [
-    { id: "evt_lebron_scoring_record", title: "LeBron passes Kareem as the all-time scoring leader", date: "2023-02-07", reveal: "In 2023, LeBron passed Kareem Abdul-Jabbar with a mid-range jumper in front of a home crowd in LA." },
-    { id: "evt_astros_first_ws", title: "The Astros win their first World Series", date: "2017-11-01", reveal: "In 2017, Houston beat the Dodgers in seven games — the title was later clouded by the sign-stealing scandal." },
-    { id: "evt_linsanity", title: "Linsanity takes over New York", date: "2012-02-04", reveal: "In 2012, Jeremy Lin went from undrafted benchwarmer to Knicks sensation in one of the wildest stretches in NBA history." },
-    { id: "evt_seahawks_demolish_broncos", title: "The Seahawks demolish the Broncos 43–8 in the Super Bowl", date: "2014-02-02", reveal: "In 2014, Seattle's Legion of Boom defense dominated Peyton Manning in one of the most lopsided Super Bowls ever." },
-    { id: "evt_curry_3pt_record", title: "Curry breaks the all-time three-point record at MSG", date: "2021-12-14", reveal: "In 2021, Curry passed Ray Allen's career record on the road in New York." },
+    { id: "evt_carmelo_62_msg", title: "Carmelo scores 62 at Madison Square Garden", date: "2014-01-24", reveal: "In 2014, Melo set the Knicks franchise scoring record under the MSG lights." },
+    { id: "evt_astros_first_ws", title: "The Astros win their first World Series", date: "2017-11-01", reveal: "In 2017, Houston beat the Dodgers before the title was later clouded by scandal." },
+    { id: "evt_luka_trae_trade", title: "Luka Doncic and Trae Young are swapped on draft night", date: "2018-06-21", reveal: "In 2018, Dallas traded up for Luka while Atlanta landed Trae Young." },
+    { id: "evt_seahawks_demolish_broncos", title: "The Seahawks demolish the Broncos 43-8 in the Super Bowl", date: "2014-02-02", reveal: "In 2014, Seattle’s defense dominated Peyton Manning in a blowout." },
+    { id: "evt_tim_duncan_drafted", title: "Tim Duncan goes first overall to the Spurs", date: "1997-06-25", reveal: "In 1997, San Antonio drafted Duncan and changed the franchise forever." },
   ],
   // Day 10
   [
     { id: "evt_wemby_drafted", title: "Wembanyama goes first overall to the Spurs", date: "2023-06-22", reveal: "In 2023, San Antonio selected the 7'4\" French phenom as the most anticipated prospect since LeBron." },
-    { id: "evt_ichiro_debut", title: "Ichiro wins ROY and MVP in his first MLB season", date: "2001-11-20", reveal: "In 2001, Ichiro became the first Japanese position player in MLB and immediately became a sensation in Seattle." },
-    { id: "evt_cabrera_triple_crown", title: "Cabrera wins the Triple Crown, the first since 1967", date: "2012-10-03", reveal: "In 2012, Cabrera led the AL in average, homers, and RBI — a feat not seen in 45 years." },
-    { id: "evt_dirk_upsets_heat", title: "Dirk and the Mavs upset LeBron's Heat in the Finals", date: "2011-06-12", reveal: "In 2011, Dallas knocked off Miami's new superteam in Dirk's defining championship run." },
-    { id: "evt_nationals_ws", title: "The Nationals win the World Series winning all four road games", date: "2019-10-30", reveal: "In 2019, Washington beat Houston with every game in the series won by the visiting team." },
+    { id: "evt_ichiro_debut", title: "Ichiro wins ROY and MVP in his first MLB season", date: "2001-11-20", reveal: "In 2001, Ichiro became an instant sensation in Seattle." },
+    { id: "evt_cabrera_triple_crown", title: "Cabrera wins the Triple Crown, the first since 1967", date: "2012-10-03", reveal: "In 2012, Cabrera led the AL in average, homers, and RBI." },
+    { id: "evt_carmelo_62_msg", title: "Carmelo scores 62 at Madison Square Garden", date: "2014-01-24", reveal: "In 2014, Melo set the Knicks franchise scoring record under the MSG lights." },
+    { id: "evt_redeem_team_gold", title: "The Redeem Team wins Olympic gold for USA Basketball", date: "2008-08-24", reveal: "In 2008, Team USA beat Spain to reclaim Olympic gold in Beijing." },
   ],
 ];
 
