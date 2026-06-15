@@ -38,6 +38,8 @@ const FOCUSABLE_SELECTOR = [
 ].join(',');
 
 function displayIdentity(email: string | null, name: string | null): string {
+  if (name) return name;
+
   if (email) {
     if (email.length <= MAX_TRUNCATED_EMAIL_LENGTH) return email;
 
@@ -50,15 +52,12 @@ function displayIdentity(email: string | null, name: string | null): string {
     return `${localPart}@${domain.slice(0, availableDomainLength)}…`;
   }
 
-  if (name) return name;
-
   return 'Signed in';
 }
 
 export function MenuOverlay({
   open,
   currentScreen,
-  hasInProgressGame,
   isAuthenticated,
   isAuthLoading = false,
   userEmail,
@@ -183,12 +182,10 @@ export function MenuOverlay({
     onSignOut();
   };
 
-  const isTodayResumeAction = currentScreen === 'home' && hasInProgressGame;
-  const isTodayActive = currentScreen === 'home' && !isTodayResumeAction;
   const isLeaderboardActive = currentScreen === 'leaderboard';
   const isGroupsActive = currentScreen === 'groups';
   const overlay = (
-    <div className={open ? styles.root : styles.rootClosing} data-theme-invert>
+    <div className={open ? styles.root : styles.rootClosing}>
       <div className={styles.surface} role="dialog" aria-modal="true" aria-label="Menu" ref={dialogRef}>
         <div className={styles.header}>
           <button
@@ -206,9 +203,7 @@ export function MenuOverlay({
           <button
             type="button"
             onClick={handleGameNavigation}
-            disabled={isTodayActive}
-            className={`${isTodayActive ? styles.navButtonCurrent : styles.navButton} ${styles.menuItem}`}
-            aria-current={isTodayActive ? 'page' : undefined}
+            className={`${styles.navButton} ${styles.menuItem}`}
             style={{ '--stagger-index': 0 } as CSSProperties}
           >
             Today's Game

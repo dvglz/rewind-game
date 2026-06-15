@@ -54,7 +54,7 @@
 .navButtonCurrent {
   font: inherit;
   font-family: var(--font-display);
-  font-size: clamp(1.6rem, 4vw, 2.25rem);
+  font-size: clamp(2rem, 7vw, 2.5rem);
   line-height: 1.05;
   letter-spacing: -0.03em;
   text-align: left;

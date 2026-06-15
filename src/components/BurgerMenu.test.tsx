@@ -47,20 +47,19 @@ describe('BurgerMenu', () => {
     expect(document.body.style.overflow).toBe('hidden');
   });
 
-  it("marks Today's Game as current and non-interactive when Home is the active destination", () => {
+  it("keeps Today's Game actionable on Home and routes to the game", () => {
     const props = createProps();
     render(<BurgerMenu {...props} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
 
-    const currentDestination = screen.getByRole('button', { name: "Today's Game" });
-    expect(currentDestination.hasAttribute('disabled')).toBe(true);
-    expect(currentDestination.getAttribute('aria-current')).toBe('page');
+    const todaysGame = screen.getByRole('button', { name: "Today's Game" });
+    expect(todaysGame.hasAttribute('disabled')).toBe(false);
+    expect(todaysGame.getAttribute('aria-current')).toBeNull();
 
-    fireEvent.click(currentDestination);
+    fireEvent.click(todaysGame);
 
-    expect(props.onNavigateHome).not.toHaveBeenCalled();
-    expect(props.onNavigateGame).not.toHaveBeenCalled();
+    expect(props.onNavigateGame).toHaveBeenCalledTimes(1);
   });
 
   it("keeps Today's Game actionable as a resume action on Home", () => {
@@ -139,6 +138,22 @@ describe('BurgerMenu', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
 
     expect(screen.getByText('Allies')).not.toBeNull();
+  });
+
+  it('prefers username over email when both are present', () => {
+    render(
+      <BurgerMenu
+        {...createProps()}
+        isAuthenticated={true}
+        userEmail="someone@example.com"
+        userName="Allies"
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
+
+    expect(screen.getByText('Allies')).not.toBeNull();
+    expect(screen.queryByText('someone@example.com')).toBeNull();
   });
 
   it('closes and routes to auth on sign in with returnTo set to the current screen', () => {

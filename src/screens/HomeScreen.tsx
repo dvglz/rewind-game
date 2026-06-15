@@ -7,6 +7,7 @@ import {
   type Sport,
 } from '../data/puzzles';
 import { BurgerMenu } from '../components/BurgerMenu';
+import { Toast } from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
 import styles from './HomeScreen.module.css';
 
@@ -37,6 +38,7 @@ export function HomeScreen({
   const currentSport = getSport();
   const [showDebugMenu, setShowDebugMenu] = useState(false);
   const [randomEnabled, setRandomEnabled] = useState(() => isRandomModeEnabled());
+  const [signOutToast, setSignOutToast] = useState(false);
 
   const sportOptions = useMemo(() => ['american', 'soccer'] as Sport[], []);
 
@@ -76,7 +78,12 @@ export function HomeScreen({
         onNavigateLeaderboard={onLeaderboard}
         onNavigateGroups={onGroups}
         onNavigateAuth={onNavigateAuth}
-        onSignOut={() => { signOut(); onSignOut(); }}
+        onSignOut={() => {
+          signOut();
+          onSignOut();
+          setSignOutToast(true);
+          setTimeout(() => setSignOutToast(false), 3000);
+        }}
       />
       <div className={styles.top}>
         <h1 className={styles.wordmark}>Rewind</h1>
@@ -138,6 +145,7 @@ export function HomeScreen({
           )}
         </>
       )}
+      {signOutToast && <Toast message="Signed Out" />}
     </div>
   );
 }
