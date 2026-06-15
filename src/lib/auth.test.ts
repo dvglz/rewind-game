@@ -31,6 +31,44 @@ describe('cookie helpers', () => {
     clearAccessToken();
     expect(getAccessToken()).toBeNull();
   });
+
+  it('prefers the last cp_access_token when duplicate cookies exist', () => {
+    const original = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie');
+    Object.defineProperty(document, 'cookie', {
+      configurable: true,
+      get: () => 'cp_access_token=old-user; foo=1; cp_access_token=new-user',
+      set: () => {},
+    });
+    try {
+      expect(getAccessToken()).toBe('new-user');
+    } finally {
+      if (original) {
+        Object.defineProperty(document, 'cookie', original);
+      }
+    }
+  });
+
+  it('clears both host-only and parent-domain token cookies', () => {
+    const original = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie');
+    const writes: string[] = [];
+    Object.defineProperty(document, 'cookie', {
+      configurable: true,
+      get: () => '',
+      set: (value: string) => {
+        writes.push(value);
+      },
+    });
+    try {
+      clearAccessToken();
+
+      expect(writes.length).toBeGreaterThan(1);
+      expect(writes.some((value) => !value.includes('domain='))).toBe(true);
+    } finally {
+      if (original) {
+        Object.defineProperty(document, 'cookie', original);
+      }
+    }
+  });
 });
 
 const mockFetch = vi.fn();

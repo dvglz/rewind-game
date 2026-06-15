@@ -19,11 +19,17 @@ function cookieOptions(maxAge: number): string {
   return `path=/${domainAttr}; max-age=${maxAge}; SameSite=None${secureAttr}`;
 }
 
+function hostOnlyCookieOptions(maxAge: number): string {
+  const secureAttr = window.location.protocol === 'https:' ? '; Secure' : '';
+  return `path=/; max-age=${maxAge}; SameSite=None${secureAttr}`;
+}
+
 // ── Cookie helpers ────────────────────────────────────────
 
 export function getAccessToken(): string | null {
   const cookies = document.cookie.split(';').map((c) => c.trim());
-  for (const cookie of cookies) {
+  for (let i = cookies.length - 1; i >= 0; i -= 1) {
+    const cookie = cookies[i];
     if (cookie.startsWith(`${COOKIE_NAME}=`)) {
       return cookie.slice(COOKIE_NAME.length + 1);
     }
@@ -37,6 +43,7 @@ export function setAccessToken(token: string): void {
 
 export function clearAccessToken(): void {
   document.cookie = `${COOKIE_NAME}=; ${cookieOptions(0)}`;
+  document.cookie = `${COOKIE_NAME}=; ${hostOnlyCookieOptions(0)}`;
 }
 
 // ── API calls ─────────────────────────────────────────────

@@ -48,12 +48,18 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }
 
   useEffect(() => {
     if (state?.completed) {
+      setRemoteState(null);
       setRemoteChecked(true);
       return;
     }
-    if (!isAuthenticated) return;
+    if (!isAuthenticated) {
+      setRemoteState(null);
+      setRemoteChecked(false);
+      return;
+    }
 
     let cancelled = false;
+    setRemoteState(null);
     setRemoteChecked(false);
 
     fetchMyScore(getDateOverride())
@@ -71,6 +77,8 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }
               score: round.score,
             })),
           });
+        } else {
+          setRemoteState(null);
         }
       })
       .catch(() => {})

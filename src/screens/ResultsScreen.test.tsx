@@ -113,3 +113,57 @@ test('falls back to backend score when local state is missing', async () => {
   expect(await screen.findByText('777')).not.toBeNull();
   expect(await screen.findByText('1m 23s')).not.toBeNull();
 });
+
+test('does not keep the previous user remote score after sign out and sign in as another user', async () => {
+  currentState = null;
+  const onHome = vi.fn();
+  mockAuthed = true;
+  fetchMyScore
+    .mockResolvedValueOnce({
+      scores: 777,
+      created_at: '2026-06-12T00:00:00Z',
+      metadata: {
+        total_time: 83,
+        puzzle_number: 1,
+        sport: 'american',
+        rounds: [
+          { event_text: 'Remote R1', guessed_year: 2010, actual_year: 2012, diff: -2, score: 82, tier: 'great' },
+        ],
+      },
+    })
+    .mockResolvedValueOnce(null);
+
+  const { rerender } = render(
+    <ResultsScreen
+      onHome={onHome}
+      onGroups={() => {}}
+      onLeaderboard={() => {}}
+      onRequireAuth={() => {}}
+    />
+  );
+
+  expect(await screen.findByText('777')).not.toBeNull();
+
+  mockAuthed = false;
+  rerender(
+    <ResultsScreen
+      onHome={onHome}
+      onGroups={() => {}}
+      onLeaderboard={() => {}}
+      onRequireAuth={() => {}}
+    />
+  );
+
+  mockAuthed = true;
+  rerender(
+    <ResultsScreen
+      onHome={onHome}
+      onGroups={() => {}}
+      onLeaderboard={() => {}}
+      onRequireAuth={() => {}}
+    />
+  );
+
+  expect(onHome).toHaveBeenCalled();
+  expect(screen.queryByText('777')).toBeNull();
+});
