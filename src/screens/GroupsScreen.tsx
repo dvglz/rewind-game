@@ -9,6 +9,7 @@ import { JoinGroupModal } from '../components/JoinGroupModal';
 import { ArrowLeft, Plus } from '../components/icons';
 import { Toast } from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
+import { track } from '../lib/analytics';
 import type { GlobalLeaderboard, PlayhubGroup, GroupLeaderboardEntry, GroupMember } from '../types';
 import styles from './GroupsScreen.module.css';
 
@@ -49,7 +50,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
     let cancelled = false;
     if (pendingInvite) {
       joinGroup(pendingInvite)
-        .then(() => fetchGroup())
+        .then(() => { track('group_join', { via: 'invite_link' }); return fetchGroup(); })
         .then((g) => { if (!cancelled) setGroup(g); })
         .catch((err) => {
           if (cancelled) return;
@@ -90,6 +91,12 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
     };
   }, [dayOffset, group]);
 
+  useEffect(() => {
+    if (!group) return;
+    track('leaderboard_view', { scope: 'group', day_offset: dayOffset });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [group?.id, dayOffset]);
+
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(''), 3000);
@@ -105,6 +112,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
 
   const handleJoin = async (code: string) => {
     await joinGroup(code);
+    track('group_join', { via: 'code' });
     setShowJoin(false);
     const g = await fetchGroup();
     setGroup(g);

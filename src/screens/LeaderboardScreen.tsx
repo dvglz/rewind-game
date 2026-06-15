@@ -6,6 +6,7 @@ import { GroupLeaderboard } from '../components/GroupLeaderboard';
 import { DateSelector } from '../components/DateSelector';
 import { ArrowLeft } from '../components/icons';
 import { useAuth } from '../context/AuthContext';
+import { track } from '../lib/analytics';
 import type { GlobalLeaderboard, GroupLeaderboardEntry } from '../types';
 import styles from './LeaderboardScreen.module.css';
 
@@ -27,6 +28,10 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
       .catch(() => { if (!cancelled) setBoard(null); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
+  }, [dayOffset]);
+
+  useEffect(() => {
+    track('leaderboard_view', { scope: 'global', day_offset: dayOffset });
   }, [dayOffset]);
 
   const entries: GroupLeaderboardEntry[] = (board?.entries ?? []).map((e) => ({
