@@ -16,6 +16,7 @@ import { hidesCompletedGameLock, shouldEnableHapticsDebug } from './lib/testMode
 import { useThemePreference } from './hooks/useThemePreference';
 import { fetchMyScore, flushPendingScore } from './lib/api';
 import { initAnalytics, trackPageView } from './lib/analytics';
+import styles from './App.module.css';
 import './styles/global.css';
 
 type Screen = 'home' | 'game' | 'ordering' | 'results' | 'groups' | 'auth' | 'leaderboard';
@@ -30,7 +31,7 @@ function AppInner() {
   const { trigger } = useWebHaptics({
     debug: shouldEnableHapticsDebug(window.location.search, hasVibrateSupport),
   });
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading: isAuthLoading } = useAuth();
   useThemePreference();
   const [remoteCompleted, setRemoteCompleted] = useState(false);
   const [_remoteLoading, setRemoteLoading] = useState(false);
@@ -83,6 +84,7 @@ function AppInner() {
     const params = new URLSearchParams(window.location.search);
     return params.get('invite');
   });
+  const showInviteAuthOverlay = Boolean(pendingInvite) && isAuthLoading;
 
   const [screen, setScreen] = useState<Screen>(() => {
     const params = new URLSearchParams(window.location.search);
@@ -148,6 +150,14 @@ function AppInner() {
     setScreen('auth');
     trackPageView('auth');
   };
+
+  useEffect(() => {
+    if (!pendingInvite) return;
+    if (isAuthLoading) return;
+    if (isAuthenticated && screen === 'auth') {
+      navigate('groups');
+    }
+  }, [isAuthenticated, isAuthLoading, pendingInvite, screen]);
 
   const getReturnTo = (): string | null => {
     const params = new URLSearchParams(window.location.search);
@@ -248,14 +258,21 @@ function AppInner() {
         <LeaderboardScreen onBack={() => navigate('home')} />
       )}
       {screen === 'auth' && (
-        <AuthScreen
-          onBack={() => navigate('home')}
-          onSuccess={() => {
-            void handleAuthSuccess();
-          }}
-          returnTo={getReturnTo()}
-          contextMessage={pendingInvite ? "You'll join a group right after signing in" : undefined}
-        />
+        <>
+          <AuthScreen
+            onBack={() => navigate('home')}
+            onSuccess={() => {
+              void handleAuthSuccess();
+            }}
+            returnTo={getReturnTo()}
+            contextMessage={pendingInvite ? "You'll join a group right after signing in" : undefined}
+          />
+          {showInviteAuthOverlay && (
+            <div className={styles.inviteAuthOverlay} data-testid="invite-auth-overlay" aria-hidden="true">
+              <div className={styles.inviteAuthSpinner} data-testid="invite-auth-spinner" />
+            </div>
+          )}
+        </>
       )}
       {authToast && <Toast message={authToast} />}
     </>
