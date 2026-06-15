@@ -81,7 +81,7 @@ function mockBoard(dayOffset: number): GlobalLeaderboard {
     isCurrentUser: true,
   };
 
-  return { date, entries, currentUser };
+  return { date, hasPrevious: true, entries, currentUser };
 }
 
 // ── Leaderboard ID cache ──────────────────────────────────
@@ -139,8 +139,9 @@ function mapResponse(raw: LeaderboardApiResponse): GlobalLeaderboard {
 
   const currentUser = raw.me ? mapRow(raw.me, 0, true) : null;
   const date = raw.leaderboard?.start_date ?? dateForOffset(0);
+  const hasPrevious = raw.leaderboard?.previous_leaderboard_id != null;
 
-  return { date, entries, currentUser };
+  return { date, hasPrevious, entries, currentUser };
 }
 
 /** Cache the leaderboard ID at `offset` and its previous pointer at `offset+1`. */
@@ -192,7 +193,7 @@ export async function fetchLeaderboard(dayOffset: number, groupId?: number): Pro
   const targetId = leaderboardIdCache.get(cacheKey(dayOffset, groupId));
   if (!targetId) {
     // No leaderboard exists that far back
-    return { date: dateForOffset(dayOffset), entries: [], currentUser: null };
+    return { date: dateForOffset(dayOffset), hasPrevious: false, entries: [], currentUser: null };
   }
 
   const raw = await fetchLeaderboardById(targetId, groupId);

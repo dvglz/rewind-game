@@ -5,11 +5,12 @@ import styles from './DateSelector.module.css';
 interface DateSelectorProps {
   /** Number of days back from today (0 = today) */
   dayOffset: number;
+  hasPrevious?: boolean;
   onPrev: () => void;
   onNext: () => void;
 }
 
-export function DateSelector({ dayOffset, onPrev, onNext }: DateSelectorProps) {
+export function DateSelector({ dayOffset, hasPrevious = true, onPrev, onNext }: DateSelectorProps) {
   const date = new Date();
   date.setDate(date.getDate() - dayOffset);
 
@@ -28,8 +29,9 @@ export function DateSelector({ dayOffset, onPrev, onNext }: DateSelectorProps) {
   return (
     <div className={styles.selector}>
       <button
-        className={styles.arrow}
+        className={`${styles.arrow} ${!hasPrevious ? styles.arrowDisabled : ''}`}
         onClick={onPrev}
+        disabled={!hasPrevious}
         type="button"
         aria-label="Previous day"
       >

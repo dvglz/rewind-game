@@ -80,6 +80,8 @@ export interface GlobalLeaderboardEntry {
 export interface GlobalLeaderboard {
   /** ISO `YYYY-MM-DD` day this board is for. */
   date: string;
+  /** Whether an older leaderboard exists via previous_leaderboard_id. */
+  hasPrevious: boolean;
   /** Top-N rows, length <= LEADERBOARD_PAGE_LIMIT. */
   entries: GlobalLeaderboardEntry[];
   /** The signed-in user's own row, or null if not authed / no score that day. */

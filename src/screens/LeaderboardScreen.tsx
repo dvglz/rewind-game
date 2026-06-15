@@ -63,6 +63,7 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
 
         <DateSelector
           dayOffset={dayOffset}
+          hasPrevious={board?.hasPrevious ?? true}
           onPrev={() => setDayOffset((d) => d + 1)}
           onNext={() => setDayOffset((d) => Math.max(0, d - 1))}
         />
@@ -79,8 +80,7 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
 
         {!loading && entries.length > 0 && (
           <p className={styles.disclaimer}>
-            No ties: when scores match, the fastest completion time ranks higher — and if
-            that's tied too, whoever submitted first takes the spot.
+            No ties: same score ranks by fastest run time, then earliest submission.
           </p>
         )}
       </div>
