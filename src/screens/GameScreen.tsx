@@ -265,7 +265,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
               micropause ? styles.micropauseDim : ''
             } ${!micropause && revealResult ? styles.micropauseRestore : ''}`}
           >
-            Question {displayRound} of {game.totalRounds}
+            Round {displayRound} of {game.totalRounds}
           </p>
           <div className={styles.promptShell}>
             {!!displayText && (

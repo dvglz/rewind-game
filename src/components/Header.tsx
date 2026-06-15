@@ -33,10 +33,10 @@ export function Header({ sport, onHome, leftMeta, gameNumber, rightText, rightLa
             REWIND
           </span>
           {gameNumber != null && (
-            <span className={styles.gameNumber}>#{gameNumber}</span>
+            <span className={styles.gameNumber}>#{String(gameNumber).padStart(3, '0')}</span>
           )}
           {leftMeta && <span className={styles.meta}>{leftMeta}</span>}
-          {sport && (
+          {sport && SPORT_ICONS[sport] && (
             <span className={styles.sportIcon} aria-hidden="true">
               {SPORT_ICONS[sport]}
             </span>

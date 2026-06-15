@@ -156,7 +156,7 @@ const SOCCER_DAYS: RawEvent[][] = [
   ],
   // Day 8
   [
-    { id: "evt_wc_donovan_algeria", title: "🇺🇸 Donovan scores in stoppage time to save the US against Algeria", date: "2010-06-23", reveal: "In 2010, Donovan's last-second winner at South Africa became an iconic American soccer moment." },
+    { id: "evt_wc_donovan_algeria", title: "Donovan scores in stoppage time to save the US against Algeria", date: "2010-06-23", reveal: "In 2010, Donovan's last-second winner at South Africa became an iconic American soccer moment." },
     { id: "evt_wc_messi_debut", title: "🇦🇷 A teenage Messi scores in his first World Cup", date: "2006-06-16", reveal: "In 2006, an 18-year-old Messi made his debut and scored at Germany, announcing himself on the biggest stage." },
     { id: "evt_wc_italy_fails_qualify", title: "🇮🇹 Italy fails to qualify for the World Cup for the first time in 60 years", date: "2017-11-13", reveal: "In 2018, four-time champions Italy were stunned by Sweden in the playoff and watched the tournament from home." },
     { id: "evt_wc_rossi_hattrick", title: "🇮🇹 Rossi scores a hat-trick to eliminate Brazil in a classic", date: "1982-07-05", reveal: "In 1982, Rossi came back from a betting ban to deliver one of the greatest individual World Cup performances at Spain." },
@@ -164,7 +164,7 @@ const SOCCER_DAYS: RawEvent[][] = [
   ],
   // Day 9
   [
-    { id: "evt_wc_usa_hosts", title: "🇺🇸 The United States hosts the World Cup for the first time", date: "1994-06-17", reveal: "In 1994, USA '94 set attendance records and helped grow soccer in America, ending with Brazil's shootout victory." },
+    { id: "evt_wc_usa_hosts", title: "The United States hosts the World Cup for the first time", date: "1994-06-17", reveal: "In 1994, USA '94 set attendance records and helped grow soccer in America, ending with Brazil's shootout victory." },
     { id: "evt_wc_spain_destroyed", title: "🇪🇸 Defending champion Spain gets destroyed 5–1 by Netherlands", date: "2014-06-13", reveal: "In 2014, Van Persie and Robben tore Spain apart in the opening match — the end of the tiki-taka era." },
     { id: "evt_wc_korea_japan_hosts", title: "🇰🇷🇯🇵 South Korea and Japan co-host the first World Cup in Asia", date: "2002-05-31", reveal: "In 2002, the first Asian World Cup produced massive upsets, including co-host South Korea's run to the semis." },
     { id: "evt_wc_henry_handball", title: "🇫🇷 Henry's handball sends France to the World Cup over Ireland", date: "2009-11-18", reveal: "In 2009, Henry clearly handled the ball before assisting the decisive goal, sparking outrage in Ireland." },
@@ -286,12 +286,12 @@ function dayIndex(dateStr: string): number {
 export type Sport = 'american' | 'soccer';
 
 export const SPORT_LABELS: Record<Sport, string> = {
-  american: '🇺🇸 American Sports',
+  american: 'American Sports',
   soccer: '⚽ FIFA World Cup',
 };
 
 export const SPORT_ICONS: Record<Sport, string> = {
-  american: '🇺🇸',
+  american: '',
   soccer: '⚽',
 };
 
