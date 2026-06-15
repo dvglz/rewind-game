@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import {
+  getDateOverride,
   getSport,
   isRandomModeEnabled,
   setRandomModeEnabled,
@@ -56,13 +57,12 @@ export function HomeScreen({
     setRandomModeEnabled(next);
   };
 
-  // Format today's date nicely
-  const today = new Date();
-  const dateStr = today.toLocaleDateString('en-US', {
+  const dateStr = new Date(`${getDateOverride()}T00:00:00Z`).toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
     year: 'numeric',
+    timeZone: 'UTC',
   });
 
   return (
