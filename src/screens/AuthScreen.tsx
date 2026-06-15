@@ -71,10 +71,11 @@ export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage }: Auth
       const user = await validateEmailCode(email.trim(), fullCode);
       setUser(user);
       onSuccess();
+      // Keep the button in its loading state through navigation — do not reset
+      // here, or it flashes back to "Verify" before the route changes.
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Invalid code');
       setCode('');
-    } finally {
       setLoading(false);
     }
   };
