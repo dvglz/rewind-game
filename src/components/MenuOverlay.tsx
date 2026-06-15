@@ -22,6 +22,7 @@ export interface MenuOverlayProps {
   onNavigateGame: () => void;
   onNavigateLeaderboard: () => void;
   onNavigateGroups: () => void;
+  onNavigateHowTo: () => void;
   onNavigateAuth: (returnTo: TopLevelMenuScreen) => void;
   onSignOut: () => void;
 }
@@ -67,6 +68,7 @@ export function MenuOverlay({
   onNavigateGame,
   onNavigateLeaderboard,
   onNavigateGroups,
+  onNavigateHowTo,
   onNavigateAuth,
   onSignOut,
 }: MenuOverlayProps) {
@@ -172,6 +174,11 @@ export function MenuOverlay({
     onNavigateGroups();
   };
 
+  const handleHowToNavigation = () => {
+    onClose();
+    onNavigateHowTo();
+  };
+
   const handleAuthNavigation = () => {
     onClose();
     onNavigateAuth(currentScreen);
@@ -227,6 +234,14 @@ export function MenuOverlay({
             style={{ '--stagger-index': 2 } as CSSProperties}
           >
             Groups
+          </button>
+          <button
+            type="button"
+            onClick={handleHowToNavigation}
+            className={`${styles.navButton} ${styles.menuItem}`}
+            style={{ '--stagger-index': 3 } as CSSProperties}
+          >
+            How to Play
           </button>
         </nav>
 

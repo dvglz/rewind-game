@@ -15,6 +15,7 @@ function createProps() {
     onNavigateGame: vi.fn(),
     onNavigateLeaderboard: vi.fn(),
     onNavigateGroups: vi.fn(),
+    onNavigateHowTo: vi.fn(),
     onNavigateAuth: vi.fn(),
     onSignOut: vi.fn(),
   };

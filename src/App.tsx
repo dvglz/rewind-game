@@ -7,8 +7,9 @@ import { ResultsScreen } from './screens/ResultsScreen';
 import { GroupsScreen } from './screens/GroupsScreen';
 import { LeaderboardScreen } from './screens/LeaderboardScreen';
 import { AuthScreen } from './screens/AuthScreen';
+import { HowToScreen, type HowToEntryPoint } from './screens/HowToScreen';
 import { Toast } from './components/Toast';
-import { clearGameState, loadGameState, pruneOldGameStates } from './engine/storage';
+import { clearGameState, loadGameState, pruneOldGameStates, hasSeenRules } from './engine/storage';
 import { beginPuzzleSession, getDateOverride, getSport, getTodaysPuzzle } from './data/puzzles';
 import { useWebHaptics } from 'web-haptics/react';
 import { initHaptics } from './lib/haptics';
@@ -19,7 +20,7 @@ import { initAnalytics, trackPageView } from './lib/analytics';
 import styles from './App.module.css';
 import './styles/global.css';
 
-type Screen = 'home' | 'game' | 'ordering' | 'results' | 'groups' | 'auth' | 'leaderboard';
+type Screen = 'home' | 'game' | 'ordering' | 'results' | 'groups' | 'auth' | 'leaderboard' | 'howto';
 
 // In mock mode (local dev) the auth gate is bypassed so screens that normally
 // require a token — e.g. the global leaderboard — can be tested without one.
@@ -98,6 +99,7 @@ function AppInner() {
     }
     const mode = params.get('mode');
     if (mode === 'auth') return 'auth';
+    if (mode === 'howto') return 'howto';
     if (mode === 'ordering') return 'ordering';
     if (mode === 'game') {
       const sport = getSport();
@@ -115,6 +117,8 @@ function AppInner() {
     }
     return 'home';
   });
+
+  const [howToEntry, setHowToEntry] = useState<HowToEntryPoint>('menu');
 
   useEffect(() => {
     initAnalytics();
@@ -186,6 +190,24 @@ function AppInner() {
     showAuthToast();
   };
 
+  const startGame = () => {
+    const sport = getSport();
+    const puzzle = getTodaysPuzzle(sport);
+    const saved = loadGameState(puzzle.id);
+    if (saved && !saved.completed) {
+      navigate('game');
+      return;
+    }
+    beginPuzzleSession();
+    clearGameState(puzzle.id);
+    navigate('game');
+  };
+
+  const openHowTo = (entry: HowToEntryPoint) => {
+    setHowToEntry(entry);
+    navigate('howto');
+  };
+
   return (
     <>
       {screen === 'home' && (
@@ -197,16 +219,11 @@ function AppInner() {
             return !!saved && !saved.completed;
           })()}
           onPlay={() => {
-            const sport = getSport();
-            const puzzle = getTodaysPuzzle(sport);
-            const saved = loadGameState(puzzle.id);
-            if (saved && !saved.completed) {
-              navigate('game');
+            if (!hasSeenRules()) {
+              openHowTo('first_run');
               return;
             }
-            beginPuzzleSession();
-            clearGameState(puzzle.id);
-            navigate('game');
+            startGame();
           }}
           hasCompletedGame={(() => {
             const sport = getSport();
@@ -227,6 +244,7 @@ function AppInner() {
           onGroups={() => navigate('groups')}
           onNavigateAuth={(returnTo) => navigateToAuth(returnTo as Screen)}
           onSignOut={() => navigate('home')}
+          onHowTo={(source) => openHowTo(source)}
         />
       )}
       {screen === 'game' && <GameScreen onFinish={() => navigate('results')} onHome={() => navigate('home')} />}
@@ -256,6 +274,20 @@ function AppInner() {
       )}
       {screen === 'leaderboard' && (
         <LeaderboardScreen onBack={() => navigate('home')} />
+      )}
+      {screen === 'howto' && (
+        <HowToScreen
+          mode={(() => {
+            const sport = getSport();
+            const puzzle = getTodaysPuzzle(sport);
+            const saved = loadGameState(puzzle.id);
+            const completed = (!!saved && saved.completed && !allowReplay) || remoteCompleted;
+            return completed ? 'home' : 'play';
+          })()}
+          entryPoint={howToEntry}
+          onPlay={startGame}
+          onHome={() => navigate('home')}
+        />
       )}
       {screen === 'auth' && (
         <>

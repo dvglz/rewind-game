@@ -16,6 +16,7 @@ test('renders the home screen core actions without the theme switcher', () => {
       onGroups={() => {}}
       onNavigateAuth={() => {}}
       onSignOut={() => {}}
+      onHowTo={() => {}}
     />
     </AuthProvider>
   );
@@ -39,6 +40,7 @@ test('shows only see results when todays game is already completed', () => {
       onGroups={() => {}}
       onNavigateAuth={() => {}}
       onSignOut={() => {}}
+      onHowTo={() => {}}
     />
     </AuthProvider>
   );

@@ -21,6 +21,7 @@ interface HomeScreenProps {
   onGroups: () => void;
   onNavigateAuth: (returnTo: string) => void;
   onSignOut: () => void;
+  onHowTo: (source: 'menu' | 'footer') => void;
 }
 
 export function HomeScreen({
@@ -33,6 +34,7 @@ export function HomeScreen({
   onGroups,
   onNavigateAuth,
   onSignOut,
+  onHowTo,
 }: HomeScreenProps) {
   const { isAuthenticated, loading: isAuthLoading, user: authUser, signOut } = useAuth();
   const currentSport = getSport();
@@ -90,6 +92,7 @@ export function HomeScreen({
           setSignOutToast(true);
           setTimeout(() => setSignOutToast(false), 3000);
         }}
+        onNavigateHowTo={() => onHowTo('menu')}
       />
       <div className={styles.top}>
         <h1 className={styles.wordmark}>Rewind</h1>
@@ -152,6 +155,9 @@ export function HomeScreen({
         </>
       )}
       {signOutToast && <Toast message="Signed Out" />}
+      <button type="button" className={styles.howToLink} onClick={() => onHowTo('footer')}>
+        How to Play
+      </button>
     </div>
   );
 }

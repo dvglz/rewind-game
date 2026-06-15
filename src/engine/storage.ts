@@ -2,6 +2,7 @@ import type { GameState, PlayerStats } from '../types';
 
 const GAME_STATE_KEY = 'rewind_game';
 const STATS_KEY = 'rewind_stats';
+const RULES_SEEN_KEY = 'rewind_rules_seen';
 
 export function saveGameState(state: GameState): void {
   const all = JSON.parse(localStorage.getItem(GAME_STATE_KEY) || '{}');
@@ -77,4 +78,12 @@ export function updateStatsAfterGame(dateStr: string): PlayerStats {
   stats.lastPlayedDate = dateStr;
   saveStats(stats);
   return stats;
+}
+
+export function hasSeenRules(): boolean {
+  return localStorage.getItem(RULES_SEEN_KEY) === '1';
+}
+
+export function markRulesSeen(): void {
+  localStorage.setItem(RULES_SEEN_KEY, '1');
 }
