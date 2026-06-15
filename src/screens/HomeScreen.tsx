@@ -74,7 +74,13 @@ export function HomeScreen({
         userEmail={authUser?.email ?? null}
         userName={authUser?.username ?? null}
         onNavigateHome={() => {}}
-        onNavigateGame={onPlay}
+        onNavigateGame={() => {
+          if (hasCompletedGame) {
+            onViewResults();
+          } else {
+            onPlay();
+          }
+        }}
         onNavigateLeaderboard={onLeaderboard}
         onNavigateGroups={onGroups}
         onNavigateAuth={onNavigateAuth}
