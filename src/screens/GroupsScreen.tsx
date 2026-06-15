@@ -11,6 +11,7 @@ import { ArrowLeft, Plus } from '../components/icons';
 import { Toast } from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
 import { track } from '../lib/analytics';
+import { getPublicAppUrl } from '../lib/share';
 import type { GlobalLeaderboard, PlayhubGroup, GroupLeaderboardEntry, GroupMember } from '../types';
 import styles from './GroupsScreen.module.css';
 
@@ -156,7 +157,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
     if (!group) return;
 
     const code = extractInviteCode(group.invite_link);
-    const inviteUrl = `${window.location.origin}/?invite=${code}`;
+    const inviteUrl = `${getPublicAppUrl()}/?invite=${code}`;
     const shareText = `Guess 5 sports moments by year.\n\nJoin my Rewind group!\n\nLink: ${inviteUrl}\n\nUse this code to join: ${code}`;
 
     if (window.isSecureContext && navigator.share) {

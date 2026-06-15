@@ -1,6 +1,8 @@
 import { expect, test, vi } from 'vitest';
 import { generateShareText, shareResults } from './share';
 
+vi.stubEnv('VITE_PUBLIC_APP_URL', 'https://clutchpoints-rewind-test.4taps.me');
+
 test('formats the share text with launch date and score line', () => {
   const text = generateShareText(
     6,
@@ -24,7 +26,7 @@ test('formats the share text with launch date and score line', () => {
       '🟢🟢🟢🟠🟡',
       'Score 790 / 1,000',
       '',
-      'rewind.clutchpoints.com',
+      'https://clutchpoints-rewind-test.4taps.me',
       'Guess 5 sports moments by year.',
     ].join('\n'),
   );

@@ -3,6 +3,14 @@ import { getResultColor, getResultEmoji } from '../engine/scoring';
 
 export type ShareOutcome = 'shared' | 'copied' | 'failed';
 
+const PUBLIC_APP_URL =
+  ((import.meta.env.VITE_PUBLIC_APP_URL as string | undefined) || '').trim() ||
+  'https://clutchpoints-rewind-test.4taps.me';
+
+export function getPublicAppUrl(): string {
+  return PUBLIC_APP_URL.replace(/\/+$/, '');
+}
+
 export function generateShareText(
   puzzleNumber: number,
   results: RoundResult[],
@@ -27,7 +35,7 @@ export function generateShareText(
   let text = `${title} #${puzzleLabel} / ${dateStr}\n`;
   text += `${emojiRow}\n`;
   text += `Score ${totalScore.toLocaleString()} / ${maxScore.toLocaleString()}\n\n`;
-  text += `rewind.clutchpoints.com\n`;
+  text += `${getPublicAppUrl()}\n`;
   text += `Guess 5 sports moments by year.`;
   return text;
 }
