@@ -15,6 +15,7 @@ import { initHaptics } from './lib/haptics';
 import { hidesCompletedGameLock, shouldEnableHapticsDebug } from './lib/testMode';
 import { useThemePreference } from './hooks/useThemePreference';
 import { fetchMyScore, flushPendingScore } from './lib/api';
+import { initAnalytics, trackPageView } from './lib/analytics';
 import './styles/global.css';
 
 type Screen = 'home' | 'game' | 'ordering' | 'results' | 'groups' | 'auth' | 'leaderboard';
@@ -39,6 +40,12 @@ function AppInner() {
   useEffect(() => {
     initHaptics(trigger);
   }, [trigger]);
+
+  useEffect(() => {
+    initAnalytics();
+    trackPageView(screen);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const puzzle = getTodaysPuzzle(getSport());
@@ -115,6 +122,7 @@ function AppInner() {
 
   const navigate = (s: Screen) => {
     setScreen(s);
+    trackPageView(s);
     const params = new URLSearchParams(window.location.search);
     if (s === 'home') {
       params.delete('mode');
@@ -138,6 +146,7 @@ function AppInner() {
     const nextSearch = params.toString();
     window.history.pushState({}, '', `/?${nextSearch}`);
     setScreen('auth');
+    trackPageView('auth');
   };
 
   const getReturnTo = (): string | null => {
