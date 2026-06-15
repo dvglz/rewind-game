@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rewind-v2';
+const CACHE_NAME = 'rewind-v3';
 const ASSETS = [
   '/site.webmanifest',
 ];

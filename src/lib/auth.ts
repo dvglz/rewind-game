@@ -2,7 +2,7 @@ import type { AuthUser } from '../types/auth';
 
 const BASE_URL = (import.meta.env.VITE_BASE_URL as string) ?? '';
 const COOKIE_NAME = 'cp_access_token';
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
 /** Extract root domain (e.g. "4taps.me" from "clutchpoints-rewind-test.4taps.me"). */
 function getRootDomain(): string {

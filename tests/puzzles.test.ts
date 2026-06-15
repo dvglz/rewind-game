@@ -56,14 +56,14 @@ describe('getPuzzleForDate', () => {
     expect(unique.size).toBe(10);
   });
 
-  it('2026-06-06 maps to Day 1 (LeBron for nba)', () => {
-    const puzzle = getPuzzleForDate('2026-06-06', 'american');
+  it('2026-06-15 (launch) maps to Day 1 (LeBron for nba)', () => {
+    const puzzle = getPuzzleForDate('2026-06-15', 'american');
     expect(puzzle.events[0].text).toContain('LeBron');
     expect(puzzle.number).toBe(1);
   });
 
-  it('2026-06-07 maps to Day 2 (Jordan for nba)', () => {
-    const puzzle = getPuzzleForDate('2026-06-07', 'american');
+  it('2026-06-16 maps to Day 2 (Jordan for nba)', () => {
+    const puzzle = getPuzzleForDate('2026-06-16', 'american');
     expect(puzzle.events[0].text).toContain('Jordan');
     expect(puzzle.number).toBe(2);
   });
@@ -83,7 +83,7 @@ describe('getPuzzleForDate', () => {
   });
 
   it('soccer day 1 Q3 uses South Africa hosting (not Saudi/Argentina)', () => {
-    const puzzle = getPuzzleForDate('2026-06-06', 'soccer');
+    const puzzle = getPuzzleForDate('2026-06-15', 'soccer');
     // Q1 is Messi, Q3 should be South Africa (not Saudi)
     expect(puzzle.events[0].text).toContain('Messi');
     expect(puzzle.events[2].text).toContain('South Africa');
