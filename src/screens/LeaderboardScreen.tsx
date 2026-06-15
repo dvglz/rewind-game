@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { getDateOverride } from '../data/puzzles';
 import { fetchLeaderboard } from '../lib/leaderboard';
+import { getDayOffsetFromToday } from '../lib/leaderboard';
 import { formatTime } from '../lib/formatTime';
 import { LEADERBOARD_PAGE_LIMIT } from '../config/leaderboard';
 import { GroupLeaderboard } from '../components/GroupLeaderboard';
@@ -16,6 +18,8 @@ interface LeaderboardScreenProps {
 
 export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
   const { user: authUser } = useAuth();
+  const activeDate = getDateOverride();
+  const activeDateOffset = getDayOffsetFromToday(activeDate);
   const [dayOffset, setDayOffset] = useState(0);
   const [board, setBoard] = useState<GlobalLeaderboard | null>(null);
   const [loading, setLoading] = useState(true);
@@ -23,12 +27,12 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetchLeaderboard(dayOffset)
+    fetchLeaderboard(activeDateOffset + dayOffset)
       .then((b) => { if (!cancelled) setBoard(b); })
       .catch(() => { if (!cancelled) setBoard(null); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [dayOffset]);
+  }, [activeDateOffset, dayOffset]);
 
   useEffect(() => {
     track('leaderboard_view', { scope: 'global', day_offset: dayOffset });
@@ -68,6 +72,7 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
 
         <DateSelector
           dayOffset={dayOffset}
+          baseDate={activeDate}
           hasPrevious={board?.hasPrevious ?? true}
           onPrev={() => setDayOffset((d) => d + 1)}
           onNext={() => setDayOffset((d) => Math.max(0, d - 1))}

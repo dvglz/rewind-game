@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { getDateOverride } from '../data/puzzles';
 import { fetchGroup, createGroup, joinGroup, leaveGroup } from '../lib/playhub';
-import { fetchLeaderboard } from '../lib/leaderboard';
+import { fetchLeaderboard, getDayOffsetFromToday } from '../lib/leaderboard';
 import { formatTime } from '../lib/formatTime';
 import { GroupLeaderboard } from '../components/GroupLeaderboard';
 import { DateSelector } from '../components/DateSelector';
@@ -37,6 +38,8 @@ interface GroupsScreenProps {
 
 export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingInvite, onInviteHandled }: GroupsScreenProps) {
   const { user: authUser } = useAuth();
+  const activeDate = getDateOverride();
+  const activeDateOffset = getDayOffsetFromToday(activeDate);
   const [group, setGroup] = useState<PlayhubGroup | null>(null);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -78,7 +81,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
     }
 
     let cancelled = false;
-    fetchLeaderboard(dayOffset, group.id)
+    fetchLeaderboard(activeDateOffset + dayOffset, group.id)
       .then((board) => {
         if (!cancelled) setGroupBoard(board);
       })
@@ -89,7 +92,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
     return () => {
       cancelled = true;
     };
-  }, [dayOffset, group]);
+  }, [activeDateOffset, dayOffset, group]);
 
   useEffect(() => {
     if (!group) return;
@@ -222,6 +225,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
 
           <DateSelector
             dayOffset={dayOffset}
+            baseDate={activeDate}
             onPrev={() => setDayOffset((d) => d + 1)}
             onNext={() => setDayOffset((d) => Math.max(0, d - 1))}
           />

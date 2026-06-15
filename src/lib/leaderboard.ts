@@ -7,11 +7,22 @@ const USE_MOCK = import.meta.env.VITE_MOCK_API === 'true';
 
 // ── Helpers ────────────────────────────────────────────────
 
-/** ISO `YYYY-MM-DD` for `dayOffset` days before today (0 = today). */
-function dateForOffset(dayOffset: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() - dayOffset);
+function currentUtcDate(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/** ISO `YYYY-MM-DD` for `dayOffset` days before `baseDate` (0 = baseDate). */
+function dateForOffset(dayOffset: number, baseDate = currentUtcDate()): string {
+  const d = new Date(`${baseDate}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - dayOffset);
   return d.toISOString().slice(0, 10);
+}
+
+export function getDayOffsetFromToday(activeDate: string): number {
+  const today = new Date(`${currentUtcDate()}T00:00:00Z`).getTime();
+  const target = new Date(`${activeDate}T00:00:00Z`).getTime();
+  const diffDays = Math.floor((today - target) / 86_400_000);
+  return Math.max(0, diffDays);
 }
 
 /** Small seeded PRNG (mulberry32) so a date always yields the same board. */

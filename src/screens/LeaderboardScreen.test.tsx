@@ -1,9 +1,9 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { expect, test, vi } from 'vitest';
+import { beforeEach, expect, test, vi } from 'vitest';
 import { LeaderboardScreen } from './LeaderboardScreen';
 import { AuthProvider } from '../context/AuthContext';
 
-const { fetchLeaderboardMock } = vi.hoisted(() => ({
+const { fetchLeaderboardMock, getDateOverrideMock, getDayOffsetFromTodayMock } = vi.hoisted(() => ({
   fetchLeaderboardMock: vi.fn(async (dayOffset: number) => ({
     date: dayOffset === 0 ? '2026-06-11' : '2026-06-10',
     hasPrevious: dayOffset === 0,
@@ -13,11 +13,30 @@ const { fetchLeaderboardMock } = vi.hoisted(() => ({
       { rank: 2, displayName: 'Sarah', score: 670, timeMs: 131000, isCurrentUser: false },
     ],
   })),
+  getDateOverrideMock: vi.fn(() => '2026-06-16'),
+  getDayOffsetFromTodayMock: vi.fn(() => 0),
 }));
 
-vi.mock('../lib/leaderboard', () => ({
-  fetchLeaderboard: fetchLeaderboardMock,
+vi.mock('../lib/leaderboard', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../lib/leaderboard')>();
+  return {
+    ...actual,
+    fetchLeaderboard: fetchLeaderboardMock,
+    getDayOffsetFromToday: getDayOffsetFromTodayMock,
+  };
+});
+
+vi.mock('../data/puzzles', () => ({
+  getDateOverride: getDateOverrideMock,
 }));
+
+beforeEach(() => {
+  fetchLeaderboardMock.mockClear();
+  getDateOverrideMock.mockReset();
+  getDateOverrideMock.mockReturnValue('2026-06-16');
+  getDayOffsetFromTodayMock.mockReset();
+  getDayOffsetFromTodayMock.mockReturnValue(0);
+});
 
 test('renders the title and a pinned row for an out-of-page user', async () => {
   render(
@@ -50,4 +69,19 @@ test('disables previous-day navigation when the current board has no earlier his
 
   await waitFor(() => expect(fetchLeaderboardMock).toHaveBeenLastCalledWith(1));
   await waitFor(() => expect((previousButton as HTMLButtonElement).disabled).toBe(true));
+});
+
+test('anchors the first leaderboard view to the active puzzle date', async () => {
+  getDateOverrideMock.mockReturnValue('2026-06-15');
+  getDayOffsetFromTodayMock.mockReturnValue(1);
+
+  render(
+    <AuthProvider>
+      <LeaderboardScreen onBack={() => {}} />
+    </AuthProvider>,
+  );
+
+  await waitFor(() => expect(fetchLeaderboardMock).toHaveBeenCalledWith(1));
+  expect(await screen.findByText('Today')).not.toBeNull();
+  expect(screen.getByText('Jun 15, 2026')).not.toBeNull();
 });

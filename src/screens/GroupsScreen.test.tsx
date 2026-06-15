@@ -14,9 +14,13 @@ vi.mock('../lib/playhub', () => ({
   leaveGroup: vi.fn(),
 }));
 
-vi.mock('../lib/leaderboard', () => ({
-  fetchLeaderboard,
-}));
+vi.mock('../lib/leaderboard', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../lib/leaderboard')>();
+  return {
+    ...actual,
+    fetchLeaderboard,
+  };
+});
 
 vi.mock('../context/AuthContext', () => ({
   useAuth: () => ({
