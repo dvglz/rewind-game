@@ -3,6 +3,26 @@ const ASSETS = [
   '/site.webmanifest',
 ];
 
+function isHtmlRequest(request) {
+  const accept = request.headers.get('accept') || '';
+  return (
+    request.mode === 'navigate' ||
+    request.destination === 'document' ||
+    request.destination === 'iframe' ||
+    accept.includes('text/html')
+  );
+}
+
+function isCacheableAssetRequest(request) {
+  if (request.method !== 'GET') return false;
+
+  const url = new URL(request.url);
+  if (url.origin !== self.location.origin) return false;
+  if (isHtmlRequest(request)) return false;
+
+  return /\.[a-z0-9]+$/i.test(url.pathname);
+}
+
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
@@ -22,11 +42,13 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Always fetch the current HTML shell so hashed asset references stay fresh across deploys.
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request))
-    );
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
+  // Always fetch HTML documents directly so auth/FedCM flows are not treated as cacheable assets.
+  if (isHtmlRequest(event.request)) {
+    event.respondWith(fetch(event.request));
     return;
   }
 
@@ -35,6 +57,9 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(fetch(event.request));
     return;
   }
+
+  if (!isCacheableAssetRequest(event.request)) return;
+
   event.respondWith(
     caches.match(event.request).then((cached) => cached || fetch(event.request))
   );
