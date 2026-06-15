@@ -5,6 +5,7 @@ import { loginWithGoogle, requestEmailCode, validateEmailCode } from '../lib/aut
 import { ArrowLeft } from '../components/icons';
 import { Toast } from '../components/Toast';
 import { OtpInput } from '../components/OtpInput';
+import { track, setUser as setAnalyticsUser } from '../lib/analytics';
 import styles from './AuthScreen.module.css';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -38,6 +39,8 @@ export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage }: Auth
     try {
       const user = await loginWithGoogle(credential);
       setUser(user);
+      track('auth_success', { method: 'google' });
+      setAnalyticsUser({ user_id: user.id, is_authenticated: true, auth_method: 'google' });
       onSuccess();
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Sign-in failed');
@@ -70,6 +73,8 @@ export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage }: Auth
     try {
       const user = await validateEmailCode(email.trim(), fullCode);
       setUser(user);
+      track('auth_success', { method: 'email' });
+      setAnalyticsUser({ user_id: user.id, is_authenticated: true, auth_method: 'email' });
       onSuccess();
       // Keep the button in its loading state through navigation — do not reset
       // here, or it flashes back to "Verify" before the route changes.

@@ -4,6 +4,7 @@ import type { AuthUser } from '../types/auth';
 import { fetchProfile, setAccessToken as storeToken, clearAccessToken } from '../lib/auth';
 import { clearAllGameStates } from '../engine/storage';
 import { clearScoreSyncState } from '../lib/api';
+import { setUser as setAnalyticsUser, clearUser as clearAnalyticsUser } from '../lib/analytics';
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -21,7 +22,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     fetchProfile()
-      .then((u) => setUserState(u))
+      .then((u) => {
+        setUserState(u);
+        if (u) setAnalyticsUser({ user_id: u.id, is_authenticated: true });
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -34,6 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearAccessToken();
     clearAllGameStates();
     clearScoreSyncState();
+    clearAnalyticsUser();
     setUserState(null);
   }, []);
 
