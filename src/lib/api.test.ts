@@ -154,7 +154,7 @@ describe('fetchLeaderboardById', () => {
     await fetchLeaderboardById(10);
 
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining('/playhub/leaderboard/10/?game_type=REWIND'),
+      expect.stringContaining('/playhub/leaderboard/10/daily/scores/?game_type=REWIND&game_mode=rewind_nba'),
       expect.any(Object),
     );
   });

@@ -118,6 +118,27 @@ describe('fetchLeaderboard (real response mapping)', () => {
     expect(board.entries[1]).toMatchObject({ displayName: 'Allies', isCurrentUser: true });
   });
 
+  test('maps the top-level total_time (seconds) to timeMs', async () => {
+    vi.stubEnv('VITE_MOCK_API', 'false');
+    vi.stubEnv('VITE_BASE_URL', 'https://test.4taps.me');
+    vi.resetModules();
+    document.cookie = 'cp_access_token=tok123';
+
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        leaderboard: { id: 11, start_date: '2026-06-12', end_date: '2026-06-12', previous_leaderboard_id: 10 },
+        top_20: [{ place_scores: 1, username: 'Mike', scores: 950, total_time: 35 }],
+        me: null,
+      }),
+    });
+
+    const { fetchLeaderboard: fetchRealLeaderboard } = await import('./leaderboard');
+    const board = await fetchRealLeaderboard(0);
+
+    expect(board.entries[0].timeMs).toBe(35000);
+  });
+
   test('uses previous_leaderboard_id chain for dayOffset>0', async () => {
     vi.stubEnv('VITE_MOCK_API', 'false');
     vi.stubEnv('VITE_BASE_URL', 'https://test.4taps.me');

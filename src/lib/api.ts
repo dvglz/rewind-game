@@ -129,14 +129,17 @@ export async function fetchLeaderboardApi(groupId?: number): Promise<Leaderboard
 }
 
 export async function fetchLeaderboardById(id: number, groupId?: number): Promise<LeaderboardApiResponse> {
+  // Historical boards use path segments id/period/metric, with game_type/game_mode
+  // as query params — same period ("daily") and metric ("scores") as the live board.
   const params = new URLSearchParams({
     game_type: GAME_TYPE,
+    game_mode: GAME_MODE,
   });
   if (groupId != null) {
     params.set('group_id', String(groupId));
   }
 
-  const res = await fetch(`${BASE_URL}/playhub/leaderboard/${id}/?${params.toString()}`, {
+  const res = await fetch(`${BASE_URL}/playhub/leaderboard/${id}/daily/scores/?${params.toString()}`, {
     headers: getHeaders(),
   });
 

@@ -118,9 +118,11 @@ function mapRow(row: Record<string, unknown>, index: number, isCurrent: boolean)
       ? row.time
       : typeof row.time_ms === 'number'
         ? row.time_ms
-        : typeof row.metadata === 'object' && row.metadata !== null && typeof (row.metadata as { total_time?: unknown }).total_time === 'number'
-          ? ((row.metadata as { total_time: number }).total_time * 1000)
-          : 0,
+        : typeof row.total_time === 'number'
+          ? row.total_time * 1000
+          : typeof row.metadata === 'object' && row.metadata !== null && typeof (row.metadata as { total_time?: unknown }).total_time === 'number'
+            ? ((row.metadata as { total_time: number }).total_time * 1000)
+            : 0,
     isCurrentUser: isCurrent,
   };
 }
