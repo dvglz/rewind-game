@@ -6,8 +6,11 @@ import { ConfirmButton } from '../components/ConfirmButton';
 import { useGame } from '../hooks/useGame';
 import { useTimeline } from '../hooks/useTimeline';
 import { getTodaysPuzzle } from '../data/puzzles';
-import { getResultColor, getResultColorVar, getResultLabel, ROUND_WEIGHTS } from '../engine/scoring';
+import { getResultColor, getResultColorVar, getResultLabel, getMaxPossibleScore, ROUND_WEIGHTS } from '../engine/scoring';
 import { vibrateConfirm, vibrateError, vibrateMedium } from '../lib/haptics';
+import { loadStats } from '../engine/storage';
+import { getAccessToken } from '../lib/auth';
+import { track } from '../lib/analytics';
 import type { RoundResult } from '../types';
 import styles from './GameScreen.module.css';
 
@@ -47,6 +50,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
   const flashTimer = useRef<ReturnType<typeof setTimeout>>(null);
   const flashOffTimer = useRef<ReturnType<typeof setTimeout>>(null);
   const rafRef = useRef<number | null>(null);
+  const completeFired = useRef(false);
   const activeResult = revealResult ?? pendingResult;
   const displayRound = activeResult
     ? Math.min(game.currentRound, game.totalRounds)
@@ -57,8 +61,16 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
   }, [timeline]);
 
   const handleConfirm = useCallback(async () => {
+    const roundNumber = game.results.length + 1;
     const result = game.submitGuess(timeline.selectedYear);
     if (!result) return;
+
+    track('round_complete', {
+      game_number: puzzle.number,
+      round_number: roundNumber,
+      diff: result.diff,
+      round_score: result.score,
+    });
 
     setPendingResult(result);
     setIsResolving(true);
@@ -158,7 +170,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
     revealTimer.current = setTimeout(() => {
       setShowRevealText(true);
     }, 250);
-  }, [game, timeline, displayedScore]);
+  }, [game, timeline, displayedScore, puzzle.number]);
 
   const handleNext = useCallback(() => {
     setPendingResult(null);
@@ -209,6 +221,43 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
     if (flashOffTimer.current) clearTimeout(flashOffTimer.current);
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
   }, []);
+
+  useEffect(() => {
+    const entry = game.results.length > 0 && !game.isComplete ? 'resume' : 'new';
+    track('game_start', {
+      game_number: puzzle.number,
+      sport: puzzle.sport,
+      is_authenticated: Boolean(getAccessToken()),
+      entry_point: entry,
+    });
+
+    const stats = loadStats();
+    if (stats.lastPlayedDate) {
+      const days = Math.floor(
+        (Date.now() - new Date(stats.lastPlayedDate).getTime()) / 86_400_000,
+      );
+      if (days >= 1) {
+        track('return_play', { days_since_last: days, streak: stats.currentStreak });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (game.isComplete && !completeFired.current) {
+      completeFired.current = true;
+      const stats = loadStats();
+      track('game_complete', {
+        game_number: puzzle.number,
+        sport: puzzle.sport,
+        total_score: game.totalScore,
+        max_score: getMaxPossibleScore(game.totalRounds),
+        elapsed_ms: game.state.elapsedMs ?? 0,
+        streak: stats.currentStreak,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game.isComplete]);
 
   if (game.isComplete && !activeResult && !isResolving) {
     onFinish();
