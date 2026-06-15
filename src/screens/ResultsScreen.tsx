@@ -8,6 +8,7 @@ import { fetchMyScore } from '../lib/api';
 import { Toast } from '../components/Toast';
 import { RewindGlyph } from '../components/icons';
 import { useAuth } from '../context/AuthContext';
+import { track } from '../lib/analytics';
 import type { RoundResult } from '../types';
 import styles from './ResultsScreen.module.css';
 
@@ -117,6 +118,11 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }
       getDateOverride(),
     );
     const outcome = await shareResults(text);
+    track('share_score', {
+      method: outcome === 'shared' ? 'web_share' : 'clipboard',
+      outcome,
+      game_number: puzzle.number,
+    });
     setShareState(outcome);
     if (outcome !== 'failed') {
       setTimeout(() => setShareState(null), 2000);
