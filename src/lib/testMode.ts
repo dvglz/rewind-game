@@ -5,6 +5,8 @@ export function hidesCompletedGameLock(search: string, isProduction = import.met
 }
 
 export function shouldEnableHapticsDebug(_search: string, _hasVibrateSupport: boolean): boolean {
+  void _search;
+  void _hasVibrateSupport;
   // No longer needed — sound fallback in haptics.ts handles all browsers
   // without navigator.vibrate (Safari). Keeping the function to avoid
   // breaking the call site.

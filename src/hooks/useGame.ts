@@ -97,7 +97,7 @@ export function useGame(puzzle: Puzzle) {
 
       return result;
     },
-    [state, currentEvent, puzzle.id]
+    [state, currentEvent, puzzle.id, puzzle.number, puzzle.sport]
   );
 
   return {
