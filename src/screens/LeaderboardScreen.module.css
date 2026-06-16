@@ -77,6 +77,25 @@
 
 .leaderboardArea {
   width: 100%;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+}
+
+.loadingState {
+  flex: 1;
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loadingGlyph {
+  width: 56px;
+  height: 56px;
+  color: var(--color-text);
+  transform-origin: center;
+  animation: loadingBreathe 1.25s ease-in-out infinite;
 }
 
 .disclaimer {
@@ -87,4 +106,17 @@
   color: var(--color-muted);
   padding: 16px 16px 0;
   text-align: center;
+}
+
+@keyframes loadingBreathe {
+  0%, 100% { transform: scale(0.82); opacity: 0.5; }
+  50% { transform: scale(1); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loadingGlyph {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }

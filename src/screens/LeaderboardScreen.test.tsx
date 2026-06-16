@@ -86,14 +86,27 @@ test('anchors the first leaderboard view to the active puzzle date', async () =>
   expect(screen.getByText('Jun 15, 2026')).not.toBeNull();
 });
 
-test('shows the loading overlay until the leaderboard resolves', async () => {
+test('keeps leaderboard chrome visible while showing inline loading state', async () => {
   render(
     <AuthProvider>
       <LeaderboardScreen onBack={() => {}} />
     </AuthProvider>,
   );
 
-  expect(screen.getByRole('status', { name: 'Loading' })).toBeTruthy();
+  expect(screen.getByRole('heading', { name: 'Leaderboard' })).not.toBeNull();
+  expect(screen.getByText('Today')).not.toBeNull();
+  expect(screen.getByText('Jun 16, 2026')).not.toBeNull();
+  expect(screen.getByRole('status', { name: 'Loading leaderboard' })).toBeTruthy();
   await screen.findByText('Mike');
-  expect(screen.queryByRole('status', { name: 'Loading' })).toBeNull();
+  expect(screen.queryByRole('status', { name: 'Loading leaderboard' })).toBeNull();
+});
+
+test('shows the leaderboard freshness and tiebreak disclaimer', async () => {
+  render(
+    <AuthProvider>
+      <LeaderboardScreen onBack={() => {}} />
+    </AuthProvider>,
+  );
+
+  expect(await screen.findByText('Updates every 2 min. Ties: fastest run, then earliest submission.')).not.toBeNull();
 });

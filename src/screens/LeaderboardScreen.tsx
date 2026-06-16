@@ -5,9 +5,8 @@ import { getDayOffsetFromToday } from '../lib/leaderboard';
 import { formatTime } from '../lib/formatTime';
 import { LEADERBOARD_PAGE_LIMIT } from '../config/leaderboard';
 import { GroupLeaderboard } from '../components/GroupLeaderboard';
-import { LoadingOverlay } from '../components/LoadingOverlay';
 import { DateSelector } from '../components/DateSelector';
-import { ArrowLeft } from '../components/icons';
+import { ArrowLeft, RewindGlyph } from '../components/icons';
 import { useAuth } from '../context/AuthContext';
 import { track } from '../lib/analytics';
 import type { GlobalLeaderboard, GroupLeaderboardEntry } from '../types';
@@ -58,7 +57,6 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
 
   return (
     <div className={styles.screen}>
-      {loading && <LoadingOverlay />}
       <div className={styles.topBar}>
         <button className={styles.backButton} onClick={onBack} type="button" aria-label="Back">
           <ArrowLeft />
@@ -79,7 +77,11 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
         />
 
         <div className={styles.leaderboardArea}>
-          {!loading && (
+          {loading ? (
+            <div className={styles.loadingState} role="status" aria-label="Loading leaderboard">
+              <RewindGlyph className={styles.loadingGlyph} aria-hidden="true" />
+            </div>
+          ) : (
             <GroupLeaderboard
               entries={entries}
               pinnedEntry={pinnedEntry}
@@ -88,11 +90,9 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
           )}
         </div>
 
-        {!loading && entries.length > 0 && (
-          <p className={styles.disclaimer}>
-            No ties: same score ranks by fastest run time, then earliest submission.
-          </p>
-        )}
+        <p className={styles.disclaimer}>
+          Updates every 2 min. Ties: fastest run, then earliest submission.
+        </p>
       </div>
     </div>
   );
