@@ -36,6 +36,14 @@
   letter-spacing: -0.4px;
 }
 
+.wordmarkButton {
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  padding: 0;
+  cursor: pointer;
+}
+
 .topBarSpacer {
   width: 24px;
 }

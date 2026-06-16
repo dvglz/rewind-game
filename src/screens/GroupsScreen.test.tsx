@@ -170,6 +170,35 @@ test('back arrow navigates home via onBack', async () => {
   expect(onBack).toHaveBeenCalledTimes(1);
 });
 
+test('wordmark navigates home via onBack', async () => {
+  const onBack = vi.fn();
+  fetchGroup.mockResolvedValueOnce({
+    id: 42,
+    name: 'the boys',
+    invite_link: 'YPWFZC',
+    members: [
+      { group: 42, user: { id: 7, username: 'You', email: 'you@test.dev' }, joined_at: '2026-06-01T00:00:00Z' },
+    ],
+  });
+  fetchLeaderboard.mockResolvedValueOnce({
+    date: '2026-06-12',
+    currentUser: null,
+    entries: [],
+  });
+
+  render(
+    <GroupsScreen
+      onBack={onBack}
+      onRequireAuth={() => {}}
+      isAuthenticated
+    />,
+  );
+
+  fireEvent.click(await screen.findByRole('button', { name: 'REWIND' }));
+
+  expect(onBack).toHaveBeenCalledTimes(1);
+});
+
 test('shows the loading overlay until the group resolves', async () => {
   fetchGroup.mockResolvedValueOnce({
     id: 1, name: 'the boys', invite_link: 'ABC',

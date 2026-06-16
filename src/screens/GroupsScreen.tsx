@@ -226,7 +226,9 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
         <button className={styles.backButton} onClick={onBack} type="button" aria-label="Back">
           <ArrowLeft />
         </button>
-        <span className={styles.wordmark}>REWIND</span>
+        <button className={styles.wordmarkButton} onClick={onBack} type="button">
+          <span className={styles.wordmark}>REWIND</span>
+        </button>
         <span className={styles.topBarSpacer} />
       </div>
 
