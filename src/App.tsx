@@ -9,6 +9,7 @@ import { LeaderboardScreen } from './screens/LeaderboardScreen';
 import { AuthScreen } from './screens/AuthScreen';
 import { HowToScreen, type HowToEntryPoint } from './screens/HowToScreen';
 import { Toast } from './components/Toast';
+import { ToastRegion } from './components/ToastRegion';
 import { clearGameState, loadGameState, pruneOldGameStates, hasSeenRules } from './engine/storage';
 import { beginPuzzleSession, getDateOverride, getSport, getTodaysPuzzle } from './data/puzzles';
 import { useWebHaptics } from 'web-haptics/react';
@@ -17,7 +18,7 @@ import { hidesCompletedGameLock, shouldEnableHapticsDebug } from './lib/testMode
 import { useThemePreference } from './hooks/useThemePreference';
 import { fetchMyScore, flushPendingScore } from './lib/api';
 import { initAnalytics, trackPageView } from './lib/analytics';
-import styles from './App.module.css';
+import { LoadingOverlay } from './components/LoadingOverlay';
 import './styles/global.css';
 
 type Screen = 'home' | 'game' | 'ordering' | 'results' | 'groups' | 'auth' | 'leaderboard' | 'howto';
@@ -35,8 +36,6 @@ function AppInner() {
   const { isAuthenticated, loading: isAuthLoading } = useAuth();
   useThemePreference();
   const [remoteCompleted, setRemoteCompleted] = useState(false);
-  const [_remoteLoading, setRemoteLoading] = useState(false);
-  void _remoteLoading; // TODO: use for loading indicator
   const [authToast, setAuthToast] = useState('');
 
   useEffect(() => {
@@ -51,7 +50,6 @@ function AppInner() {
   useEffect(() => {
     if (!isAuthenticated) {
       setRemoteCompleted(false);
-      setRemoteLoading(false);
       return;
     }
 
@@ -59,21 +57,16 @@ function AppInner() {
     const local = loadGameState(puzzle.id);
     if (local?.completed) {
       setRemoteCompleted(true);
-      setRemoteLoading(false);
       return;
     }
 
     let cancelled = false;
-    setRemoteLoading(true);
     fetchMyScore(getDateOverride())
       .then((score) => {
         if (!cancelled) setRemoteCompleted(Boolean(score));
       })
       .catch(() => {
         if (!cancelled) setRemoteCompleted(false);
-      })
-      .finally(() => {
-        if (!cancelled) setRemoteLoading(false);
       });
 
     return () => {
@@ -85,7 +78,6 @@ function AppInner() {
     const params = new URLSearchParams(window.location.search);
     return params.get('invite');
   });
-  const showInviteAuthOverlay = Boolean(pendingInvite) && isAuthLoading;
 
   const [screen, setScreen] = useState<Screen>(() => {
     const params = new URLSearchParams(window.location.search);
@@ -208,8 +200,13 @@ function AppInner() {
     navigate('howto');
   };
 
+  if (isAuthLoading) {
+    return <LoadingOverlay />;
+  }
+
   return (
     <>
+      <ToastRegion />
       {screen === 'home' && (
         <HomeScreen
           hasInProgressGame={(() => {
@@ -299,11 +296,6 @@ function AppInner() {
             returnTo={getReturnTo()}
             contextMessage={pendingInvite ? "You'll join a group right after signing in" : undefined}
           />
-          {showInviteAuthOverlay && (
-            <div className={styles.inviteAuthOverlay} data-testid="invite-auth-overlay" aria-hidden="true">
-              <div className={styles.inviteAuthSpinner} data-testid="invite-auth-spinner" />
-            </div>
-          )}
         </>
       )}
       {authToast && <Toast message={authToast} />}

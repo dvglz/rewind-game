@@ -109,18 +109,17 @@ beforeEach(() => {
   window.history.replaceState({}, '', '/?invite=EMNRLJ2G&returnTo=groups');
 });
 
-test('authenticated invite links land on groups after auth state resolves', async () => {
+test('shows the loading overlay while auth resolves, then lands on groups for an invite link', async () => {
   const { App } = await import('./App');
 
   render(<App />);
 
-  expect(screen.getByTestId('invite-auth-overlay')).toBeTruthy();
-  expect(screen.getByTestId('invite-auth-spinner')).toBeTruthy();
-  expect(screen.getByTestId('auth-screen')).toBeTruthy();
+  expect(screen.getByRole('status', { name: 'Loading' })).toBeTruthy();
+  expect(screen.queryByTestId('auth-screen')).toBeNull();
 
   await waitFor(() => {
     expect(screen.getByTestId('groups-screen').textContent).toContain('EMNRLJ2G');
   });
 
-  expect(screen.queryByTestId('invite-auth-overlay')).toBeNull();
+  expect(screen.queryByRole('status', { name: 'Loading' })).toBeNull();
 });

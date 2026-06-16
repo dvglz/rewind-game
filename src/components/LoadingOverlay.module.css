@@ -1,0 +1,36 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  background: var(--color-bg);
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.glyph {
+  width: 64px;
+  height: 64px;
+  color: var(--color-text);
+  transform-origin: center;
+  animation: loadingBreathe 1.25s ease-in-out infinite;
+}
+
+.label {
+  font-family: var(--font-body);
+  color: var(--color-muted);
+  font-size: 0.95rem;
+}
+
+@keyframes loadingBreathe {
+  0%, 100% { transform: scale(0.82); opacity: 0.5; }
+  50%      { transform: scale(1);    opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glyph { animation: none; opacity: 1; transform: none; }
+}
