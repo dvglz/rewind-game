@@ -55,7 +55,12 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
     if (pendingInvite) {
       joinGroup(pendingInvite)
         .then(() => { track('group_join', { via: 'invite_link' }); return fetchGroup(); })
-        .then((g) => { if (!cancelled) setGroup(g); })
+        .then((g) => {
+          if (!cancelled) {
+            setGroup(g);
+            showToast('Joined group');
+          }
+        })
         .catch((err) => {
           if (cancelled) return;
           showToast(err instanceof Error ? err.message : 'Failed to join group');
@@ -120,6 +125,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
     setShowJoin(false);
     const g = await fetchGroup();
     setGroup(g);
+    showToast('Joined group');
   };
 
   const handleLeave = async () => {
@@ -210,7 +216,9 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
         <button className={styles.backButton} onClick={onBack} type="button" aria-label="Back">
           <ArrowLeft />
         </button>
-        <span className={styles.wordmark}>REWIND</span>
+        <button className={styles.wordmarkButton} onClick={onBack} type="button">
+          <span className={styles.wordmark}>REWIND</span>
+        </button>
         <span className={styles.topBarSpacer} />
       </div>
 

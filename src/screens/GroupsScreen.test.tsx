@@ -2,9 +2,10 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { GroupsScreen } from './GroupsScreen';
 
-const { fetchGroup, fetchLeaderboard } = vi.hoisted(() => ({
+const { fetchGroup, fetchLeaderboard, joinGroup } = vi.hoisted(() => ({
   fetchGroup: vi.fn(),
   fetchLeaderboard: vi.fn(),
+  joinGroup: vi.fn(),
 }));
 
 vi.stubEnv('VITE_PUBLIC_APP_URL', 'https://clutchpoints-rewind-test.4taps.me');
@@ -12,7 +13,7 @@ vi.stubEnv('VITE_PUBLIC_APP_URL', 'https://clutchpoints-rewind-test.4taps.me');
 vi.mock('../lib/playhub', () => ({
   fetchGroup,
   createGroup: vi.fn(),
-  joinGroup: vi.fn(),
+  joinGroup,
   leaveGroup: vi.fn(),
 }));
 
@@ -33,6 +34,7 @@ vi.mock('../context/AuthContext', () => ({
 beforeEach(() => {
   fetchGroup.mockReset();
   fetchLeaderboard.mockReset();
+  joinGroup.mockReset();
   Object.defineProperty(window, 'isSecureContext', {
     configurable: true,
     value: false,
@@ -109,4 +111,61 @@ test('shares group invite links with the configured public app url', async () =>
   expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
     expect.stringContaining('https://clutchpoints-rewind-test.4taps.me/?invite=YPWFZC'),
   );
+});
+
+test('shows a success toast after joining by invite link', async () => {
+  joinGroup.mockResolvedValueOnce(undefined);
+  fetchGroup.mockResolvedValueOnce({
+    id: 42,
+    name: 'the boys',
+    invite_link: 'YPWFZC',
+    members: [
+      { group: 42, user: { id: 7, username: 'You', email: 'you@test.dev' }, joined_at: '2026-06-01T00:00:00Z' },
+    ],
+  });
+  fetchLeaderboard.mockResolvedValueOnce({
+    date: '2026-06-12',
+    currentUser: null,
+    entries: [],
+  });
+
+  render(
+    <GroupsScreen
+      onBack={() => {}}
+      onRequireAuth={() => {}}
+      isAuthenticated
+      pendingInvite="YPWFZC"
+    />,
+  );
+
+  expect(await screen.findByText('Joined group')).not.toBeNull();
+});
+
+test('rewind wordmark navigates home via onBack', async () => {
+  const onBack = vi.fn();
+  fetchGroup.mockResolvedValueOnce({
+    id: 42,
+    name: 'the boys',
+    invite_link: 'YPWFZC',
+    members: [
+      { group: 42, user: { id: 7, username: 'You', email: 'you@test.dev' }, joined_at: '2026-06-01T00:00:00Z' },
+    ],
+  });
+  fetchLeaderboard.mockResolvedValueOnce({
+    date: '2026-06-12',
+    currentUser: null,
+    entries: [],
+  });
+
+  render(
+    <GroupsScreen
+      onBack={onBack}
+      onRequireAuth={() => {}}
+      isAuthenticated
+    />,
+  );
+
+  fireEvent.click(await screen.findByRole('button', { name: 'REWIND' }));
+
+  expect(onBack).toHaveBeenCalledTimes(1);
 });
