@@ -3,7 +3,7 @@ import type { GameState, RoundResult, Puzzle } from '../types';
 import { calculateScore, getResultColor } from '../engine/scoring';
 import { saveGameState, loadGameState, updateStatsAfterGame } from '../engine/storage';
 import { getAccessToken } from '../lib/auth';
-import { submitScore, savePendingScore, isScoreSubmitted, markScoreSubmitted, GAME_MODE, GAME_TYPE } from '../lib/api';
+import { submitScore, savePendingScore, isScoreSubmitted, markScoreSubmitted, markScoreSuperseded, GAME_MODE, GAME_TYPE } from '../lib/api';
 
 const TOTAL_ROUNDS = 5;
 
@@ -84,10 +84,13 @@ export function useGame(puzzle: Puzzle) {
 
           if (getAccessToken()) {
             void submitScore(payload)
-              .then(() => markScoreSubmitted(puzzle.id))
-              .catch(() => savePendingScore(payload));
+              .then((submitResult) => {
+                markScoreSubmitted(puzzle.id);
+                if (submitResult === 'duplicate') markScoreSuperseded(puzzle.id);
+              })
+              .catch(() => savePendingScore(payload, puzzle.id));
           } else {
-            savePendingScore(payload);
+            savePendingScore(payload, puzzle.id);
           }
         }
       }

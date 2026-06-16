@@ -63,6 +63,84 @@ describe('submitScore', () => {
       metadata: { total_time: 0, puzzle_number: 1, sport: 'american', rounds: [] },
     })).rejects.toThrow('bad');
   });
+
+  it('resolves "submitted" on success', async () => {
+    document.cookie = 'cp_access_token=tok123';
+    mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({}) });
+    const { submitScore } = await import('./api');
+    const result = await submitScore({
+      game_type: 'REWIND', game_mode: 'rewind_nba', scores: 500,
+      metadata: { total_time: 60, puzzle_number: 1, sport: 'american', rounds: [] },
+    });
+    expect(result).toBe('submitted');
+  });
+});
+
+describe('parseDetail via submitScore (array detail)', () => {
+  it('treats a 400 with array detail "already been submitted today" as a duplicate, not an error', async () => {
+    document.cookie = 'cp_access_token=tok123';
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 400,
+      json: async () => ({ detail: ['A score for this game has already been submitted today.'] }),
+    });
+
+    const { submitScore } = await import('./api');
+    const result = await submitScore({
+      game_type: 'REWIND',
+      game_mode: 'rewind_nba',
+      scores: 100,
+      metadata: { total_time: 30, puzzle_number: 1, sport: 'american', rounds: [] },
+    });
+
+    expect(result).toBe('duplicate');
+  });
+});
+
+describe('superseded flag + pending puzzleId', () => {
+  it('defaults isScoreSuperseded to false and flips after markScoreSuperseded', async () => {
+    const { isScoreSuperseded, markScoreSuperseded } = await import('./api');
+    expect(isScoreSuperseded('2026-06-16-american')).toBe(false);
+    markScoreSuperseded('2026-06-16-american');
+    expect(isScoreSuperseded('2026-06-16-american')).toBe(true);
+  });
+
+  it('savePendingScore persists the puzzleId; clearScoreSyncState removes flag, pending, and puzzleId', async () => {
+    const { savePendingScore, clearScoreSyncState, markScoreSuperseded, isScoreSuperseded,
+      PENDING_SCORE_KEY, PENDING_PUZZLE_KEY } = await import('./api');
+    savePendingScore({
+      game_type: 'REWIND', game_mode: 'rewind_nba', scores: 1,
+      metadata: { total_time: 1, puzzle_number: 1, sport: 'american', rounds: [] },
+    }, '2026-06-16-american');
+    markScoreSuperseded('2026-06-16-american');
+
+    expect(localStorage.getItem(PENDING_PUZZLE_KEY)).toBe('2026-06-16-american');
+
+    clearScoreSyncState();
+
+    expect(localStorage.getItem(PENDING_SCORE_KEY)).toBeNull();
+    expect(localStorage.getItem(PENDING_PUZZLE_KEY)).toBeNull();
+    expect(isScoreSuperseded('2026-06-16-american')).toBe(false);
+  });
+
+  it('flushPendingScore marks the puzzle superseded and clears pending on a duplicate', async () => {
+    document.cookie = 'cp_access_token=tok123';
+    const { flushPendingScore, savePendingScore, isScoreSuperseded, PENDING_SCORE_KEY } = await import('./api');
+    savePendingScore({
+      game_type: 'REWIND', game_mode: 'rewind_nba', scores: 100,
+      metadata: { total_time: 30, puzzle_number: 1, sport: 'american', rounds: [] },
+    }, '2026-06-16-american');
+
+    mockFetch.mockResolvedValueOnce({
+      ok: false, status: 400,
+      json: async () => ({ detail: ['A score for this game has already been submitted today.'] }),
+    });
+
+    await flushPendingScore();
+
+    expect(localStorage.getItem(PENDING_SCORE_KEY)).toBeNull();
+    expect(isScoreSuperseded('2026-06-16-american')).toBe(true);
+  });
 });
 
 describe('fetchMyScore', () => {

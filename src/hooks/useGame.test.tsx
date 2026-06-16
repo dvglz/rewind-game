@@ -8,10 +8,11 @@ vi.mock('../lib/auth', () => ({
 }));
 
 vi.mock('../lib/api', () => ({
-  submitScore: vi.fn(() => Promise.resolve()),
+  submitScore: vi.fn(() => Promise.resolve('submitted')),
   savePendingScore: vi.fn(),
   isScoreSubmitted: vi.fn(() => false),
   markScoreSubmitted: vi.fn(),
+  markScoreSuperseded: vi.fn(),
   GAME_TYPE: 'rewind',
   GAME_MODE: 'rewind_nba',
 }));
@@ -24,7 +25,7 @@ vi.mock('../engine/storage', () => ({
 
 const { saveGameState } = await import('../engine/storage');
 const { getAccessToken } = await import('../lib/auth');
-const { savePendingScore, submitScore, markScoreSubmitted } = await import('../lib/api');
+const { savePendingScore, submitScore, markScoreSubmitted, markScoreSuperseded } = await import('../lib/api');
 
 const puzzle: Puzzle = {
   id: 'rewind-001',
@@ -182,4 +183,28 @@ test('submits a completed score immediately for authenticated players', async ()
 
   expect(submitScore).toHaveBeenCalledTimes(1);
   expect(markScoreSubmitted).toHaveBeenCalledWith('rewind-001');
+});
+
+test('marks the score superseded (not pending) when the backend reports a duplicate', async () => {
+  vi.spyOn(Date, 'now')
+    .mockReturnValueOnce(1_700_000_000_000)
+    .mockReturnValue(1_700_000_125_000);
+  vi.mocked(getAccessToken).mockReturnValue('tok123');
+  vi.mocked(submitScore).mockResolvedValueOnce('duplicate');
+
+  const { result } = renderHook(() => useGame(puzzle));
+
+  await act(async () => { result.current.submitGuess(2001); });
+  await act(async () => { result.current.submitGuess(2002); });
+  await act(async () => { result.current.submitGuess(2003); });
+  await act(async () => { result.current.submitGuess(2004); });
+  await act(async () => {
+    result.current.submitGuess(2005);
+    await Promise.resolve();
+  });
+
+  expect(submitScore).toHaveBeenCalledTimes(1);
+  expect(markScoreSubmitted).toHaveBeenCalledWith('rewind-001');
+  expect(markScoreSuperseded).toHaveBeenCalledWith('rewind-001');
+  expect(savePendingScore).not.toHaveBeenCalled();
 });

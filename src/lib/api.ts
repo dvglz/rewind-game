@@ -1,12 +1,14 @@
 import { getAccessToken } from './auth';
 
 const BASE_URL = (import.meta.env.VITE_BASE_URL as string) ?? '';
-const DETAIL_STALE_PATTERNS = ['stale', 'already submitted', 'duplicate'];
+const DETAIL_STALE_PATTERNS = ['stale', 'already submitted', 'already been submitted', 'already played', 'duplicate'];
 
 export const GAME_TYPE = 'REWIND';
 export const GAME_MODE = 'rewind_nba';
 export const PENDING_SCORE_KEY = 'rewind_pending_score';
+export const PENDING_PUZZLE_KEY = 'rewind_pending_puzzle_id';
 export const SUBMITTED_PREFIX = 'rewind_score_submitted_';
+export const SUPERSEDED_PREFIX = 'rewind_score_superseded_';
 
 export interface RoundMetadata {
   event_text: string;
@@ -52,7 +54,10 @@ function getHeaders(): Record<string, string> {
 async function parseDetail(res: Response): Promise<string> {
   try {
     const body = await res.json();
-    return typeof body.detail === 'string' ? body.detail : '';
+    const detail = body?.detail;
+    if (typeof detail === 'string') return detail;
+    if (Array.isArray(detail)) return detail.filter((x) => typeof x === 'string').join(' ');
+    return '';
   } catch {
     return '';
   }
@@ -66,17 +71,20 @@ function shouldClearPending(status: number, detail: string): boolean {
   return DETAIL_STALE_PATTERNS.some((pattern) => normalized.includes(pattern));
 }
 
-export async function submitScore(payload: ScorePayload): Promise<void> {
+export type SubmitResult = 'submitted' | 'duplicate';
+
+export async function submitScore(payload: ScorePayload): Promise<SubmitResult> {
   const res = await fetch(`${BASE_URL}/playhub/scores/`, {
     method: 'POST',
     headers: getHeaders(),
     body: JSON.stringify(payload),
   });
 
-  if (!res.ok) {
-    const detail = await parseDetail(res);
-    throw new Error(detail || 'Failed to submit score');
-  }
+  if (res.ok) return 'submitted';
+
+  const detail = await parseDetail(res);
+  if (shouldClearPending(res.status, detail)) return 'duplicate';
+  throw new Error(detail || 'Failed to submit score');
 }
 
 export async function fetchMyScore(date: string): Promise<MyScoreResponse | null> {
@@ -151,8 +159,17 @@ export async function fetchLeaderboardById(id: number, groupId?: number): Promis
   return res.json();
 }
 
-export function savePendingScore(payload: ScorePayload): void {
+export function savePendingScore(payload: ScorePayload, puzzleId: string): void {
   localStorage.setItem(PENDING_SCORE_KEY, JSON.stringify(payload));
+  localStorage.setItem(PENDING_PUZZLE_KEY, puzzleId);
+}
+
+export function markScoreSuperseded(puzzleId: string): void {
+  localStorage.setItem(`${SUPERSEDED_PREFIX}${puzzleId}`, 'true');
+}
+
+export function isScoreSuperseded(puzzleId: string): boolean {
+  return localStorage.getItem(`${SUPERSEDED_PREFIX}${puzzleId}`) === 'true';
 }
 
 export function markScoreSubmitted(puzzleId: string): void {
@@ -165,10 +182,11 @@ export function isScoreSubmitted(puzzleId: string): boolean {
 
 export function clearScoreSyncState(): void {
   localStorage.removeItem(PENDING_SCORE_KEY);
+  localStorage.removeItem(PENDING_PUZZLE_KEY);
 
   for (let i = localStorage.length - 1; i >= 0; i -= 1) {
     const key = localStorage.key(i);
-    if (key?.startsWith(SUBMITTED_PREFIX)) {
+    if (key?.startsWith(SUBMITTED_PREFIX) || key?.startsWith(SUPERSEDED_PREFIX)) {
       localStorage.removeItem(key);
     }
   }
@@ -179,6 +197,7 @@ export async function flushPendingScore(): Promise<void> {
   if (!raw || !getAccessToken()) return;
 
   const payload: ScorePayload = JSON.parse(raw);
+  const puzzleId = localStorage.getItem(PENDING_PUZZLE_KEY);
   const res = await fetch(`${BASE_URL}/playhub/scores/`, {
     method: 'POST',
     headers: getHeaders(),
@@ -187,11 +206,14 @@ export async function flushPendingScore(): Promise<void> {
 
   if (res.ok) {
     localStorage.removeItem(PENDING_SCORE_KEY);
+    localStorage.removeItem(PENDING_PUZZLE_KEY);
     return;
   }
 
   const detail = await parseDetail(res);
   if (shouldClearPending(res.status, detail)) {
+    if (puzzleId) markScoreSuperseded(puzzleId);
     localStorage.removeItem(PENDING_SCORE_KEY);
+    localStorage.removeItem(PENDING_PUZZLE_KEY);
   }
 }
