@@ -120,7 +120,6 @@ function AppInner() {
 
   const navigate = (s: Screen) => {
     setScreen(s);
-    trackPageView(s);
     const params = new URLSearchParams(window.location.search);
     if (s === 'home') {
       params.delete('mode');
@@ -135,6 +134,7 @@ function AppInner() {
 
     const nextSearch = params.toString();
     window.history.pushState({}, '', nextSearch ? `/?${nextSearch}` : '/');
+    trackPageView(s);
   };
 
   const navigateToAuth = (returnTo: Screen) => {

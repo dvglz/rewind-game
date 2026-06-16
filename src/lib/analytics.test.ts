@@ -19,18 +19,65 @@ describe('analytics (enabled)', () => {
   });
 
   it('track pushes an event entry', () => {
+    window.history.replaceState({}, '', '/?mode=results');
     track('game_complete', { total_score: 1200 });
-    expect(last()).toEqual(['event', 'game_complete', { total_score: 1200 }]);
+    expect(last()).toEqual([
+      'event',
+      'game_complete',
+      {
+        total_score: 1200,
+        page_location: 'http://localhost:3000/?mode=results',
+        send_to: 'G-TEST123',
+      },
+    ]);
   });
 
-  it('trackPageView maps a screen to a page_path', () => {
+  it('track initializes analytics if an event fires before initAnalytics', () => {
+    window.__gaInit = false;
+    window.dataLayer = [];
+    window.gtag = undefined as unknown as Window['gtag'];
+
+    track('leaderboard_view', { scope: 'global' });
+
+    expect(entries()).toContainEqual([
+      'event',
+      'leaderboard_view',
+      {
+        scope: 'global',
+        page_location: 'http://localhost:3000/?mode=results',
+        send_to: 'G-TEST123',
+      },
+    ]);
+  });
+
+  it('trackPageView maps a screen to page details', () => {
+    window.history.replaceState({}, '', '/?mode=game');
     trackPageView('game');
-    expect(last()).toEqual(['event', 'page_view', { page_path: '/game', page_title: 'game' }]);
+    expect(last()).toEqual([
+      'event',
+      'page_view',
+      {
+        page_path: '/game',
+        page_title: 'game',
+        page_location: 'http://localhost:3000/?mode=game',
+        send_to: 'G-TEST123',
+      },
+    ]);
   });
 
   it('trackPageView maps home to root', () => {
+    window.history.replaceState({}, '', '/');
     trackPageView('home');
-    expect(last()).toEqual(['event', 'page_view', { page_path: '/', page_title: 'home' }]);
+    expect(last()).toEqual([
+      'event',
+      'page_view',
+      {
+        page_path: '/',
+        page_title: 'home',
+        page_location: 'http://localhost:3000/',
+        send_to: 'G-TEST123',
+      },
+    ]);
   });
 
   it('setUser sets user_id and user_properties', () => {

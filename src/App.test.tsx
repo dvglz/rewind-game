@@ -2,6 +2,10 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { useEffect, useMemo, useState, createContext, useContext, type ReactNode } from 'react';
 import { beforeEach, expect, test, vi } from 'vitest';
 
+const { trackPageViewMock } = vi.hoisted(() => ({
+  trackPageViewMock: vi.fn(),
+}));
+
 type AuthValue = {
   isAuthenticated: boolean;
   loading: boolean;
@@ -54,7 +58,7 @@ vi.mock('./lib/api', () => ({
 
 vi.mock('./lib/analytics', () => ({
   initAnalytics: vi.fn(),
-  trackPageView: vi.fn(),
+  trackPageView: trackPageViewMock,
 }));
 
 vi.mock('./engine/storage', () => ({
@@ -76,7 +80,12 @@ vi.mock('./lib/testMode', () => ({
 }));
 
 vi.mock('./screens/HomeScreen', () => ({
-  HomeScreen: () => <div data-testid="home-screen">home</div>,
+  HomeScreen: ({ onLeaderboard }: { onLeaderboard: () => void }) => (
+    <div data-testid="home-screen">
+      home
+      <button type="button" onClick={onLeaderboard}>Leaderboard</button>
+    </div>
+  ),
 }));
 
 vi.mock('./screens/GameScreen', () => ({
@@ -106,6 +115,7 @@ vi.mock('./screens/GroupsScreen', () => ({
 }));
 
 beforeEach(() => {
+  trackPageViewMock.mockClear();
   window.history.replaceState({}, '', '/?invite=EMNRLJ2G&returnTo=groups');
 });
 
@@ -122,4 +132,27 @@ test('shows the loading overlay while auth resolves, then lands on groups for an
   });
 
   expect(screen.queryByRole('status', { name: 'Loading' })).toBeNull();
+});
+
+test('updates the URL before tracking SPA navigation pageviews', async () => {
+  window.history.replaceState({}, '', '/');
+  trackPageViewMock.mockImplementation((screen: string) => {
+    if (screen === 'leaderboard') {
+      expect(window.location.search).toBe('?mode=leaderboard');
+    }
+  });
+
+  const { App } = await import('./App');
+
+  render(<App />);
+
+  await waitFor(() => {
+    expect(screen.getByTestId('home-screen')).toBeTruthy();
+  });
+
+  screen.getByRole('button', { name: 'Leaderboard' }).click();
+
+  await waitFor(() => {
+    expect(trackPageViewMock).toHaveBeenCalledWith('leaderboard');
+  });
 });

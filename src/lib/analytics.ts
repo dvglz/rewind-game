@@ -5,6 +5,18 @@ const measurementId = (): string | undefined =>
 
 const enabled = (): boolean => Boolean(measurementId());
 
+const currentPageLocation = (): string | undefined =>
+  typeof window === 'undefined' ? undefined : window.location.href;
+
+function ensureAnalytics(): string | undefined {
+  const id = measurementId();
+  if (!id || typeof window === 'undefined') return undefined;
+  if (!window.__gaInit || typeof window.gtag !== 'function') {
+    initAnalytics();
+  }
+  return typeof window.gtag === 'function' ? id : undefined;
+}
+
 /** Set up the gtag buffer + load the GA script. Safe to call once at startup. */
 export function initAnalytics(): void {
   if (!enabled() || typeof window === 'undefined' || window.__gaInit) return;
@@ -21,7 +33,7 @@ export function initAnalytics(): void {
   // We fire page_view manually on screen change, so disable the automatic one.
   window.gtag('config', id, { send_page_view: false });
   window.gtag('set', 'user_properties', {
-    is_pwa: window.matchMedia('(display-mode: standalone)').matches,
+    is_pwa: window.matchMedia?.('(display-mode: standalone)').matches ?? false,
   });
 
   const script = document.createElement('script');
@@ -33,16 +45,24 @@ export function initAnalytics(): void {
 }
 
 export function track(name: string, params: Params = {}): void {
-  if (!enabled()) return;
-  window.gtag('event', name, params);
+  const id = ensureAnalytics();
+  if (!id) return;
+  window.gtag('event', name, {
+    ...params,
+    page_location: currentPageLocation(),
+    send_to: id,
+  });
 }
 
 /** Manual page_view for the SPA. `screen` is the App's screen-state string. */
 export function trackPageView(screen: string): void {
-  if (!enabled()) return;
+  const id = ensureAnalytics();
+  if (!id) return;
   window.gtag('event', 'page_view', {
     page_path: screen === 'home' ? '/' : `/${screen}`,
     page_title: screen,
+    page_location: currentPageLocation(),
+    send_to: id,
   });
 }
 
@@ -51,7 +71,7 @@ export function setUser(props: {
   is_authenticated?: boolean;
   auth_method?: 'google' | 'email';
 }): void {
-  if (!enabled()) return;
+  if (!ensureAnalytics()) return;
   const { user_id, ...userProps } = props;
   if (user_id != null) window.gtag('set', { user_id: String(user_id) });
   if (Object.keys(userProps).length > 0) {
@@ -60,7 +80,7 @@ export function setUser(props: {
 }
 
 export function clearUser(): void {
-  if (!enabled()) return;
+  if (!ensureAnalytics()) return;
   window.gtag('set', { user_id: null });
   window.gtag('set', 'user_properties', { is_authenticated: false, auth_method: null });
 }
