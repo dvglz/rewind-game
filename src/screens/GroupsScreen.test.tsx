@@ -141,7 +141,7 @@ test('shows a success toast after joining by invite link', async () => {
   expect(await screen.findByText('Joined group')).not.toBeNull();
 });
 
-test('rewind wordmark navigates home via onBack', async () => {
+test('back arrow navigates home via onBack', async () => {
   const onBack = vi.fn();
   fetchGroup.mockResolvedValueOnce({
     id: 42,
@@ -165,7 +165,21 @@ test('rewind wordmark navigates home via onBack', async () => {
     />,
   );
 
-  fireEvent.click(await screen.findByRole('button', { name: 'REWIND' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Back' }));
 
   expect(onBack).toHaveBeenCalledTimes(1);
+});
+
+test('shows the loading overlay until the group resolves', async () => {
+  fetchGroup.mockResolvedValueOnce({
+    id: 1, name: 'the boys', invite_link: 'ABC',
+    members: [{ group: 1, user: { id: 7, username: 'You', email: 'you@test.dev' }, joined_at: '2026-06-01T00:00:00Z' }],
+  });
+  fetchLeaderboard.mockResolvedValueOnce({ date: '2026-06-12', currentUser: null, entries: [] });
+
+  render(<GroupsScreen onBack={() => {}} onRequireAuth={() => {}} isAuthenticated />);
+
+  expect(screen.getByRole('status', { name: 'Loading' })).toBeTruthy();
+  await screen.findByText('the boys');
+  expect(screen.queryByRole('status', { name: 'Loading' })).toBeNull();
 });

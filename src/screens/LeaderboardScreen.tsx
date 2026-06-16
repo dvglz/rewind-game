@@ -5,6 +5,7 @@ import { getDayOffsetFromToday } from '../lib/leaderboard';
 import { formatTime } from '../lib/formatTime';
 import { LEADERBOARD_PAGE_LIMIT } from '../config/leaderboard';
 import { GroupLeaderboard } from '../components/GroupLeaderboard';
+import { LoadingOverlay } from '../components/LoadingOverlay';
 import { DateSelector } from '../components/DateSelector';
 import { ArrowLeft } from '../components/icons';
 import { useAuth } from '../context/AuthContext';
@@ -57,13 +58,12 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
 
   return (
     <div className={styles.screen}>
+      {loading && <LoadingOverlay />}
       <div className={styles.topBar}>
         <button className={styles.backButton} onClick={onBack} type="button" aria-label="Back">
           <ArrowLeft />
         </button>
-        <button className={styles.wordmarkButton} onClick={onBack} type="button">
-          <span className={styles.wordmark}>REWIND</span>
-        </button>
+        <span className={styles.wordmark}>REWIND</span>
         <span className={styles.topBarSpacer} />
       </div>
 

@@ -155,7 +155,7 @@ export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage }: Auth
           </div>
         ) : (
           <>
-            <h1 className={styles.heading}>{'Sign in\nto Clutch Play'}</h1>
+            <h1 className={styles.heading}>{'Sign in\nto Rewind'}</h1>
             <p className={styles.subtitle}>
               {contextMessage ?? 'Play with friends, track your scores'}
             </p>

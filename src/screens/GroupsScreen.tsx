@@ -9,6 +9,7 @@ import { CreateGroupModal } from '../components/CreateGroupModal';
 import { JoinGroupModal } from '../components/JoinGroupModal';
 import { ArrowLeft, Plus } from '../components/icons';
 import { Toast } from '../components/Toast';
+import { LoadingOverlay } from '../components/LoadingOverlay';
 import { useAuth } from '../context/AuthContext';
 import { track } from '../lib/analytics';
 import { getPublicAppUrl } from '../lib/share';
@@ -113,6 +114,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
 
   const handleCreate = async (name: string) => {
     await createGroup(name);
+    track('group_create');
     setShowCreate(false);
     const g = await fetchGroup();
     setGroup(g);
@@ -134,6 +136,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
       return;
     }
     await leaveGroup();
+    track('group_leave');
     setConfirmLeave(false);
     setGroup(null);
     showToast('You left the group');
@@ -171,6 +174,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
         await navigator.share({
           text: shareText,
         });
+        track('invite_share', { method: 'native' });
         return;
       } catch {
         // User cancelled or share failed — fall through to clipboard
@@ -179,13 +183,19 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
 
     try {
       await navigator.clipboard.writeText(shareText);
+      track('invite_share', { method: 'clipboard' });
       showToast('Copied!');
     } catch {
-      showToast(fallbackCopy(shareText) ? 'Copied!' : 'Copy failed');
+      if (fallbackCopy(shareText)) {
+        track('invite_share', { method: 'clipboard' });
+        showToast('Copied!');
+      } else {
+        showToast('Copy failed');
+      }
     }
   };
 
-  if (loading) return null;
+  if (loading) return <LoadingOverlay />;
 
   const scoreByName = new Map(
     (groupBoard?.entries ?? []).map((entry) => [entry.displayName, entry] as const),
@@ -216,9 +226,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
         <button className={styles.backButton} onClick={onBack} type="button" aria-label="Back">
           <ArrowLeft />
         </button>
-        <button className={styles.wordmarkButton} onClick={onBack} type="button">
-          <span className={styles.wordmark}>REWIND</span>
-        </button>
+        <span className={styles.wordmark}>REWIND</span>
         <span className={styles.topBarSpacer} />
       </div>
 

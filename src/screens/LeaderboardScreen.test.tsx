@@ -85,3 +85,15 @@ test('anchors the first leaderboard view to the active puzzle date', async () =>
   expect(await screen.findByText('Today')).not.toBeNull();
   expect(screen.getByText('Jun 15, 2026')).not.toBeNull();
 });
+
+test('shows the loading overlay until the leaderboard resolves', async () => {
+  render(
+    <AuthProvider>
+      <LeaderboardScreen onBack={() => {}} />
+    </AuthProvider>,
+  );
+
+  expect(screen.getByRole('status', { name: 'Loading' })).toBeTruthy();
+  await screen.findByText('Mike');
+  expect(screen.queryByRole('status', { name: 'Loading' })).toBeNull();
+});
