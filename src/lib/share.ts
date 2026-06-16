@@ -7,8 +7,13 @@ const PUBLIC_APP_URL =
   ((import.meta.env.VITE_PUBLIC_APP_URL as string | undefined) || '').trim() ||
   'https://clutchpoints-rewind-test.4taps.me';
 
+function withProtocol(url: string): string {
+  if (/^https?:\/\//i.test(url)) return url;
+  return `https://${url}`;
+}
+
 export function getPublicAppUrl(): string {
-  return PUBLIC_APP_URL.replace(/\/+$/, '');
+  return withProtocol(PUBLIC_APP_URL).replace(/\/+$/, '');
 }
 
 export function generateShareText(

@@ -46,6 +46,25 @@ test('adds the soccer marker only for soccer shares', () => {
   expect(text.startsWith('Rewind ⚽ #006 / Jun 6, 2026')).toBe(true);
 });
 
+test('normalizes a bare public app url to https for share and invite links', async () => {
+  vi.resetModules();
+  vi.stubEnv('VITE_PUBLIC_APP_URL', 'rewindgame.com');
+
+  const { generateShareText: generateText, getPublicAppUrl } = await import('./share');
+  const text = generateText(
+    1,
+    [{ event: { text: 'Q1', year: 2010 }, guessedYear: 2010, actualYear: 2010, diff: 0, score: 100 }],
+    100,
+    1000,
+    0,
+    'american',
+    '2026-06-16',
+  );
+
+  expect(getPublicAppUrl()).toBe('https://rewindgame.com');
+  expect(text).toContain('https://rewindgame.com');
+});
+
 test('native share sends only text to avoid duplicating the Rewind title', async () => {
   const share = vi.fn().mockResolvedValue(undefined);
   Object.defineProperty(window, 'isSecureContext', {
