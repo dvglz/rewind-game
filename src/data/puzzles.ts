@@ -73,7 +73,7 @@ const AMERICAN_SPORTS_DAYS: RawEvent[][] = [
     { id: "evt_jordan_drafted", title: "Jordan is drafted third overall by the Bulls", date: "1984-06-19", reveal: "In 1984, Chicago took Jordan after Olajuwon and Bowie — arguably the greatest draft steal ever." },
     { id: "evt_celtics_big_three", title: "The Celtics Big Three of Pierce, Garnett, and Allen win the title", date: "2008-06-17", reveal: "In 2008, Boston beat the Lakers after assembling its superteam via blockbuster trades." },
     { id: "evt_butler_heat_finals", title: "Butler and the 8-seed Heat make the Finals as a play-in team", date: "2023-05-29", reveal: "In 2023, Jimmy Butler led Miami on an improbable run through the East before losing to Denver." },
-    { id: "evt_flutie_hail_mary", title: "Flutie throws the Hail Mary for Boston College against Miami", date: "1984-11-23", reveal: "In 1984, Flutie's last-second touchdown became the most famous play in college football history." },
+    { id: "evt_reggie_8_9", title: "Reggie Miller scores 8 points in 9 seconds against the Knicks", date: "1995-05-07", reveal: "In 1995, Reggie stunned the Knicks with 8 points in 8.9 seconds." },
   ],
   // Day 9
   [
