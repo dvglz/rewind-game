@@ -2,8 +2,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-const publicAppUrl = (process.env.VITE_PUBLIC_APP_URL || 'https://clutchpoints-rewind-test.4taps.me').replace(/\/+$/, '');
-
 const previewAllowedHosts = [
   'rewind-game-dqkul.ondigitalocean.app',
   'clutchpoints-rewind-test.4taps.me',
@@ -15,25 +13,32 @@ const previewAllowedHosts = [
     : []),
 ];
 
-export default defineConfig(() => ({
-  base: process.env.VITE_BASE_PATH || '/',
-  plugins: [
-    react(),
-    {
-      name: 'rewind-public-app-url',
-      transformIndexHtml(html) {
-        return html.replaceAll('__PUBLIC_APP_URL__', publicAppUrl);
+export default defineConfig(() => {
+  const publicAppUrl = (process.env.VITE_PUBLIC_APP_URL || 'https://clutchpoints-rewind-test.4taps.me').replace(/\/+$/, '');
+  const robotsDirective = publicAppUrl === 'https://rewindgame.com' ? 'index, follow' : 'noindex, nofollow';
+
+  return {
+    base: process.env.VITE_BASE_PATH || '/',
+    plugins: [
+      react(),
+      {
+        name: 'rewind-public-app-url',
+        transformIndexHtml(html) {
+          return html
+            .replaceAll('__PUBLIC_APP_URL__', publicAppUrl)
+            .replaceAll('__ROBOTS_DIRECTIVE__', robotsDirective);
+        },
       },
+    ],
+    preview: {
+      allowedHosts: previewAllowedHosts,
     },
-  ],
-  preview: {
-    allowedHosts: previewAllowedHosts,
-  },
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: [],
-    // Keep analytics a no-op in tests regardless of .env.local.
-    env: { VITE_GA_MEASUREMENT_ID: '' },
-  },
-}));
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: [],
+      // Keep analytics a no-op in tests regardless of .env.local.
+      env: { VITE_GA_MEASUREMENT_ID: '' },
+    },
+  };
+});
