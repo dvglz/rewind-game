@@ -276,7 +276,7 @@ function rawToGameEvent(raw: RawEvent, sport: Sport): GameEvent {
  * Offset so that DAY_ZERO_DATE maps to index 0 (= Day 1 in the pool).
  * Change DAY_ZERO_DATE to shift which real date gets Day 1.
  */
-const DAY_ZERO_DATE = '2026-06-15';
+const DAY_ZERO_DATE = '2026-06-16';
 
 function dayIndex(dateStr: string): number {
   const ms = new Date(dateStr).getTime() - new Date(DAY_ZERO_DATE).getTime();
