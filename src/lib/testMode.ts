@@ -1,4 +1,6 @@
-export function hidesCompletedGameLock(search: string): boolean {
+export function hidesCompletedGameLock(search: string, isProduction = import.meta.env.PROD): boolean {
+  if (isProduction) return false;
+
   return new URLSearchParams(search).get('test') === '1';
 }
 
