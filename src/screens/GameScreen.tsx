@@ -5,7 +5,7 @@ import { Timeline } from '../components/Timeline';
 import { ConfirmButton } from '../components/ConfirmButton';
 import { useGame } from '../hooks/useGame';
 import { useTimeline } from '../hooks/useTimeline';
-import { getTodaysPuzzle } from '../data/puzzles';
+import { getTodaysPuzzle, isRewindLabMode } from '../data/puzzles';
 import { getResultColor, getResultColorVar, getResultLabel, getMaxPossibleScore, ROUND_WEIGHTS } from '../engine/scoring';
 import { vibrateConfirm, vibrateError, vibrateMedium } from '../lib/haptics';
 import { loadStats } from '../engine/storage';
@@ -25,7 +25,7 @@ interface GameScreenProps {
 
 export function GameScreen({ onFinish, onHome }: GameScreenProps) {
   const puzzle = getTodaysPuzzle();
-  const game = useGame(puzzle);
+  const game = useGame(puzzle, { scoringEnabled: !isRewindLabMode() });
   const timeline = useTimeline(puzzle.events);
   const [pendingResult, setPendingResult] = useState<RoundResult | null>(null);
   const [revealResult, setRevealResult] = useState<RoundResult | null>(null);

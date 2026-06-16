@@ -72,6 +72,7 @@ vi.mock('./data/puzzles', () => ({
   getDateOverride: vi.fn().mockReturnValue('2026-06-15'),
   getSport: vi.fn().mockReturnValue('american'),
   getTodaysPuzzle: vi.fn().mockReturnValue({ id: '2026-06-15-american', number: 1 }),
+  isRewindLabMode: vi.fn().mockReturnValue(false),
 }));
 
 vi.mock('./lib/testMode', () => ({

@@ -11,7 +11,7 @@ import { HowToScreen, type HowToEntryPoint } from './screens/HowToScreen';
 import { Toast } from './components/Toast';
 import { ToastRegion } from './components/ToastRegion';
 import { clearGameState, loadGameState, pruneOldGameStates, hasSeenRules } from './engine/storage';
-import { beginPuzzleSession, getDateOverride, getSport, getTodaysPuzzle } from './data/puzzles';
+import { beginPuzzleSession, getDateOverride, getSport, getTodaysPuzzle, isRewindLabMode } from './data/puzzles';
 import { useWebHaptics } from 'web-haptics/react';
 import { initHaptics } from './lib/haptics';
 import { hidesCompletedGameLock, shouldEnableHapticsDebug } from './lib/testMode';
@@ -49,6 +49,10 @@ function AppInner() {
 
   useEffect(() => {
     if (!isAuthenticated) {
+      setRemoteCompleted(false);
+      return;
+    }
+    if (isRewindLabMode()) {
       setRemoteCompleted(false);
       return;
     }

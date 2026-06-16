@@ -50,6 +50,23 @@ describe('analytics (enabled)', () => {
     ]);
   });
 
+  it('adds debug mode to custom events when gaDebug=1 is present', () => {
+    window.history.replaceState({}, '', '/?gaDebug=1');
+
+    track('share_score', { method: 'clipboard' });
+
+    expect(last()).toEqual([
+      'event',
+      'share_score',
+      {
+        method: 'clipboard',
+        page_location: 'http://localhost:3000/?gaDebug=1',
+        send_to: 'G-TEST123',
+        debug_mode: true,
+      },
+    ]);
+  });
+
   it('trackPageView maps a screen to page details', () => {
     window.history.replaceState({}, '', '/?mode=game');
     trackPageView('game');
@@ -76,6 +93,24 @@ describe('analytics (enabled)', () => {
         page_title: 'home',
         page_location: 'http://localhost:3000/',
         send_to: 'G-TEST123',
+      },
+    ]);
+  });
+
+  it('adds debug mode to pageviews when gaDebug=1 is present', () => {
+    window.history.replaceState({}, '', '/?mode=groups&gaDebug=1');
+
+    trackPageView('groups');
+
+    expect(last()).toEqual([
+      'event',
+      'page_view',
+      {
+        page_path: '/groups',
+        page_title: 'groups',
+        page_location: 'http://localhost:3000/?mode=groups&gaDebug=1',
+        send_to: 'G-TEST123',
+        debug_mode: true,
       },
     ]);
   });

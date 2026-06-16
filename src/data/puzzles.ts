@@ -197,6 +197,7 @@ const FLAT_POOLS: Record<string, RawEvent[]> = {
 
 const RANDOM_MODE_KEY = 'rewind_random_mode';
 const RANDOM_SEED_KEY = 'rewind_random_seed';
+const REWIND_LAB_PARAM = 'rewindLab';
 
 /**
  * Deterministic hash for seeding.
@@ -283,6 +284,31 @@ function dayIndex(dateStr: string): number {
   return Math.floor(ms / 86_400_000);
 }
 
+function dateFromPuzzleNumber(value: string): string | null {
+  if (!/^\d{1,3}$/.test(value)) return null;
+  const puzzleNumber = Number(value);
+  if (!Number.isInteger(puzzleNumber) || puzzleNumber < 1) return null;
+  const date = new Date(`${DAY_ZERO_DATE}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + puzzleNumber - 1);
+  return date.toISOString().slice(0, 10);
+}
+
+function getRewindLabDate(): string | null {
+  const params = new URLSearchParams(window.location.search);
+  const value = params.get(REWIND_LAB_PARAM)?.trim();
+  if (!value) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  const numericDate = dateFromPuzzleNumber(value);
+  if (numericDate) return numericDate;
+
+  const match = value.match(/(?:lab-)?(\d{4}-\d{2}-\d{2})-(?:american|soccer)$/);
+  return match?.[1] ?? null;
+}
+
+export function isRewindLabMode(): boolean {
+  return getRewindLabDate() !== null;
+}
+
 export type Sport = 'american' | 'soccer';
 
 export const SPORT_LABELS: Record<Sport, string> = {
@@ -366,6 +392,9 @@ export function getPuzzleForDate(dateStr: string, sport: Sport = 'american'): Pu
  * for real daily rotation.
  */
 export function getDateOverride(): string {
+  const labDate = getRewindLabDate();
+  if (labDate) return labDate;
+
   const params = new URLSearchParams(window.location.search);
   const dateParam = params.get('date');
   if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
@@ -375,5 +404,12 @@ export function getDateOverride(): string {
 }
 
 export function getTodaysPuzzle(sport?: Sport): Puzzle {
-  return getPuzzleForDate(getDateOverride(), sport ?? getSport());
+  const selectedSport = sport ?? getSport();
+  const date = getDateOverride();
+  const puzzle = getPuzzleForDate(date, selectedSport);
+  if (!isRewindLabMode()) return puzzle;
+  return {
+    ...puzzle,
+    id: `lab-${date}-${selectedSport}`,
+  };
 }

@@ -23,7 +23,7 @@ vi.mock('../engine/storage', () => ({
   updateStatsAfterGame: vi.fn(),
 }));
 
-const { saveGameState } = await import('../engine/storage');
+const { saveGameState, updateStatsAfterGame } = await import('../engine/storage');
 const { getAccessToken } = await import('../lib/auth');
 const { savePendingScore, submitScore, markScoreSubmitted, markScoreSuperseded } = await import('../lib/api');
 
@@ -154,6 +154,26 @@ test('stashes a pending score when an anonymous player completes the game', () =
 
   expect(savePendingScore).toHaveBeenCalledTimes(1);
   expect(submitScore).not.toHaveBeenCalled();
+});
+
+test('does not update stats or sync score when scoring is disabled', () => {
+  vi.spyOn(Date, 'now')
+    .mockReturnValueOnce(1_700_000_000_000)
+    .mockReturnValue(1_700_000_125_000);
+  vi.mocked(getAccessToken).mockReturnValue('tok123');
+
+  const { result } = renderHook(() => useGame(puzzle, { scoringEnabled: false }));
+
+  act(() => { result.current.submitGuess(2001); });
+  act(() => { result.current.submitGuess(2002); });
+  act(() => { result.current.submitGuess(2003); });
+  act(() => { result.current.submitGuess(2004); });
+  act(() => { result.current.submitGuess(2005); });
+
+  expect(result.current.isComplete).toBe(true);
+  expect(updateStatsAfterGame).not.toHaveBeenCalled();
+  expect(submitScore).not.toHaveBeenCalled();
+  expect(savePendingScore).not.toHaveBeenCalled();
 });
 
 test('submits a completed score immediately for authenticated players', async () => {

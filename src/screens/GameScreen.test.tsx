@@ -42,6 +42,7 @@ vi.mock('../hooks/useTimeline', () => ({
 
 vi.mock('../data/puzzles', () => ({
   getTodaysPuzzle: vi.fn(),
+  isRewindLabMode: vi.fn(() => false),
 }));
 
 vi.mock('../lib/haptics', () => ({

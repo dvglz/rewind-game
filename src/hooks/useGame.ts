@@ -7,7 +7,11 @@ import { submitScore, savePendingScore, isScoreSubmitted, markScoreSubmitted, ma
 
 const TOTAL_ROUNDS = 5;
 
-export function useGame(puzzle: Puzzle) {
+interface UseGameOptions {
+  scoringEnabled?: boolean;
+}
+
+export function useGame(puzzle: Puzzle, { scoringEnabled = true }: UseGameOptions = {}) {
   const [state, setState] = useState<GameState>(() => {
     const saved = loadGameState(puzzle.id);
     if (saved) return saved;
@@ -59,7 +63,7 @@ export function useGame(puzzle: Puzzle) {
       setState(newState);
       saveGameState(newState);
 
-      if (completed) {
+      if (completed && scoringEnabled) {
         updateStatsAfterGame(puzzle.id);
 
         if (!isScoreSubmitted(puzzle.id)) {
@@ -97,7 +101,7 @@ export function useGame(puzzle: Puzzle) {
 
       return result;
     },
-    [state, currentEvent, puzzle.id, puzzle.number, puzzle.sport]
+    [state, currentEvent, puzzle.id, puzzle.number, puzzle.sport, scoringEnabled]
   );
 
   return {

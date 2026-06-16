@@ -8,6 +8,13 @@ const enabled = (): boolean => Boolean(measurementId());
 const currentPageLocation = (): string | undefined =>
   typeof window === 'undefined' ? undefined : window.location.href;
 
+const debugParams = (): Params => {
+  if (typeof window === 'undefined') return {};
+  return new URLSearchParams(window.location.search).get('gaDebug') === '1'
+    ? { debug_mode: true }
+    : {};
+};
+
 function ensureAnalytics(): string | undefined {
   const id = measurementId();
   if (!id || typeof window === 'undefined') return undefined;
@@ -51,6 +58,7 @@ export function track(name: string, params: Params = {}): void {
     ...params,
     page_location: currentPageLocation(),
     send_to: id,
+    ...debugParams(),
   });
 }
 
@@ -63,6 +71,7 @@ export function trackPageView(screen: string): void {
     page_title: screen,
     page_location: currentPageLocation(),
     send_to: id,
+    ...debugParams(),
   });
 }
 
