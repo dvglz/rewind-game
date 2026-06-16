@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ShareCard } from '../components/ShareCard';
-import { loadGameState, loadStats } from '../engine/storage';
+import { loadGameState, loadStats, hasSeenGrade, markGradeSeen } from '../engine/storage';
 import { getTodaysPuzzle, getSport, getDateOverride } from '../data/puzzles';
 import { getMaxPossibleScore, getScoreTierLabel } from '../engine/scoring';
 import { generateShareText, shareResults, type ShareOutcome } from '../lib/share';
-import { fetchMyScore } from '../lib/api';
+import { fetchMyScore, isScoreSuperseded } from '../lib/api';
 import { Toast } from '../components/Toast';
 import { RewindGlyph } from '../components/icons';
 import { useAuth } from '../context/AuthContext';
@@ -25,8 +25,10 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }
   const sport = getSport();
   const state = useMemo(() => loadGameState(puzzle.id), [puzzle.id]);
   const stats = useMemo(() => loadStats(), []);
+  const superseded = useMemo(() => isScoreSuperseded(puzzle.id), [puzzle.id]);
   const [shareState, setShareState] = useState<ShareOutcome | null>(null);
   const [showMotivational, setShowMotivational] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   const [remoteState, setRemoteState] = useState<{
     totalScore: number;
     elapsedMs: number;
@@ -41,14 +43,16 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }
     timeZone: 'UTC',
   });
 
-  const displayState = state?.completed
-    ? { totalScore: state.totalScore, elapsedMs: state.elapsedMs ?? 0, results: state.results }
+  const preferLocal = Boolean(state?.completed) && !superseded;
+  const displayState = preferLocal
+    ? { totalScore: state!.totalScore, elapsedMs: state!.elapsedMs ?? 0, results: state!.results }
     : remoteState;
 
   const motivationalLabel = displayState ? getScoreTierLabel(displayState.totalScore, maxScore) : '';
+  const hasScore = Boolean(displayState);
 
   useEffect(() => {
-    if (state?.completed) {
+    if (state?.completed && !superseded) {
       setRemoteState(null);
       setRemoteChecked(true);
       return;
@@ -90,14 +94,25 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated, state?.completed]);
+  }, [isAuthenticated, state?.completed, superseded]);
 
   useEffect(() => {
-    // Show the motivational toast after the card animation settles
-    const showTimer = setTimeout(() => setShowMotivational(true), 600);
+    // Show the score-grade toast once per puzzle/day, after the card settles.
+    if (!hasScore || hasSeenGrade(puzzle.id)) return;
+    const showTimer = setTimeout(() => {
+      setShowMotivational(true);
+      markGradeSeen(puzzle.id);
+    }, 600);
     const hideTimer = setTimeout(() => setShowMotivational(false), 4000);
     return () => { clearTimeout(showTimer); clearTimeout(hideTimer); };
-  }, []);
+  }, [puzzle.id, hasScore]);
+
+  useEffect(() => {
+    if (!superseded) return;
+    const show = setTimeout(() => setShowInfo(true), 100);
+    const hide = setTimeout(() => setShowInfo(false), 4000);
+    return () => { clearTimeout(show); clearTimeout(hide); };
+  }, [superseded]);
 
   if (!displayState) {
     if (isAuthenticated && !remoteChecked) {
@@ -133,9 +148,7 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }
     <div className={styles.screen}>
       <header className={styles.topBar}>
         <span className={styles.topBarSpacer} />
-        <button type="button" className={styles.wordmarkButton} onClick={onHome}>
-          <span className={styles.wordmark}>REWIND</span>
-        </button>
+        <span className={styles.wordmark}>REWIND</span>
         <span className={styles.topBarSpacer} />
       </header>
       <div className={styles.content}>
@@ -205,6 +218,7 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }
       </div>
       {showMotivational && <Toast message={motivationalLabel} />}
       {shareState === 'copied' && <Toast message="Copied to clipboard" />}
+      {superseded && showInfo && <Toast message="Showing your score from earlier today" />}
     </div>
   );
 }

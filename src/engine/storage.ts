@@ -87,3 +87,13 @@ export function hasSeenRules(): boolean {
 export function markRulesSeen(): void {
   localStorage.setItem(RULES_SEEN_KEY, '1');
 }
+
+const GRADE_SEEN_PREFIX = 'rewind_grade_seen_';
+
+export function hasSeenGrade(puzzleId: string): boolean {
+  return localStorage.getItem(`${GRADE_SEEN_PREFIX}${puzzleId}`) === '1';
+}
+
+export function markGradeSeen(puzzleId: string): void {
+  localStorage.setItem(`${GRADE_SEEN_PREFIX}${puzzleId}`, '1');
+}

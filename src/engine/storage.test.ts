@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { hasSeenRules, markRulesSeen } from './storage';
+import { hasSeenRules, markRulesSeen, hasSeenGrade, markGradeSeen } from './storage';
 
 describe('rules-seen flag', () => {
   beforeEach(() => {
@@ -18,5 +18,21 @@ describe('rules-seen flag', () => {
   it('persists the flag in localStorage', () => {
     markRulesSeen();
     expect(localStorage.getItem('rewind_rules_seen')).toBe('1');
+  });
+});
+
+describe('grade-seen flag (once per puzzle/day)', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
+  it('defaults to false for a puzzle never marked', () => {
+    expect(hasSeenGrade('2026-06-16-american')).toBe(false);
+  });
+
+  it('returns true only for the marked puzzle id', () => {
+    markGradeSeen('2026-06-16-american');
+    expect(hasSeenGrade('2026-06-16-american')).toBe(true);
+    expect(hasSeenGrade('2026-06-17-american')).toBe(false);
   });
 });
