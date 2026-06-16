@@ -74,6 +74,23 @@ test('logged-in users get friends CTA plus inline leaderboard link', () => {
   expect(onLeaderboard).toHaveBeenCalledTimes(1);
 });
 
+test('wordmark navigates home via onHome', () => {
+  const onHome = vi.fn();
+
+  render(
+    <ResultsScreen
+      onHome={onHome}
+      onGroups={() => {}}
+      onLeaderboard={() => {}}
+      onRequireAuth={() => {}}
+    />
+  );
+
+  fireEvent.click(screen.getByRole('button', { name: 'REWIND' }));
+
+  expect(onHome).toHaveBeenCalledTimes(1);
+});
+
 test('logged-out users get account CTA, benefits sentence, and sign-in link', () => {
   const onRequireAuth = vi.fn();
 

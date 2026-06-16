@@ -114,7 +114,9 @@ export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage }: Auth
         >
           <ArrowLeft />
         </button>
-        <span className={styles.wordmark}>REWIND</span>
+        <button className={`${styles.wordmark} ${styles.wordmarkAction}`} onClick={onBack} type="button">
+          REWIND
+        </button>
         <span className={styles.topBarSpacer} />
       </div>
 

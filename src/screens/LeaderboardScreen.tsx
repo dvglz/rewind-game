@@ -61,7 +61,9 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
         <button className={styles.backButton} onClick={onBack} type="button" aria-label="Back">
           <ArrowLeft />
         </button>
-        <span className={styles.wordmark}>REWIND</span>
+        <button className={`${styles.wordmark} ${styles.wordmarkAction}`} onClick={onBack} type="button">
+          REWIND
+        </button>
         <span className={styles.topBarSpacer} />
       </div>
 

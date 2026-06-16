@@ -148,7 +148,9 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }
     <div className={styles.screen}>
       <header className={styles.topBar}>
         <span className={styles.topBarSpacer} />
-        <span className={styles.wordmark}>REWIND</span>
+        <button className={`${styles.wordmark} ${styles.wordmarkAction}`} onClick={onHome} type="button">
+          REWIND
+        </button>
         <span className={styles.topBarSpacer} />
       </header>
       <div className={styles.content}>

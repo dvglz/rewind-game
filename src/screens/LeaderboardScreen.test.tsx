@@ -53,6 +53,20 @@ test('renders the title and a pinned row for an out-of-page user', async () => {
   expect(await screen.findByText('2m 39s')).not.toBeNull();
 });
 
+test('wordmark navigates home via onBack', () => {
+  const onBack = vi.fn();
+
+  render(
+    <AuthProvider>
+      <LeaderboardScreen onBack={onBack} />
+    </AuthProvider>,
+  );
+
+  fireEvent.click(screen.getByRole('button', { name: 'REWIND' }));
+
+  expect(onBack).toHaveBeenCalledTimes(1);
+});
+
 test('disables previous-day navigation when the current board has no earlier history', async () => {
   render(
     <AuthProvider>

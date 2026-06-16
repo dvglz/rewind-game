@@ -38,6 +38,14 @@
   color: var(--color-text);
 }
 
+.wordmarkAction {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
 .content {
   --results-action-width: min(280px, calc(100vw - 48px));
   flex: 1;

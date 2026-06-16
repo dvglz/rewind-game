@@ -25,13 +25,13 @@ export function Header({ sport, onHome, leftMeta, gameNumber, rightText, rightLa
     <header className={styles.header}>
       <div className={styles.inner}>
         <div className={styles.brand}>
-          <span
-            className={styles.wordmark}
-            onClick={onHome}
-            style={onHome ? { cursor: 'pointer' } : undefined}
-          >
-            REWIND
-          </span>
+          {onHome ? (
+            <button className={`${styles.wordmark} ${styles.wordmarkAction}`} onClick={onHome} type="button">
+              REWIND
+            </button>
+          ) : (
+            <span className={styles.wordmark}>REWIND</span>
+          )}
           {gameNumber != null && (
             <span className={styles.gameNumber}>#{String(gameNumber).padStart(3, '0')}</span>
           )}

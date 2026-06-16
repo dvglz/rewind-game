@@ -28,6 +28,15 @@
   letter-spacing: -0.4px;
 }
 
+.wordmarkAction {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
 .meta {
   font-family: var(--font-display);
   font-weight: 400;
