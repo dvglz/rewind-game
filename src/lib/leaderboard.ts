@@ -3,7 +3,9 @@ import { LEADERBOARD_PAGE_LIMIT } from '../config/leaderboard';
 import { fetchLeaderboardApi, fetchLeaderboardById } from './api';
 import type { LeaderboardApiResponse } from './api';
 
-const USE_MOCK = import.meta.env.VITE_MOCK_API === 'true';
+function usesMockApi(): boolean {
+  return import.meta.env.VITE_MOCK_API === 'true';
+}
 
 // ── Helpers ────────────────────────────────────────────────
 
@@ -167,7 +169,7 @@ function cacheFromResponse(raw: LeaderboardApiResponse, offset: number, groupId?
 // ── Public API ─────────────────────────────────────────────
 
 export async function fetchLeaderboard(dayOffset: number, groupId?: number): Promise<GlobalLeaderboard> {
-  if (USE_MOCK) {
+  if (usesMockApi()) {
     await new Promise((r) => setTimeout(r, 300));
     return mockBoard(dayOffset);
   }
