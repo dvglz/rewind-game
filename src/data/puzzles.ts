@@ -1,4 +1,6 @@
 import type { Puzzle, GameEvent } from '../types';
+import { REWIND_QUESTION_BANK } from './questionBank';
+import { DAY_DEFINITIONS } from './dayDefinitions';
 
 interface RawEvent {
   id: string;
@@ -8,90 +10,21 @@ interface RawEvent {
   revealContext?: string;
 }
 
-// ── American Sports: 10 days × 5 questions (easy → hard) ──────────────
+// ── American Sports: 10 days × 5 questions, resolved from the question bank ──
+// Days are generated from the bank via scripts/buildDayDefinitions.ts (committed
+// as DAY_DEFINITIONS). Soccer below stays hand-authored.
 
-const AMERICAN_SPORTS_DAYS: RawEvent[][] = [
-  // Day 1
-  [
-    { id: "evt_lebron_drafted", title: "LeBron is drafted first overall by Cleveland", date: "2003-06-26", reveal: "In 2003, Cleveland selected LeBron straight out of high school as the NBA’s next superstar." },
-    { id: "evt_brady_first_sb", title: "Brady and the Patriots win their first Super Bowl", date: "2002-02-03", reveal: "In 2002, New England upset the Rams and launched the Brady-Belichick dynasty." },
-    { id: "evt_rose_youngest_mvp", title: "Derrick Rose becomes the youngest MVP in NBA history", date: "2011-05-03", reveal: "In 2011, Rose won MVP at 22, still the youngest winner in NBA history." },
-    { id: "evt_red_sox_3_0", title: "The Red Sox come back from 3–0 down against the Yankees", date: "2004-10-20", reveal: "In 2004, Boston became the first MLB team to erase a 3–0 series deficit." },
-    { id: "evt_nova_knicks_ncaa", title: "Brunson, Hart and Bridges win their first title together", date: "2016-04-04", reveal: "The Knicks’ Nova trio first won together at Villanova, taking the 2016 NCAA title." },
-  ],
-  // Day 2
-  [
-    { id: "evt_jordan_last_shot", title: "Jordan hits his last shot as a Bull to win the Finals", date: "1998-06-14", reveal: "In 1998, Jordan's jumper over Bryon Russell sealed Chicago's sixth title in eight years." },
-    { id: "evt_eagles_first_sb", title: "The Eagles win their first Super Bowl with the Philly Special", date: "2018-02-04", reveal: "In 2018, Nick Foles caught the Philly Special TD and outdueled Tom Brady." },
-    { id: "evt_vince_dunk_contest", title: "Vince Carter takes over the Slam Dunk Contest", date: "2000-02-12", reveal: "In 2000, Vince delivered the most iconic dunk contest ever, including the elbow dunk." },
-    { id: "evt_cubs_ws", title: "The Cubs win the World Series after 108 years", date: "2016-11-02", reveal: "In 2016, Chicago beat Cleveland in a legendary extra-innings Game 7." },
-    { id: "evt_ray_allen_game6", title: "Ray Allen hits the corner three to save Miami in Game 6", date: "2013-06-18", reveal: "In 2013, Ray Allen’s corner three forced overtime and saved Miami in Game 6." },
-  ],
-  // Day 3
-  [
-    { id: "evt_kawhi_bounce", title: "Kawhi’s shot bounces in to beat Philly in Game 7", date: "2019-05-12", reveal: "In 2019, Kawhi’s shot bounced four times before sending Toronto past Philly." },
-    { id: "evt_the_decision", title: "LeBron announces The Decision on live TV", date: "2010-07-08", reveal: "In 2010, LeBron left Cleveland to join Wade and Bosh in Miami." },
-    { id: "evt_curry_3pt_record", title: "Curry breaks the all-time three-point record at MSG", date: "2021-12-14", reveal: "In 2021, Curry passed Ray Allen’s career record on the road in New York." },
-    { id: "evt_manning_last_sb", title: "Peyton Manning wins the Super Bowl in his final game", date: "2016-02-07", reveal: "In 2016, Denver’s defense carried Manning to his second ring before retirement." },
-    { id: "evt_iverson_stepover", title: "Iverson drops 48 and creates the iconic step-over Finals image", date: "2001-06-06", reveal: "In 2001, Iverson stunned the Lakers in Game 1 and stepped over Tyronn Lue." },
-  ],
-  // Day 4
-  [
-    { id: "evt_kobe_drafted", title: "Kobe is drafted by Charlotte before being traded to the Lakers", date: "1996-06-26", reveal: "In 1996, Charlotte took Kobe at No. 13 before sending him to Los Angeles." },
-    { id: "evt_mahomes_first_sb", title: "Mahomes wins his first Super Bowl with the Chiefs", date: "2020-02-02", reveal: "In 2020, Kansas City came back late to beat San Francisco." },
-    { id: "evt_kd_joins_warriors", title: "Kevin Durant joins the Warriors in free agency", date: "2016-07-04", reveal: "In 2016, Durant’s move to Golden State reshaped the NBA." },
-    { id: "evt_giannis_50_title", title: "Giannis drops 50 to win the Bucks their first title in 50 years", date: "2021-07-20", reveal: "In 2021, Giannis scored 50 in Game 6 to end Milwaukee’s title drought." },
-    { id: "evt_phil_lakers_hired", title: "Phil Jackson takes over the Lakers before the three-peat", date: "1999-06-16", reveal: "In 1999, the Lakers hired Phil Jackson before winning three straight titles." },
-  ],
-  // Day 5
-  [
-    { id: "evt_lebron_scoring_record", title: "LeBron passes Kareem as the all-time scoring leader", date: "2023-02-07", reveal: "In 2023, LeBron became the NBA’s all-time scoring leader in LA." },
-    { id: "evt_giants_upset_pats", title: "Eli Manning’s Giants end the Patriots’ 18-0 run in the Super Bowl", date: "2008-02-03", reveal: "In 2008, the Giants ruined New England’s perfect 18-0 season." },
-    { id: "evt_linsanity", title: "Linsanity takes over New York", date: "2012-02-04", reveal: "In 2012, Jeremy Lin went from benchwarmer to Knicks sensation." },
-    { id: "evt_judge_62", title: "Aaron Judge hits 62 homers breaking the AL single-season record", date: "2022-10-04", reveal: "In 2022, Judge broke Roger Maris’s American League home run record." },
-    { id: "evt_dirk_upsets_heat", title: "The Mavs spoil Miami’s first Big Three Finals run", date: "2011-06-12", reveal: "In 2011, Dallas beat Miami’s new superteam in Dirk’s title run." },
-  ],
-  // Day 6
-  [
-    { id: "evt_ohtani_dodgers", title: "Ohtani signs the richest contract in sports history with the Dodgers", date: "2023-12-09", reveal: "In 2023, Ohtani's 10-year, $700 million deal became the largest in professional sports." },
-    { id: "evt_brady_tampa", title: "Brady leaves the Patriots and signs with Tampa Bay", date: "2020-03-20", reveal: "In 2020, Brady ended his 20-year New England era, then won the Super Bowl with Tampa in year one." },
-    { id: "evt_harden_rockets_trade", title: "James Harden is traded to the Rockets", date: "2012-10-27", reveal: "In 2012, Oklahoma City sent Harden to Houston, changing his career and the West." },
-    { id: "evt_malice_palace", title: "The Malice at the Palace turns an NBA game into chaos", date: "2004-11-19", reveal: "In 2004, the Pacers-Pistons brawl became the NBA’s most infamous fight." },
-    { id: "evt_ripken_streak", title: "Ripken plays his 2,131st straight game, breaking Gehrig's record", date: "1995-09-06", reveal: "In 1995, Ripken's consecutive games streak became one of baseball's most celebrated achievements." },
-  ],
-  // Day 7
-  [
-    { id: "evt_shaq_kobe_first", title: "Shaq and Kobe win their first title together", date: "2000-06-19", reveal: "In 2000, Los Angeles beat Indiana to start the Lakers' three-peat run." },
-    { id: "evt_dream_team", title: "The Dream Team wins Olympic gold in Barcelona", date: "1992-08-08", reveal: "In 1992, the first US team with NBA players dominated the Olympics and changed basketball globally." },
-    { id: "evt_tmac_13_35", title: "T-Mac scores 13 points in 35 seconds", date: "2004-12-09", reveal: "In 2004, McGrady stunned the Spurs with one of the wildest NBA comebacks ever." },
-    { id: "evt_saints_first_sb", title: "The Saints win their first Super Bowl four years after Katrina", date: "2010-02-07", reveal: "In 2010, New Orleans' first championship became a symbol of the city's recovery." },
-    { id: "evt_magic_center_finals", title: "Rookie Magic starts at center and wins Finals MVP", date: "1980-05-16", reveal: "In 1980, Magic started at center in Game 6 and led the Lakers to the title." },
-  ],
-  // Day 8
-  [
-    { id: "evt_warriors_73_9", title: "The Warriors finish 73–9 breaking the wins record", date: "2016-04-13", reveal: "In 2016, Golden State broke Chicago's 72–10 record but then lost the Finals to Cleveland." },
-    { id: "evt_jordan_drafted", title: "Jordan is drafted third overall by the Bulls", date: "1984-06-19", reveal: "In 1984, Chicago took Jordan after Olajuwon and Bowie — arguably the greatest draft steal ever." },
-    { id: "evt_celtics_big_three", title: "The Celtics Big Three of Pierce, Garnett, and Allen win the title", date: "2008-06-17", reveal: "In 2008, Boston beat the Lakers after assembling its superteam via blockbuster trades." },
-    { id: "evt_butler_heat_finals", title: "Butler and the 8-seed Heat make the Finals as a play-in team", date: "2023-05-29", reveal: "In 2023, Jimmy Butler led Miami on an improbable run through the East before losing to Denver." },
-    { id: "evt_reggie_8_9", title: "Reggie Miller scores 8 points in 9 seconds against the Knicks", date: "1995-05-07", reveal: "In 1995, Reggie stunned the Knicks with 8 points in 8.9 seconds." },
-  ],
-  // Day 9
-  [
-    { id: "evt_carmelo_62_msg", title: "Carmelo scores 62 at Madison Square Garden", date: "2014-01-24", reveal: "In 2014, Melo set the Knicks franchise scoring record under the MSG lights." },
-    { id: "evt_astros_first_ws", title: "The Astros win their first World Series", date: "2017-11-01", reveal: "In 2017, Houston beat the Dodgers before the title was later clouded by scandal." },
-    { id: "evt_luka_trae_trade", title: "Luka Doncic and Trae Young are swapped on draft night", date: "2018-06-21", reveal: "In 2018, Dallas traded up for Luka while Atlanta landed Trae Young." },
-    { id: "evt_seahawks_demolish_broncos", title: "The Seahawks demolish the Broncos 43-8 in the Super Bowl", date: "2014-02-02", reveal: "In 2014, Seattle’s defense dominated Peyton Manning in a blowout." },
-    { id: "evt_tim_duncan_drafted", title: "Tim Duncan goes first overall to the Spurs", date: "1997-06-25", reveal: "In 1997, San Antonio drafted Duncan and changed the franchise forever." },
-  ],
-  // Day 10
-  [
-    { id: "evt_wemby_drafted", title: "Wembanyama goes first overall to the Spurs", date: "2023-06-22", reveal: "In 2023, San Antonio selected the 7'4\" French phenom as the most anticipated prospect since LeBron." },
-    { id: "evt_ichiro_debut", title: "Ichiro wins ROY and MVP in his first MLB season", date: "2001-11-20", reveal: "In 2001, Ichiro became an instant sensation in Seattle." },
-    { id: "evt_cabrera_triple_crown", title: "Cabrera wins the Triple Crown, the first since 1967", date: "2012-10-03", reveal: "In 2012, Cabrera led the AL in average, homers, and RBI." },
-    { id: "evt_carmelo_62_msg", title: "Carmelo scores 62 at Madison Square Garden", date: "2014-01-24", reveal: "In 2014, Melo set the Knicks franchise scoring record under the MSG lights." },
-    { id: "evt_redeem_team_gold", title: "The Redeem Team wins Olympic gold for USA Basketball", date: "2008-08-24", reveal: "In 2008, Team USA beat Spain to reclaim Olympic gold in Beijing." },
-  ],
-];
+const questionLookup = new Map(REWIND_QUESTION_BANK.map((q) => [q.id, q]));
+
+function questionToRawEvent(id: string): RawEvent {
+  const q = questionLookup.get(id);
+  if (!q) throw new Error(`DAY_DEFINITIONS references unknown question id: ${id}`);
+  return { id: q.id, title: q.title, date: q.date, reveal: q.reveal };
+}
+
+const AMERICAN_SPORTS_DAYS: RawEvent[][] = DAY_DEFINITIONS.map((day) =>
+  day.map(questionToRawEvent),
+);
 
 // ── World Cup: 10 days × 5 questions (easy → hard) ────────────────────
 // Day 1 Q3 swapped: South Africa hosting instead of Saudi/Argentina (avoids double-Messi/2022)
@@ -277,7 +210,7 @@ function rawToGameEvent(raw: RawEvent, sport: Sport): GameEvent {
  * Offset so that DAY_ZERO_DATE maps to index 0 (= Day 1 in the pool).
  * Change DAY_ZERO_DATE to shift which real date gets Day 1.
  */
-const DAY_ZERO_DATE = '2026-06-16';
+const DAY_ZERO_DATE = '2026-06-18';
 
 function dayIndex(dateStr: string): number {
   const ms = new Date(dateStr).getTime() - new Date(DAY_ZERO_DATE).getTime();

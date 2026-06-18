@@ -9,6 +9,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "days:build": "WRITE_DAYS=1 vitest run scripts/buildDayDefinitions.test.ts",
+    "days:random": "WRITE_DAYS=1 RANDOM_DAYS=1 vitest run scripts/buildDayDefinitions.test.ts",
     "lint": "eslint .",
     "preview": "vite preview",
     "start": "vite preview --host 0.0.0.0 --port ${PORT:-8080}"
