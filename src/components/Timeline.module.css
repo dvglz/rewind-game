@@ -129,7 +129,10 @@
 
 @media (min-width: 900px) {
   .wrapper {
-    height: 400px;
+    /* Cap at the region's height so the timeline never overflows downward onto
+       the footer button on shorter desktop windows (which would otherwise sit
+       on top of the Lock / Next Round button and swallow its clicks). */
+    height: min(400px, 100%);
   }
 
   .track {

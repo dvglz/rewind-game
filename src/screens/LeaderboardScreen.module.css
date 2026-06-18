@@ -86,6 +86,10 @@
 .leaderboardArea {
   width: 100%;
   min-height: 260px;
+  /* Grow to fill empty space (pushes the disclaimer to the bottom when the
+     board is short) but never shrink below the rows' real height, otherwise a
+     populated top-20 spills out of the area and overlaps the disclaimer. */
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
 }
@@ -108,7 +112,6 @@
 
 .disclaimer {
   width: 100%;
-  margin-top: auto;
   font-family: var(--font-body);
   font-size: 14px;
   line-height: 1.5;
