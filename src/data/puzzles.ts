@@ -1,4 +1,5 @@
 import type { Puzzle, GameEvent } from '../types';
+import { getTodayString } from '../lib/date';
 import { REWIND_QUESTION_BANK } from './questionBank';
 import { DAY_DEFINITIONS } from './dayDefinitions';
 
@@ -319,10 +320,9 @@ export function getPuzzleForDate(dateStr: string, sport: Sport = 'american'): Pu
 }
 
 /**
- * Read override date from ?date=YYYY-MM-DD URL param.
- * Defaults to DAY_ZERO_DATE so the game always opens on Day 1.
- * Once launched, swap the fallback to `new Date().toISOString().slice(0, 10)`
- * for real daily rotation.
+ * Read override date from ?date=YYYY-MM-DD URL param, falling back to the real
+ * current date in the backend's daily-reset timezone (Pacific) so the client's
+ * "today" rolls over at the same instant as the server.
  */
 export function getDateOverride(): string {
   const labDate = getRewindLabDate();
@@ -333,7 +333,7 @@ export function getDateOverride(): string {
   if (dateParam && /^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
     return dateParam;
   }
-  return new Date().toISOString().slice(0, 10);
+  return getTodayString();
 }
 
 export function getTodaysPuzzle(sport?: Sport): Puzzle {

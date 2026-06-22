@@ -2,6 +2,7 @@ import type { GlobalLeaderboard, GlobalLeaderboardEntry } from '../types';
 import { LEADERBOARD_PAGE_LIMIT } from '../config/leaderboard';
 import { fetchLeaderboardApi, fetchLeaderboardById } from './api';
 import type { LeaderboardApiResponse } from './api';
+import { getTodayString } from './date';
 
 function usesMockApi(): boolean {
   return import.meta.env.VITE_MOCK_API === 'true';
@@ -9,19 +10,16 @@ function usesMockApi(): boolean {
 
 // ── Helpers ────────────────────────────────────────────────
 
-function currentUtcDate(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
-/** ISO `YYYY-MM-DD` for `dayOffset` days before `baseDate` (0 = baseDate). */
-function dateForOffset(dayOffset: number, baseDate = currentUtcDate()): string {
+/** ISO `YYYY-MM-DD` for `dayOffset` days before `baseDate` (0 = baseDate).
+ *  `baseDate` defaults to today in the backend's reset timezone (Pacific). */
+function dateForOffset(dayOffset: number, baseDate = getTodayString()): string {
   const d = new Date(`${baseDate}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() - dayOffset);
   return d.toISOString().slice(0, 10);
 }
 
 export function getDayOffsetFromToday(activeDate: string): number {
-  const today = new Date(`${currentUtcDate()}T00:00:00Z`).getTime();
+  const today = new Date(`${getTodayString()}T00:00:00Z`).getTime();
   const target = new Date(`${activeDate}T00:00:00Z`).getTime();
   const diffDays = Math.floor((today - target) / 86_400_000);
   return Math.max(0, diffDays);

@@ -1,5 +1,6 @@
 import type { RoundResult } from '../types';
 import { getResultColor, getResultEmoji } from '../engine/scoring';
+import { getTodayString } from './date';
 
 export type ShareOutcome = 'shared' | 'copied' | 'failed';
 
@@ -27,7 +28,7 @@ export function generateShareText(
 ): string {
   const title = sport === 'soccer' ? 'Rewind ⚽' : 'Rewind';
   const puzzleLabel = String(puzzleNumber).padStart(3, '0');
-  const dateStr = new Date(`${date ?? new Date().toISOString().slice(0, 10)}T00:00:00`).toLocaleDateString('en-US', {
+  const dateStr = new Date(`${date ?? getTodayString()}T00:00:00`).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
