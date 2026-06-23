@@ -97,3 +97,14 @@ export function hasSeenGrade(puzzleId: string): boolean {
 export function markGradeSeen(puzzleId: string): void {
   localStorage.setItem(`${GRADE_SEEN_PREFIX}${puzzleId}`, '1');
 }
+
+const ARCHIVE_FREE_USED_KEY = 'rewind_archive_free_used';
+
+/** Whether a logged-out user has spent their single free archived (practice) game. */
+export function hasUsedArchiveFreePlay(): boolean {
+  return localStorage.getItem(ARCHIVE_FREE_USED_KEY) === '1';
+}
+
+export function markArchiveFreePlayUsed(): void {
+  localStorage.setItem(ARCHIVE_FREE_USED_KEY, '1');
+}

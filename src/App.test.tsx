@@ -65,6 +65,8 @@ vi.mock('./engine/storage', () => ({
   clearGameState: vi.fn(),
   loadGameState: vi.fn().mockReturnValue(null),
   pruneOldGameStates: vi.fn(),
+  hasUsedArchiveFreePlay: vi.fn().mockReturnValue(false),
+  markArchiveFreePlayUsed: vi.fn(),
 }));
 
 vi.mock('./data/puzzles', () => ({
