@@ -11,7 +11,7 @@ import { AuthScreen } from './screens/AuthScreen';
 import { HowToScreen, type HowToEntryPoint } from './screens/HowToScreen';
 import { Toast } from './components/Toast';
 import { ToastRegion } from './components/ToastRegion';
-import { clearGameState, loadGameState, pruneOldGameStates, hasSeenRules } from './engine/storage';
+import { clearGameState, loadGameState, pruneOldGameStates, hasSeenRules, hasUsedArchiveFreePlay, markArchiveFreePlayUsed } from './engine/storage';
 import { beginPuzzleSession, getDateOverride, getSport, getTodaysPuzzle, isRewindLabMode, isPracticeMode } from './data/puzzles';
 import { useWebHaptics } from 'web-haptics/react';
 import { initHaptics } from './lib/haptics';
@@ -19,6 +19,8 @@ import { hidesCompletedGameLock, shouldEnableHapticsDebug } from './lib/testMode
 import { useThemePreference } from './hooks/useThemePreference';
 import { fetchMyScore, flushPendingScore } from './lib/api';
 import { initAnalytics, trackPageView, track } from './lib/analytics';
+import { archiveGateAction } from './lib/archiveGate';
+import { computeNavSearch } from './lib/navigation';
 import { LoadingOverlay } from './components/LoadingOverlay';
 import './styles/global.css';
 
@@ -125,19 +127,7 @@ function AppInner() {
 
   const navigate = (s: Screen) => {
     setScreen(s);
-    const params = new URLSearchParams(window.location.search);
-    if (s === 'home') {
-      params.delete('mode');
-      params.delete('returnTo');
-    } else {
-      params.set('mode', s);
-    }
-    // Preserve returnTo only for auth screen
-    if (s !== 'auth') {
-      params.delete('returnTo');
-    }
-
-    const nextSearch = params.toString();
+    const nextSearch = computeNavSearch(window.location.search, s);
     window.history.pushState({}, '', nextSearch ? `/?${nextSearch}` : '/');
     trackPageView(s);
   };
@@ -179,6 +169,16 @@ function AppInner() {
       return;
     }
     const returnTo = getReturnTo();
+    if (returnTo === 'archive') {
+      const archiveDate = new URLSearchParams(window.location.search).get('archiveDate');
+      if (archiveDate) {
+        startPracticeGame(archiveDate);
+      } else {
+        navigate('archive');
+      }
+      showAuthToast();
+      return;
+    }
     if (returnTo && ['home', 'game', 'ordering', 'results', 'groups', 'leaderboard'].includes(returnTo)) {
       navigate(returnTo as Screen);
     } else {
@@ -214,9 +214,34 @@ function AppInner() {
     params.set('practice', '1');
     params.set('mode', 'game');
     params.delete('returnTo');
+    params.delete('archiveDate');
     window.history.pushState({}, '', `/?${params.toString()}`);
     setScreen('game');
     trackPageView('game');
+  };
+
+  // Soft gate: logged-out users get one free archived game, then a sign-in prompt.
+  const playArchivedDate = (date: string) => {
+    const action = archiveGateAction({
+      isAuthenticated,
+      mockMode: USE_MOCK,
+      freeUsed: hasUsedArchiveFreePlay(),
+    });
+    if (action === 'gate') {
+      const params = new URLSearchParams(window.location.search);
+      params.set('mode', 'auth');
+      params.set('returnTo', 'archive');
+      params.set('archiveDate', date);
+      params.delete('practice');
+      window.history.pushState({}, '', `/?${params.toString()}`);
+      setScreen('auth');
+      trackPageView('auth');
+      return;
+    }
+    if (action === 'play-free') {
+      markArchiveFreePlayUsed();
+    }
+    startPracticeGame(date);
   };
 
   const exitToArchive = () => {
@@ -307,7 +332,7 @@ function AppInner() {
       {screen === 'archive' && (
         <ArchiveScreen
           onBack={() => navigate('home')}
-          onPlayPast={(date) => startPracticeGame(date)}
+          onPlayPast={playArchivedDate}
         />
       )}
       {screen === 'howto' && (
@@ -332,7 +357,13 @@ function AppInner() {
               void handleAuthSuccess();
             }}
             returnTo={getReturnTo()}
-            contextMessage={pendingInvite ? "You'll join a group right after signing in" : undefined}
+            contextMessage={
+              pendingInvite
+                ? "You'll join a group right after signing in"
+                : getReturnTo() === 'archive'
+                  ? 'Sign in to keep playing past puzzles'
+                  : undefined
+            }
           />
         </>
       )}
