@@ -73,6 +73,7 @@ vi.mock('./data/puzzles', () => ({
   getSport: vi.fn().mockReturnValue('american'),
   getTodaysPuzzle: vi.fn().mockReturnValue({ id: '2026-06-15-american', number: 1 }),
   isRewindLabMode: vi.fn().mockReturnValue(false),
+  isPracticeMode: vi.fn().mockReturnValue(false),
 }));
 
 vi.mock('./lib/testMode', () => ({
@@ -103,6 +104,10 @@ vi.mock('./screens/ResultsScreen', () => ({
 
 vi.mock('./screens/LeaderboardScreen', () => ({
   LeaderboardScreen: () => <div data-testid="leaderboard-screen">leaderboard</div>,
+}));
+
+vi.mock('./screens/ArchiveScreen', () => ({
+  ArchiveScreen: () => <div data-testid="archive-screen">archive</div>,
 }));
 
 vi.mock('./screens/AuthScreen', () => ({

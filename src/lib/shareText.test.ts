@@ -82,3 +82,9 @@ test('native share sends only text to avoid duplicating the Rewind title', async
 
   expect(share).toHaveBeenCalledWith({ text });
 });
+
+test('uses the Archive title when the archive flag is set', () => {
+  const text = generateShareText(2, [], 800, 1000, 0, 'american', '2026-06-19', true);
+  expect(text.startsWith('Rewind Archive')).toBe(true);
+  expect(text).not.toMatch(/^Rewind #/);
+});

@@ -249,3 +249,27 @@ test('does not re-show the score-grade toast once it has been seen today', () =>
   expect(markGradeSeen).not.toHaveBeenCalled();
   vi.useRealTimers();
 });
+
+test('practice mode shows Play Again + Back to Archive and skips the remote fetch', () => {
+  window.history.replaceState({}, '', '/?date=2026-06-19&practice=1');
+  currentState = completedState;
+
+  render(
+    <ResultsScreen
+      onHome={() => {}}
+      onGroups={() => {}}
+      onLeaderboard={() => {}}
+      onRequireAuth={() => {}}
+      onBackToArchive={() => {}}
+      onPlayAgain={() => {}}
+    />
+  );
+
+  expect(screen.getByRole('button', { name: 'Play Again' })).not.toBeNull();
+  expect(screen.getByRole('button', { name: 'Back to Archive' })).not.toBeNull();
+  expect(screen.getByText(/scores aren’t saved/i)).not.toBeNull();
+  expect(screen.queryByRole('button', { name: /See Friends' Scores/i })).toBeNull();
+  expect(fetchMyScore).not.toHaveBeenCalled();
+
+  window.history.replaceState({}, '', '/');
+});

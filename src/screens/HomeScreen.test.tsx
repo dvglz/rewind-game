@@ -18,6 +18,7 @@ test('renders the home screen core actions without the theme switcher', () => {
       onLeaderboard={() => {}}
       showDebugTools={false}
       onGroups={() => {}}
+      onArchive={() => {}}
       onNavigateAuth={() => {}}
       onSignOut={() => {}}
       onHowTo={() => {}}
@@ -42,6 +43,7 @@ test('shows only see results when todays game is already completed', () => {
       onLeaderboard={() => {}}
       showDebugTools={false}
       onGroups={() => {}}
+      onArchive={() => {}}
       onNavigateAuth={() => {}}
       onSignOut={() => {}}
       onHowTo={() => {}}
@@ -66,6 +68,7 @@ test('shows the active puzzle date instead of the local device date', () => {
         onLeaderboard={() => {}}
         showDebugTools={false}
         onGroups={() => {}}
+        onArchive={() => {}}
         onNavigateAuth={() => {}}
         onSignOut={() => {}}
         onHowTo={() => {}}

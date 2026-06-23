@@ -20,6 +20,7 @@ interface HomeScreenProps {
   onLeaderboard: () => void;
   showDebugTools: boolean;
   onGroups: () => void;
+  onArchive: () => void;
   onNavigateAuth: (returnTo: string) => void;
   onSignOut: () => void;
   onHowTo: (source: 'menu' | 'footer') => void;
@@ -33,6 +34,7 @@ export function HomeScreen({
   onLeaderboard,
   showDebugTools,
   onGroups,
+  onArchive,
   onNavigateAuth,
   onSignOut,
   onHowTo,
@@ -85,6 +87,7 @@ export function HomeScreen({
         }}
         onNavigateLeaderboard={onLeaderboard}
         onNavigateGroups={onGroups}
+        onNavigateArchive={onArchive}
         onNavigateAuth={onNavigateAuth}
         onSignOut={() => {
           signOut();

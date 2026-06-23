@@ -15,6 +15,7 @@ function createProps() {
     onNavigateGame: vi.fn(),
     onNavigateLeaderboard: vi.fn(),
     onNavigateGroups: vi.fn(),
+    onNavigateArchive: vi.fn(),
     onNavigateHowTo: vi.fn(),
     onNavigateAuth: vi.fn(),
     onSignOut: vi.fn(),
@@ -46,6 +47,16 @@ describe('BurgerMenu', () => {
     expect(screen.getByRole('button', { name: 'Close menu' }) === document.activeElement).toBe(true);
     expect(container.contains(dialog)).toBe(false);
     expect(document.body.style.overflow).toBe('hidden');
+  });
+
+  it('renders an Archive item that routes to the archive', () => {
+    const props = createProps();
+    render(<BurgerMenu {...props} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Archive' }));
+
+    expect(props.onNavigateArchive).toHaveBeenCalledTimes(1);
   });
 
   it("keeps Today's Game actionable on Home and routes to the game", () => {

@@ -196,6 +196,17 @@
   color: var(--color-text);
 }
 
+/* Practice/archive footnote — small muted body, matches other screen footnotes. */
+.practiceNote {
+  width: min(340px, calc(100vw - 40px));
+  margin: 4px 0 0;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--color-muted);
+}
+
 /* Context line + inline links — Special Gothic 20px, half-opacity text per Figma */
 .contextLine {
   width: var(--results-action-width);

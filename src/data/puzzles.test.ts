@@ -1,5 +1,5 @@
 import { beforeEach, expect, test } from 'vitest';
-import { getPuzzleForDate, getTodaysPuzzle, isRewindLabMode } from './puzzles';
+import { getPuzzleForDate, getTodaysPuzzle, isRewindLabMode, isPracticeMode } from './puzzles';
 
 beforeEach(() => {
   window.history.replaceState({}, '', '/');
@@ -41,4 +41,19 @@ test('rewindLab accepts a stable puzzle id', () => {
 
   expect(puzzle.id).toBe('lab-2026-06-19-american');
   expect(puzzle.number).toBe(2);
+});
+
+test('isPracticeMode reflects the ?practice=1 param', () => {
+  window.history.replaceState({}, '', '/');
+  expect(isPracticeMode()).toBe(false);
+  window.history.replaceState({}, '', '/?practice=1');
+  expect(isPracticeMode()).toBe(true);
+});
+
+test('practice mode gives the dated puzzle an isolated practice- id', () => {
+  window.history.replaceState({}, '', '/?date=2026-06-19&practice=1');
+  const puzzle = getTodaysPuzzle();
+  expect(puzzle.id).toBe('practice-2026-06-19-american');
+  expect(puzzle.number).toBe(2); // 2026-06-19 = Day 2 (launch is 06-18)
+  expect(puzzle.events).toHaveLength(5);
 });

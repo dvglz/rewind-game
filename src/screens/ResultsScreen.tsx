@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ShareCard } from '../components/ShareCard';
 import { loadGameState, loadStats, hasSeenGrade, markGradeSeen } from '../engine/storage';
-import { getTodaysPuzzle, getSport, getDateOverride } from '../data/puzzles';
+import { getTodaysPuzzle, getSport, getDateOverride, isPracticeMode } from '../data/puzzles';
 import { getMaxPossibleScore, getScoreTierLabel } from '../engine/scoring';
 import { generateShareText, shareResults, type ShareOutcome } from '../lib/share';
 import { fetchMyScore, isScoreSuperseded } from '../lib/api';
@@ -17,12 +17,15 @@ interface ResultsScreenProps {
   onGroups: () => void;
   onLeaderboard: () => void;
   onRequireAuth: () => void;
+  onBackToArchive?: () => void;
+  onPlayAgain?: () => void;
 }
 
-export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }: ResultsScreenProps) {
+export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, onBackToArchive, onPlayAgain }: ResultsScreenProps) {
   const { isAuthenticated } = useAuth();
   const puzzle = getTodaysPuzzle();
   const sport = getSport();
+  const practice = isPracticeMode();
   const state = useMemo(() => loadGameState(puzzle.id), [puzzle.id]);
   const stats = useMemo(() => loadStats(), []);
   const superseded = useMemo(() => isScoreSuperseded(puzzle.id), [puzzle.id]);
@@ -52,6 +55,11 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }
   const hasScore = Boolean(displayState);
 
   useEffect(() => {
+    if (practice) {
+      setRemoteState(null);
+      setRemoteChecked(true);
+      return;
+    }
     if (state?.completed && !superseded) {
       setRemoteState(null);
       setRemoteChecked(true);
@@ -94,7 +102,7 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated, state?.completed, superseded]);
+  }, [practice, isAuthenticated, state?.completed, superseded]);
 
   useEffect(() => {
     // Show the score-grade toast once per puzzle/day, after the card settles.
@@ -131,6 +139,7 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }
       stats.currentStreak,
       sport,
       getDateOverride(),
+      practice,
     );
     const outcome = await shareResults(text);
     track('share_score', {
@@ -162,15 +171,39 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }
           elapsedMs={displayState.elapsedMs}
         />
 
-        <button
-          onClick={() => void handleShare()}
-          className={styles.shareButton}
-          style={{ animationDelay: '620ms' }}
-        >
-          Share Score
-        </button>
+        {!practice && (
+          <button
+            onClick={() => void handleShare()}
+            className={styles.shareButton}
+            style={{ animationDelay: '620ms' }}
+          >
+            Share Score
+          </button>
+        )}
 
-        {isAuthenticated ? (
+        {practice ? (
+          <>
+            <button
+              className={styles.shareButton}
+              onClick={onPlayAgain}
+              type="button"
+              style={{ animationDelay: '620ms' }}
+            >
+              Play Again
+            </button>
+            <button
+              className={styles.secondaryButton}
+              onClick={onBackToArchive}
+              type="button"
+              style={{ animationDelay: '660ms' }}
+            >
+              Back to Archive
+            </button>
+            <p className={styles.practiceNote} style={{ animationDelay: '700ms' }}>
+              Practice run — scores aren’t saved.
+            </p>
+          </>
+        ) : isAuthenticated ? (
           <>
             <button
               className={styles.secondaryButton}
@@ -209,14 +242,16 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth }
           </>
         )}
 
-        <div className={styles.footer} style={{ animationDelay: '780ms' }}>
-          <RewindGlyph className={styles.rewindGlyph} />
-          <p className={styles.motivational}>
-            New questions drop daily.
-            <br />
-            Get back tomorrow.
-          </p>
-        </div>
+        {!practice && (
+          <div className={styles.footer} style={{ animationDelay: '780ms' }}>
+            <RewindGlyph className={styles.rewindGlyph} />
+            <p className={styles.motivational}>
+              New questions drop daily.
+              <br />
+              Get back tomorrow.
+            </p>
+          </div>
+        )}
       </div>
       {showMotivational && <Toast message={motivationalLabel} />}
       {shareState === 'copied' && <Toast message="Copied to clipboard" />}
