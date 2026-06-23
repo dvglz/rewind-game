@@ -251,7 +251,7 @@ export function MenuOverlay({
             aria-current={isArchiveActive ? 'page' : undefined}
             style={{ '--stagger-index': 3 } as CSSProperties}
           >
-            Archive
+            Rewind Archive
           </button>
           <button
             type="button"

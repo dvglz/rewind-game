@@ -54,7 +54,7 @@ describe('BurgerMenu', () => {
     render(<BurgerMenu {...props} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
-    fireEvent.click(screen.getByRole('button', { name: 'Archive' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Rewind Archive' }));
 
     expect(props.onNavigateArchive).toHaveBeenCalledTimes(1);
   });
