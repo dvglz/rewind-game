@@ -6,22 +6,23 @@ import { OrderingScreen } from './screens/OrderingScreen';
 import { ResultsScreen } from './screens/ResultsScreen';
 import { GroupsScreen } from './screens/GroupsScreen';
 import { LeaderboardScreen } from './screens/LeaderboardScreen';
+import { ArchiveScreen } from './screens/ArchiveScreen';
 import { AuthScreen } from './screens/AuthScreen';
 import { HowToScreen, type HowToEntryPoint } from './screens/HowToScreen';
 import { Toast } from './components/Toast';
 import { ToastRegion } from './components/ToastRegion';
 import { clearGameState, loadGameState, pruneOldGameStates, hasSeenRules } from './engine/storage';
-import { beginPuzzleSession, getDateOverride, getSport, getTodaysPuzzle, isRewindLabMode } from './data/puzzles';
+import { beginPuzzleSession, getDateOverride, getSport, getTodaysPuzzle, isRewindLabMode, isPracticeMode } from './data/puzzles';
 import { useWebHaptics } from 'web-haptics/react';
 import { initHaptics } from './lib/haptics';
 import { hidesCompletedGameLock, shouldEnableHapticsDebug } from './lib/testMode';
 import { useThemePreference } from './hooks/useThemePreference';
 import { fetchMyScore, flushPendingScore } from './lib/api';
-import { initAnalytics, trackPageView } from './lib/analytics';
+import { initAnalytics, trackPageView, track } from './lib/analytics';
 import { LoadingOverlay } from './components/LoadingOverlay';
 import './styles/global.css';
 
-type Screen = 'home' | 'game' | 'ordering' | 'results' | 'groups' | 'auth' | 'leaderboard' | 'howto';
+type Screen = 'home' | 'game' | 'ordering' | 'results' | 'groups' | 'auth' | 'leaderboard' | 'howto' | 'archive';
 
 // In mock mode (local dev) the auth gate is bypassed so screens that normally
 // require a token — e.g. the global leaderboard — can be tested without one.
@@ -52,7 +53,7 @@ function AppInner() {
       setRemoteCompleted(false);
       return;
     }
-    if (isRewindLabMode()) {
+    if (isRewindLabMode() || isPracticeMode()) {
       setRemoteCompleted(false);
       return;
     }
@@ -204,6 +205,30 @@ function AppInner() {
     navigate('howto');
   };
 
+  const startPracticeGame = (date: string) => {
+    const sport = getSport();
+    track('practice_start', { date, sport });
+    clearGameState(`practice-${date}-${sport}`);
+    const params = new URLSearchParams(window.location.search);
+    params.set('date', date);
+    params.set('practice', '1');
+    params.set('mode', 'game');
+    params.delete('returnTo');
+    window.history.pushState({}, '', `/?${params.toString()}`);
+    setScreen('game');
+    trackPageView('game');
+  };
+
+  const exitToArchive = () => {
+    const params = new URLSearchParams(window.location.search);
+    params.delete('date');
+    params.delete('practice');
+    params.set('mode', 'archive');
+    window.history.pushState({}, '', `/?${params.toString()}`);
+    setScreen('archive');
+    trackPageView('archive');
+  };
+
   if (isAuthLoading) {
     return <LoadingOverlay />;
   }
@@ -243,6 +268,7 @@ function AppInner() {
           onLeaderboard={() => (isAuthenticated || USE_MOCK) ? navigate('leaderboard') : navigateToAuth('leaderboard')}
           showDebugTools={allowReplay}
           onGroups={() => navigate('groups')}
+          onArchive={() => navigate('archive')}
           onNavigateAuth={(returnTo) => navigateToAuth(returnTo as Screen)}
           onSignOut={() => navigate('home')}
           onHowTo={(source) => openHowTo(source)}
@@ -256,6 +282,8 @@ function AppInner() {
           onGroups={() => navigate('groups')}
           onLeaderboard={() => navigate('leaderboard')}
           onRequireAuth={() => navigateToAuth('results')}
+          onBackToArchive={exitToArchive}
+          onPlayAgain={() => startPracticeGame(getDateOverride())}
         />
       )}
       {screen === 'groups' && (
@@ -275,6 +303,12 @@ function AppInner() {
       )}
       {screen === 'leaderboard' && (
         <LeaderboardScreen onBack={() => navigate('home')} />
+      )}
+      {screen === 'archive' && (
+        <ArchiveScreen
+          onBack={() => navigate('home')}
+          onPlayPast={(date) => startPracticeGame(date)}
+        />
       )}
       {screen === 'howto' && (
         <HowToScreen

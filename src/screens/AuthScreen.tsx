@@ -159,7 +159,7 @@ export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage }: Auth
           <>
             <h1 className={styles.heading}>{'Sign in\nto Rewind'}</h1>
             <p className={styles.subtitle}>
-              {contextMessage ?? 'Play with friends, track your scores'}
+              {contextMessage ?? 'Play with friends, replay past days, track your scores'}
             </p>
 
             <div className={styles.providers}>

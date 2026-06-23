@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { Close } from './icons';
 import styles from './MenuOverlay.module.css';
 
-export type TopLevelMenuScreen = 'home' | 'results' | 'groups' | 'auth' | 'leaderboard';
+export type TopLevelMenuScreen = 'home' | 'results' | 'groups' | 'auth' | 'leaderboard' | 'archive';
 
 export interface MenuOverlayProps {
   open: boolean;
@@ -22,6 +22,7 @@ export interface MenuOverlayProps {
   onNavigateGame: () => void;
   onNavigateLeaderboard: () => void;
   onNavigateGroups: () => void;
+  onNavigateArchive: () => void;
   onNavigateHowTo: () => void;
   onNavigateAuth: (returnTo: TopLevelMenuScreen) => void;
   onSignOut: () => void;
@@ -68,6 +69,7 @@ export function MenuOverlay({
   onNavigateGame,
   onNavigateLeaderboard,
   onNavigateGroups,
+  onNavigateArchive,
   onNavigateHowTo,
   onNavigateAuth,
   onSignOut,
@@ -174,6 +176,11 @@ export function MenuOverlay({
     onNavigateGroups();
   };
 
+  const handleArchiveNavigation = () => {
+    onClose();
+    onNavigateArchive();
+  };
+
   const handleHowToNavigation = () => {
     onClose();
     onNavigateHowTo();
@@ -191,6 +198,7 @@ export function MenuOverlay({
 
   const isLeaderboardActive = currentScreen === 'leaderboard';
   const isGroupsActive = currentScreen === 'groups';
+  const isArchiveActive = currentScreen === 'archive';
   const overlay = (
     <div className={open ? styles.root : styles.rootClosing}>
       <div className={styles.surface} role="dialog" aria-modal="true" aria-label="Menu" ref={dialogRef}>
@@ -237,9 +245,19 @@ export function MenuOverlay({
           </button>
           <button
             type="button"
+            className={`${isArchiveActive ? styles.navButtonCurrent : styles.navButton} ${styles.menuItem}`}
+            onClick={handleArchiveNavigation}
+            disabled={isArchiveActive}
+            aria-current={isArchiveActive ? 'page' : undefined}
+            style={{ '--stagger-index': 3 } as CSSProperties}
+          >
+            Archive
+          </button>
+          <button
+            type="button"
             onClick={handleHowToNavigation}
             className={`${styles.navButton} ${styles.menuItem}`}
-            style={{ '--stagger-index': 3 } as CSSProperties}
+            style={{ '--stagger-index': 4 } as CSSProperties}
           >
             How to Play
           </button>

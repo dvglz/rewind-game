@@ -243,6 +243,11 @@ export function isRewindLabMode(): boolean {
   return getRewindLabDate() !== null;
 }
 
+export function isPracticeMode(): boolean {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('practice') === '1';
+}
+
 export type Sport = 'american' | 'soccer';
 
 export const SPORT_LABELS: Record<Sport, string> = {
@@ -340,6 +345,9 @@ export function getTodaysPuzzle(sport?: Sport): Puzzle {
   const selectedSport = sport ?? getSport();
   const date = getDateOverride();
   const puzzle = getPuzzleForDate(date, selectedSport);
+  if (isPracticeMode()) {
+    return { ...puzzle, id: `practice-${date}-${selectedSport}` };
+  }
   if (!isRewindLabMode()) return puzzle;
   return {
     ...puzzle,

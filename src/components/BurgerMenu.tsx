@@ -15,6 +15,7 @@ export interface BurgerMenuProps {
   onNavigateGame: () => void;
   onNavigateLeaderboard: () => void;
   onNavigateGroups: () => void;
+  onNavigateArchive: () => void;
   onNavigateHowTo: () => void;
   onNavigateAuth: (returnTo: TopLevelMenuScreen) => void;
   onSignOut: () => void;

@@ -25,8 +25,10 @@ export function generateShareText(
   _streak: number,
   sport: 'american' | 'soccer' = 'american',
   date?: string,
+  archive = false,
 ): string {
-  const title = sport === 'soccer' ? 'Rewind ⚽' : 'Rewind';
+  const base = sport === 'soccer' ? 'Rewind ⚽' : 'Rewind';
+  const title = archive ? (sport === 'soccer' ? 'Rewind Archive ⚽' : 'Rewind Archive') : base;
   const puzzleLabel = String(puzzleNumber).padStart(3, '0');
   const dateStr = new Date(`${date ?? getTodayString()}T00:00:00`).toLocaleDateString('en-US', {
     month: 'short',
