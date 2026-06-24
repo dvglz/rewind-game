@@ -20,6 +20,7 @@ describe('playhub API', () => {
   let createGroup: typeof import('./playhub').createGroup;
   let joinGroup: typeof import('./playhub').joinGroup;
   let leaveGroup: typeof import('./playhub').leaveGroup;
+  let claimReward: typeof import('./playhub').claimReward;
 
   beforeEach(async () => {
     vi.resetModules();
@@ -28,6 +29,7 @@ describe('playhub API', () => {
     createGroup = mod.createGroup;
     joinGroup = mod.joinGroup;
     leaveGroup = mod.leaveGroup;
+    claimReward = mod.claimReward;
   });
 
   describe('fetchGroup', () => {
@@ -98,6 +100,47 @@ describe('playhub API', () => {
     it('resolves on 204', async () => {
       mockFetch.mockResolvedValueOnce({ status: 204, ok: true });
       await expect(leaveGroup()).resolves.toBeUndefined();
+    });
+  });
+
+  describe('claimReward', () => {
+    it('no-ops (no fetch) when unauthenticated', async () => {
+      const result = await claimReward('participant');
+      expect(result).toBe(false);
+      expect(mockFetch).not.toHaveBeenCalled();
+    });
+
+    it('POSTs the claim with auth header and returns true on 2xx', async () => {
+      document.cookie = 'cp_access_token=tok123';
+      mockFetch.mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({}) });
+
+      const result = await claimReward('mission_2');
+
+      expect(result).toBe(true);
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://clutchpoints.4taps.me/playhub/claim/',
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({ Authorization: 'Token tok123' }),
+          body: JSON.stringify({
+            game_type: 'REWIND',
+            game_mode: 'rewind_nba',
+            reward_key: 'mission_2',
+          }),
+        }),
+      );
+    });
+
+    it('returns false on non-OK response', async () => {
+      document.cookie = 'cp_access_token=tok123';
+      mockFetch.mockResolvedValueOnce({ ok: false, status: 500, json: async () => ({}) });
+      expect(await claimReward('participant')).toBe(false);
+    });
+
+    it('returns false (swallows) on network error', async () => {
+      document.cookie = 'cp_access_token=tok123';
+      mockFetch.mockRejectedValueOnce(new Error('network'));
+      expect(await claimReward('participant')).toBe(false);
     });
   });
 });

@@ -1,4 +1,5 @@
 import type { PlayhubGroup, GroupMember } from '../types';
+import { GAME_TYPE, GAME_MODE } from './api';
 
 const BASE_URL = (import.meta.env.VITE_BASE_URL as string) ?? '';
 const USE_MOCK = import.meta.env.VITE_MOCK_API === 'true';
@@ -40,6 +41,10 @@ const mock = {
   async leaveGroup(): Promise<void> {
     await delay(300);
     mockGroup = null;
+  },
+  async claimReward(_rewardKey: string): Promise<boolean> {
+    await delay(200);
+    return true;
   },
 };
 
@@ -102,6 +107,23 @@ const real = {
     });
     if (!res.ok) throw new Error('Failed to leave group');
   },
+  async claimReward(rewardKey: string): Promise<boolean> {
+    if (!getAccessToken()) return false;
+    try {
+      const res = await fetch(`${BASE_URL}/playhub/claim/`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({
+          game_type: GAME_TYPE,
+          game_mode: GAME_MODE,
+          reward_key: rewardKey,
+        }),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  },
 };
 
 // ── Exports ────────────────────────────────────────────────
@@ -112,3 +134,4 @@ export const fetchGroup = api.fetchGroup;
 export const createGroup = api.createGroup;
 export const joinGroup = api.joinGroup;
 export const leaveGroup = api.leaveGroup;
+export const claimReward = api.claimReward;
