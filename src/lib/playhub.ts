@@ -42,7 +42,8 @@ const mock = {
     await delay(300);
     mockGroup = null;
   },
-  async claimReward(_rewardKey: string): Promise<boolean> {
+  async claimReward(rewardKey: string): Promise<boolean> {
+    void rewardKey;
     await delay(200);
     return true;
   },
