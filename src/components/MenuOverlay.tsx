@@ -26,6 +26,7 @@ export interface MenuOverlayProps {
   onNavigateHowTo: () => void;
   onNavigateAuth: (returnTo: TopLevelMenuScreen) => void;
   onSignOut: () => void;
+  hideAuthControls?: boolean;
 }
 
 const CLOSE_ANIMATION_MS = 160;
@@ -73,6 +74,7 @@ export function MenuOverlay({
   onNavigateHowTo,
   onNavigateAuth,
   onSignOut,
+  hideAuthControls = false,
 }: MenuOverlayProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -273,11 +275,13 @@ export function MenuOverlay({
             ) : isAuthenticated ? (
               <div className={`${styles.authRow} ${styles.menuItem}`} style={{ '--stagger-index': 3 } as CSSProperties}>
                 <span className={styles.authStatus}>{displayIdentity(userEmail, userName)}</span>
-                <button type="button" className={styles.authAction} onClick={handleSignOut}>
-                  Sign Out
-                </button>
+                {!hideAuthControls && (
+                  <button type="button" className={styles.authAction} onClick={handleSignOut}>
+                    Sign Out
+                  </button>
+                )}
               </div>
-            ) : (
+            ) : hideAuthControls ? null : (
               <div className={`${styles.authRow} ${styles.menuItem}`} style={{ '--stagger-index': 3 } as CSSProperties}>
                 <button type="button" className={styles.authAction} onClick={handleAuthNavigation}>
                   Sign In

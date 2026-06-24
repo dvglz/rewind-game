@@ -10,6 +10,7 @@ import {
 import { BurgerMenu } from '../components/BurgerMenu';
 import { Toast } from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
+import { isAppMode } from '../lib/appMode';
 import styles from './HomeScreen.module.css';
 
 interface HomeScreenProps {
@@ -44,6 +45,7 @@ export function HomeScreen({
   const [showDebugMenu, setShowDebugMenu] = useState(false);
   const [randomEnabled, setRandomEnabled] = useState(() => isRandomModeEnabled());
   const [signOutToast, setSignOutToast] = useState(false);
+  const hideAuthControls = isAppMode();
 
   const sportOptions = useMemo(() => ['american', 'soccer'] as Sport[], []);
 
@@ -89,6 +91,7 @@ export function HomeScreen({
         onNavigateGroups={onGroups}
         onNavigateArchive={onArchive}
         onNavigateAuth={onNavigateAuth}
+        hideAuthControls={hideAuthControls}
         onSignOut={() => {
           signOut();
           onSignOut();

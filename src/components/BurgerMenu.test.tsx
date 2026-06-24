@@ -202,4 +202,28 @@ describe('BurgerMenu', () => {
     expect(document.body.style.overflow).toBe('');
     vi.useRealTimers();
   });
+
+  it('hides Sign Out but keeps the status line when hideAuthControls is set', () => {
+    render(
+      <BurgerMenu
+        {...createProps()}
+        isAuthenticated={true}
+        userEmail="me@example.com"
+        hideAuthControls={true}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
+
+    expect(screen.queryByRole('button', { name: 'Sign Out' })).toBeNull();
+    expect(screen.getByText('me@example.com')).not.toBeNull();
+  });
+
+  it('hides the Sign In CTA when hideAuthControls is set and the user is anonymous', () => {
+    render(<BurgerMenu {...createProps()} hideAuthControls={true} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
+
+    expect(screen.queryByRole('button', { name: 'Sign In' })).toBeNull();
+  });
 });

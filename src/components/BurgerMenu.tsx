@@ -19,6 +19,7 @@ export interface BurgerMenuProps {
   onNavigateHowTo: () => void;
   onNavigateAuth: (returnTo: TopLevelMenuScreen) => void;
   onSignOut: () => void;
+  hideAuthControls?: boolean;
 }
 
 export function BurgerMenu(props: BurgerMenuProps) {
