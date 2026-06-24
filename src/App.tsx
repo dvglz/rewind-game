@@ -16,6 +16,7 @@ import { beginPuzzleSession, getDateOverride, getSport, getTodaysPuzzle, isRewin
 import { useWebHaptics } from 'web-haptics/react';
 import { initHaptics } from './lib/haptics';
 import { hidesCompletedGameLock, shouldEnableHapticsDebug } from './lib/testMode';
+import { isAppMode, ensureAppModeParam } from './lib/appMode';
 import { useThemePreference } from './hooks/useThemePreference';
 import { fetchMyScore, flushPendingScore } from './lib/api';
 import { initAnalytics, trackPageView, track } from './lib/analytics';
@@ -32,6 +33,7 @@ const USE_MOCK = import.meta.env.VITE_MOCK_API === 'true';
 
 function AppInner() {
   const allowReplay = hidesCompletedGameLock(window.location.search);
+  const appMode = isAppMode();
   const hasVibrateSupport = typeof navigator !== 'undefined' && 'vibrate' in navigator;
   const { trigger } = useWebHaptics({
     debug: shouldEnableHapticsDebug(window.location.search, hasVibrateSupport),
@@ -44,6 +46,10 @@ function AppInner() {
   useEffect(() => {
     initHaptics(trigger);
   }, [trigger]);
+
+  useEffect(() => {
+    ensureAppModeParam();
+  }, []);
 
   useEffect(() => {
     const puzzle = getTodaysPuzzle(getSport());
@@ -97,7 +103,7 @@ function AppInner() {
       return isAuthenticated ? 'groups' : 'auth';
     }
     const mode = params.get('mode');
-    if (mode === 'auth') return 'auth';
+    if (mode === 'auth') return isAppMode() ? 'home' : 'auth';
     if (mode === 'howto') return 'howto';
     if (mode === 'ordering') return 'ordering';
     if (mode === 'game') {
@@ -133,6 +139,7 @@ function AppInner() {
   };
 
   const navigateToAuth = (returnTo: Screen) => {
+    if (appMode) return; // app owns identity — no in-app login
     const params = new URLSearchParams(window.location.search);
     params.set('mode', 'auth');
     params.set('returnTo', returnTo);
@@ -349,7 +356,7 @@ function AppInner() {
           onHome={() => navigate('home')}
         />
       )}
-      {screen === 'auth' && (
+      {screen === 'auth' && !appMode && (
         <>
           <AuthScreen
             onBack={() => navigate('home')}

@@ -124,6 +124,7 @@ vi.mock('./screens/GroupsScreen', () => ({
 
 beforeEach(() => {
   trackPageViewMock.mockClear();
+  sessionStorage.clear();
   window.history.replaceState({}, '', '/?invite=EMNRLJ2G&returnTo=groups');
 });
 
@@ -163,4 +164,20 @@ test('updates the URL before tracking SPA navigation pageviews', async () => {
   await waitFor(() => {
     expect(trackPageViewMock).toHaveBeenCalledWith('leaderboard');
   });
+});
+
+test('does not render the auth screen in app mode even with mode=auth', async () => {
+  sessionStorage.clear();
+  window.history.replaceState({}, '', '/?from=app&mode=auth');
+
+  const { App } = await import('./App');
+  render(<App />);
+
+  await waitFor(() => {
+    expect(screen.getByTestId('home-screen')).toBeTruthy();
+  });
+  expect(screen.queryByTestId('auth-screen')).toBeNull();
+
+  window.history.replaceState({}, '', '/');
+  sessionStorage.clear();
 });
