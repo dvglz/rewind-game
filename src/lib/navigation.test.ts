@@ -36,4 +36,12 @@ describe('computeNavSearch (URL params per screen)', () => {
   it('does NOT strip a date override when not in practice (e.g. lab mode)', () => {
     expect(computeNavSearch('date=2026-06-10', 'home')).toBe('date=2026-06-10');
   });
+
+  it('preserves from=app when navigating to home', () => {
+    expect(computeNavSearch('mode=game&from=app', 'home')).toBe('from=app');
+  });
+
+  it('preserves from=app when navigating to another screen', () => {
+    expect(computeNavSearch('from=app', 'leaderboard')).toBe('from=app&mode=leaderboard');
+  });
 });
