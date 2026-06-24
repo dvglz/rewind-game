@@ -8,6 +8,7 @@ import { fetchMyScore, isScoreSuperseded } from '../lib/api';
 import { Toast } from '../components/Toast';
 import { RewindGlyph } from '../components/icons';
 import { useAuth } from '../context/AuthContext';
+import { isAppMode } from '../lib/appMode';
 import { track } from '../lib/analytics';
 import type { RoundResult } from '../types';
 import styles from './ResultsScreen.module.css';
@@ -23,6 +24,7 @@ interface ResultsScreenProps {
 
 export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, onBackToArchive, onPlayAgain }: ResultsScreenProps) {
   const { isAuthenticated } = useAuth();
+  const appMode = isAppMode();
   const puzzle = getTodaysPuzzle();
   const sport = getSport();
   const practice = isPracticeMode();
@@ -203,7 +205,7 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
               Practice run — scores aren’t saved.
             </p>
           </>
-        ) : isAuthenticated ? (
+        ) : (isAuthenticated || appMode) ? (
           <>
             <button
               className={styles.secondaryButton}

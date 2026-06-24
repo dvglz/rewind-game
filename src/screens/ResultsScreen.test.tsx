@@ -49,6 +49,8 @@ beforeEach(() => {
   gradeSeenRef.value = false;
   markGradeSeen.mockReset();
   fetchMyScore.mockReset();
+  sessionStorage.clear();
+  window.history.replaceState(null, '', '/');
 });
 
 test('logged-in users get friends CTA plus inline leaderboard link', () => {
@@ -272,4 +274,21 @@ test('practice mode shows Play Again + Back to Archive and skips the remote fetc
   expect(fetchMyScore).not.toHaveBeenCalled();
 
   window.history.replaceState({}, '', '/');
+});
+
+test('hides the sign-in prompt when in app mode', () => {
+  mockAuthed = false;
+  window.history.replaceState(null, '', '/?from=app');
+
+  render(
+    <ResultsScreen
+      onHome={() => {}}
+      onGroups={() => {}}
+      onLeaderboard={() => {}}
+      onRequireAuth={vi.fn()}
+    />
+  );
+
+  expect(screen.queryByRole('button', { name: /^Sign in$/i })).toBeNull();
+  expect(screen.queryByRole('button', { name: /Create an Account/i })).toBeNull();
 });
