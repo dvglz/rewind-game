@@ -13,8 +13,14 @@ vi.mock('../lib/api', () => ({
   isScoreSubmitted: vi.fn(() => false),
   markScoreSubmitted: vi.fn(),
   markScoreSuperseded: vi.fn(),
+  isRewardClaimed: vi.fn(() => false),
+  markRewardClaimed: vi.fn(),
   GAME_TYPE: 'rewind',
   GAME_MODE: 'rewind_nba',
+}));
+
+vi.mock('../lib/playhub', () => ({
+  claimReward: vi.fn(() => Promise.resolve(true)),
 }));
 
 vi.mock('../engine/storage', () => ({
@@ -25,7 +31,8 @@ vi.mock('../engine/storage', () => ({
 
 const { saveGameState, updateStatsAfterGame } = await import('../engine/storage');
 const { getAccessToken } = await import('../lib/auth');
-const { savePendingScore, submitScore, markScoreSubmitted, markScoreSuperseded } = await import('../lib/api');
+const { savePendingScore, submitScore, markScoreSubmitted, markScoreSuperseded, markRewardClaimed } = await import('../lib/api');
+const { claimReward } = await import('../lib/playhub');
 
 const puzzle: Puzzle = {
   id: 'rewind-001',
@@ -227,4 +234,44 @@ test('marks the score superseded (not pending) when the backend reports a duplic
   expect(markScoreSubmitted).toHaveBeenCalledWith('rewind-001');
   expect(markScoreSuperseded).toHaveBeenCalledWith('rewind-001');
   expect(savePendingScore).not.toHaveBeenCalled();
+});
+
+test('claims earned missions once on daily completion when authenticated', async () => {
+  vi.spyOn(Date, 'now')
+    .mockReturnValueOnce(1_700_000_000_000)
+    .mockReturnValue(1_700_000_125_000);
+  vi.mocked(getAccessToken).mockReturnValue('tok123');
+
+  const { result } = renderHook(() => useGame(puzzle));
+
+  // Perfect run: guess each event's exact year → 1000 points, all 5 green.
+  await act(async () => { result.current.submitGuess(2001); });
+  await act(async () => { result.current.submitGuess(2002); });
+  await act(async () => { result.current.submitGuess(2003); });
+  await act(async () => { result.current.submitGuess(2004); });
+  await act(async () => {
+    result.current.submitGuess(2005);
+    await Promise.resolve();
+  });
+
+  expect(claimReward).toHaveBeenCalledWith('participant');
+  expect(claimReward).toHaveBeenCalledWith('mission_2');
+  expect(claimReward).toHaveBeenCalledWith('mission_3');
+  expect(claimReward).toHaveBeenCalledTimes(3);
+  // Marked claimed only after the (resolved) 2xx response.
+  expect(markRewardClaimed).toHaveBeenCalledWith('participant', 'rewind-001');
+});
+
+test('does not claim missions when scoring is disabled', () => {
+  vi.mocked(getAccessToken).mockReturnValue('tok123');
+
+  const { result } = renderHook(() => useGame(puzzle, { scoringEnabled: false }));
+
+  act(() => { result.current.submitGuess(2001); });
+  act(() => { result.current.submitGuess(2002); });
+  act(() => { result.current.submitGuess(2003); });
+  act(() => { result.current.submitGuess(2004); });
+  act(() => { result.current.submitGuess(2005); });
+
+  expect(claimReward).not.toHaveBeenCalled();
 });

@@ -3,7 +3,9 @@ import type { GameState, RoundResult, Puzzle } from '../types';
 import { calculateScore, getResultColor } from '../engine/scoring';
 import { saveGameState, loadGameState, updateStatsAfterGame } from '../engine/storage';
 import { getAccessToken } from '../lib/auth';
-import { submitScore, savePendingScore, isScoreSubmitted, markScoreSubmitted, markScoreSuperseded, GAME_MODE, GAME_TYPE } from '../lib/api';
+import { submitScore, savePendingScore, isScoreSubmitted, markScoreSubmitted, markScoreSuperseded, isRewardClaimed, markRewardClaimed, GAME_MODE, GAME_TYPE } from '../lib/api';
+import { claimReward } from '../lib/playhub';
+import { evaluateMissions } from '../lib/missions';
 
 const TOTAL_ROUNDS = 5;
 
@@ -96,6 +98,13 @@ export function useGame(puzzle: Puzzle, { scoringEnabled = true }: UseGameOption
           } else {
             savePendingScore(payload, puzzle.id);
           }
+        }
+
+        for (const rewardKey of evaluateMissions(newState.totalScore, newState.results)) {
+          if (isRewardClaimed(rewardKey, puzzle.id)) continue;
+          void claimReward(rewardKey).then((ok) => {
+            if (ok) markRewardClaimed(rewardKey, puzzle.id);
+          });
         }
       }
 
