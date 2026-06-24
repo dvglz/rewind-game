@@ -350,3 +350,27 @@ describe('clearScoreSyncState', () => {
     expect(localStorage.getItem('unrelated_key')).toBe('keep');
   });
 });
+
+describe('reward claim dedupe', () => {
+  it('is not claimed until marked', async () => {
+    const { isRewardClaimed, markRewardClaimed } = await import('./api');
+    expect(isRewardClaimed('participant', 'puzzle-1')).toBe(false);
+    markRewardClaimed('participant', 'puzzle-1');
+    expect(isRewardClaimed('participant', 'puzzle-1')).toBe(true);
+  });
+
+  it('tracks reward key and puzzle id independently', async () => {
+    const { isRewardClaimed, markRewardClaimed } = await import('./api');
+    markRewardClaimed('mission_2', 'puzzle-1');
+    expect(isRewardClaimed('mission_2', 'puzzle-1')).toBe(true);
+    expect(isRewardClaimed('mission_3', 'puzzle-1')).toBe(false);
+    expect(isRewardClaimed('mission_2', 'puzzle-2')).toBe(false);
+  });
+
+  it('clearScoreSyncState removes claim flags', async () => {
+    const { markRewardClaimed, isRewardClaimed, clearScoreSyncState } = await import('./api');
+    markRewardClaimed('participant', 'puzzle-1');
+    clearScoreSyncState();
+    expect(isRewardClaimed('participant', 'puzzle-1')).toBe(false);
+  });
+});

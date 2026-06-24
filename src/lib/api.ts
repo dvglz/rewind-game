@@ -9,6 +9,7 @@ export const PENDING_SCORE_KEY = 'rewind_pending_score';
 export const PENDING_PUZZLE_KEY = 'rewind_pending_puzzle_id';
 export const SUBMITTED_PREFIX = 'rewind_score_submitted_';
 export const SUPERSEDED_PREFIX = 'rewind_score_superseded_';
+export const CLAIM_PREFIX = 'rewind_claim_';
 
 export interface RoundMetadata {
   event_text: string;
@@ -180,13 +181,25 @@ export function isScoreSubmitted(puzzleId: string): boolean {
   return localStorage.getItem(`${SUBMITTED_PREFIX}${puzzleId}`) === 'true';
 }
 
+export function markRewardClaimed(rewardKey: string, puzzleId: string): void {
+  localStorage.setItem(`${CLAIM_PREFIX}${rewardKey}_${puzzleId}`, 'true');
+}
+
+export function isRewardClaimed(rewardKey: string, puzzleId: string): boolean {
+  return localStorage.getItem(`${CLAIM_PREFIX}${rewardKey}_${puzzleId}`) === 'true';
+}
+
 export function clearScoreSyncState(): void {
   localStorage.removeItem(PENDING_SCORE_KEY);
   localStorage.removeItem(PENDING_PUZZLE_KEY);
 
   for (let i = localStorage.length - 1; i >= 0; i -= 1) {
     const key = localStorage.key(i);
-    if (key?.startsWith(SUBMITTED_PREFIX) || key?.startsWith(SUPERSEDED_PREFIX)) {
+    if (
+      key?.startsWith(SUBMITTED_PREFIX) ||
+      key?.startsWith(SUPERSEDED_PREFIX) ||
+      key?.startsWith(CLAIM_PREFIX)
+    ) {
       localStorage.removeItem(key);
     }
   }
