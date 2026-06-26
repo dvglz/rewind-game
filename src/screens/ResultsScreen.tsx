@@ -6,18 +6,20 @@ import { getMaxPossibleScore, getScoreTierLabel } from '../engine/scoring';
 import { generateShareText, shareResults, type ShareOutcome } from '../lib/share';
 import { fetchMyScore, isScoreSuperseded } from '../lib/api';
 import { Toast } from '../components/Toast';
-import { RewindGlyph } from '../components/icons';
+import { ResultsCountdownReminder } from '../components/ResultsCountdownReminder';
 import { useAuth } from '../context/AuthContext';
 import { isAppMode } from '../lib/appMode';
 import { track } from '../lib/analytics';
 import type { RoundResult } from '../types';
 import styles from './ResultsScreen.module.css';
 
+type AuthReason = 'default' | 'reminder';
+
 interface ResultsScreenProps {
   onHome: () => void;
   onGroups: () => void;
   onLeaderboard: () => void;
-  onRequireAuth: () => void;
+  onRequireAuth: (reason?: AuthReason) => void;
   onBackToArchive?: () => void;
   onPlayAgain?: () => void;
 }
@@ -244,17 +246,19 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
           </>
         )}
 
-        {!practice && (
-          <div className={styles.footer} style={{ animationDelay: '780ms' }}>
-            <RewindGlyph className={styles.rewindGlyph} />
-            <p className={styles.motivational}>
-              New questions drop daily.
-              <br />
-              Get back tomorrow.
-            </p>
-          </div>
-        )}
       </div>
+      {!practice && (
+        <ResultsCountdownReminder
+          showNotifyCta={!isAuthenticated && !appMode}
+          onNotify={() => {
+            track('notify_me_click', {
+              game_number: puzzle.number,
+              is_authenticated: false,
+            });
+            onRequireAuth('reminder');
+          }}
+        />
+      )}
       {showMotivational && <Toast message={motivationalLabel} />}
       {shareState === 'copied' && <Toast message="Copied to clipboard" />}
       {superseded && showInfo && <Toast message="Showing your score from earlier today" />}

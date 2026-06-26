@@ -51,7 +51,7 @@
   flex: 1;
   width: 100%;
   max-width: 400px;
-  padding: 16px 24px 24px;
+  padding: 16px 24px 96px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -67,8 +67,7 @@
 
 .shareButton,
 .descriptionLine,
-.contextLine,
-.footer {
+.contextLine {
   opacity: 0;
   animation: fadeInUp 0.35s ease forwards;
 }
@@ -97,31 +96,6 @@
   transform: scale(0.95);
 }
 
-/* Footer section — rewind glyph + daily message */
-.footer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  margin-top: 24px;
-}
-
-.rewindGlyph {
-  width: 64px;
-  height: 35px;
-  color: var(--color-text);
-}
-
-.motivational {
-  text-align: center;
-  font-family: var(--font-display);
-  font-size: 32px;
-  line-height: 1.1;
-  color: var(--color-text);
-  max-width: 28ch;
-  margin-top: 6px;
-}
-
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -148,7 +122,7 @@
 
   .content {
     max-width: 480px;
-    padding: 24px 32px 32px;
+    padding: 24px 32px 104px;
     gap: 16px;
   }
 

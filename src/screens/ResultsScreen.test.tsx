@@ -112,6 +112,40 @@ test('logged-out users get account CTA, benefits sentence, and sign-in link', ()
   expect(screen.queryByRole('button', { name: /See Friends' Scores/i })).toBeNull();
 });
 
+test('logged-out daily results show Notify Me and route to auth', () => {
+  const onRequireAuth = vi.fn();
+  mockAuthed = false;
+
+  render(
+    <ResultsScreen
+      onHome={() => {}}
+      onGroups={() => {}}
+      onLeaderboard={() => {}}
+      onRequireAuth={onRequireAuth}
+    />
+  );
+
+  fireEvent.click(screen.getByRole('button', { name: 'Notify Me' }));
+
+  expect(onRequireAuth).toHaveBeenCalledWith('reminder');
+});
+
+test('logged-in daily results show countdown without Notify Me', () => {
+  mockAuthed = true;
+
+  render(
+    <ResultsScreen
+      onHome={() => {}}
+      onGroups={() => {}}
+      onLeaderboard={() => {}}
+      onRequireAuth={() => {}}
+    />
+  );
+
+  expect(screen.getByLabelText('Next Rewind puzzle')).toBeTruthy();
+  expect(screen.queryByRole('button', { name: 'Notify Me' })).toBeNull();
+});
+
 test('falls back to backend score when local state is missing', async () => {
   currentState = null;
   mockAuthed = true;
@@ -271,6 +305,7 @@ test('practice mode shows Play Again + Back to Archive and skips the remote fetc
   expect(screen.getByRole('button', { name: 'Back to Archive' })).not.toBeNull();
   expect(screen.getByText(/scores aren’t saved/i)).not.toBeNull();
   expect(screen.queryByRole('button', { name: /See Friends' Scores/i })).toBeNull();
+  expect(screen.queryByLabelText('Next Rewind puzzle')).toBeNull();
   expect(fetchMyScore).not.toHaveBeenCalled();
 
   window.history.replaceState({}, '', '/');
@@ -291,4 +326,6 @@ test('hides the sign-in prompt when in app mode', () => {
 
   expect(screen.queryByRole('button', { name: /^Sign in$/i })).toBeNull();
   expect(screen.queryByRole('button', { name: /Create an Account/i })).toBeNull();
+  expect(screen.getByLabelText('Next Rewind puzzle')).toBeTruthy();
+  expect(screen.queryByRole('button', { name: 'Notify Me' })).toBeNull();
 });
