@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useEffect, useMemo, useState, createContext, useContext, type ReactNode } from 'react';
 import { beforeEach, expect, test, vi } from 'vitest';
 
@@ -101,7 +101,12 @@ vi.mock('./screens/OrderingScreen', () => ({
 }));
 
 vi.mock('./screens/ResultsScreen', () => ({
-  ResultsScreen: () => <div data-testid="results-screen">results</div>,
+  ResultsScreen: ({ onRequireAuth }: { onRequireAuth: (reason?: 'default' | 'reminder') => void }) => (
+    <div data-testid="results-screen">
+      results
+      <button type="button" onClick={() => onRequireAuth('reminder')}>Notify Me</button>
+    </div>
+  ),
 }));
 
 vi.mock('./screens/LeaderboardScreen', () => ({
@@ -113,7 +118,9 @@ vi.mock('./screens/ArchiveScreen', () => ({
 }));
 
 vi.mock('./screens/AuthScreen', () => ({
-  AuthScreen: () => <div data-testid="auth-screen">auth</div>,
+  AuthScreen: ({ contextMessage }: { contextMessage?: string }) => (
+    <div data-testid="auth-screen">{contextMessage ?? 'auth'}</div>
+  ),
 }));
 
 vi.mock('./screens/GroupsScreen', () => ({
@@ -180,4 +187,34 @@ test('does not render the auth screen in app mode even with mode=auth', async ()
 
   window.history.replaceState({}, '', '/');
   sessionStorage.clear();
+});
+
+test('routes Notify Me from results to auth with reminder copy', async () => {
+  const { loadGameState } = await import('./engine/storage');
+  vi.mocked(loadGameState).mockReturnValue({
+    puzzleId: '2026-06-15-american',
+    currentRound: 5,
+    results: [],
+    totalScore: 500,
+    completed: true,
+    elapsedMs: 90000,
+  });
+  window.history.replaceState({}, '', '/?mode=results');
+
+  const { App } = await import('./App');
+  render(<App />);
+
+  await waitFor(() => {
+    expect(screen.getByTestId('results-screen')).toBeTruthy();
+  });
+
+  fireEvent.click(screen.getByRole('button', { name: 'Notify Me' }));
+
+  await waitFor(() => {
+    expect(screen.getByTestId('auth-screen').textContent).toBe(
+      "Get notified when tomorrow's puzzle drops. No spam. Unsubscribe anytime.",
+    );
+  });
+  expect(window.location.search).toContain('returnTo=results');
+  expect(window.location.search).toContain('authReason=reminder');
 });

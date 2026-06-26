@@ -30,6 +30,7 @@ type Screen = 'home' | 'game' | 'ordering' | 'results' | 'groups' | 'auth' | 'le
 // In mock mode (local dev) the auth gate is bypassed so screens that normally
 // require a token — e.g. the global leaderboard — can be tested without one.
 const USE_MOCK = import.meta.env.VITE_MOCK_API === 'true';
+const REMINDER_AUTH_MESSAGE = "Get notified when tomorrow's puzzle drops. No spam. Unsubscribe anytime.";
 
 function AppInner() {
   const allowReplay = hidesCompletedGameLock(window.location.search);
@@ -149,6 +150,18 @@ function AppInner() {
     trackPageView('auth');
   };
 
+  const navigateToReminderAuth = () => {
+    if (appMode) return;
+    const params = new URLSearchParams(window.location.search);
+    params.set('mode', 'auth');
+    params.set('returnTo', 'results');
+    params.set('authReason', 'reminder');
+    const nextSearch = params.toString();
+    window.history.pushState({}, '', `/?${nextSearch}`);
+    setScreen('auth');
+    trackPageView('auth');
+  };
+
   useEffect(() => {
     if (!pendingInvite) return;
     if (isAuthLoading) return;
@@ -160,6 +173,11 @@ function AppInner() {
   const getReturnTo = (): string | null => {
     const params = new URLSearchParams(window.location.search);
     return params.get('returnTo');
+  };
+
+  const getAuthReason = (): string | null => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('authReason');
   };
 
   const showAuthToast = () => {
@@ -176,6 +194,11 @@ function AppInner() {
       return;
     }
     const returnTo = getReturnTo();
+    const params = new URLSearchParams(window.location.search);
+    params.delete('authReason');
+    const nextWithoutReason = params.toString();
+    window.history.replaceState({}, '', nextWithoutReason ? `/?${nextWithoutReason}` : '/');
+
     if (returnTo === 'archive') {
       const archiveDate = new URLSearchParams(window.location.search).get('archiveDate');
       if (archiveDate) {
@@ -313,7 +336,13 @@ function AppInner() {
           onHome={() => navigate('home')}
           onGroups={() => navigate('groups')}
           onLeaderboard={() => navigate('leaderboard')}
-          onRequireAuth={() => navigateToAuth('results')}
+          onRequireAuth={(reason) => {
+            if (reason === 'reminder') {
+              navigateToReminderAuth();
+              return;
+            }
+            navigateToAuth('results');
+          }}
           onBackToArchive={exitToArchive}
           onPlayAgain={() => startPracticeGame(getDateOverride())}
         />
@@ -369,7 +398,9 @@ function AppInner() {
                 ? "You'll join a group right after signing in"
                 : getReturnTo() === 'archive'
                   ? 'Sign in to keep playing past puzzles'
-                  : undefined
+                  : getAuthReason() === 'reminder'
+                    ? REMINDER_AUTH_MESSAGE
+                    : undefined
             }
           />
         </>
