@@ -247,9 +247,9 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
         )}
 
       </div>
-      {!practice && (
+      {!practice && !appMode && (
         <ResultsCountdownReminder
-          showNotifyCta={!isAuthenticated && !appMode}
+          showNotifyCta={!isAuthenticated}
           onNotify={() => {
             track('notify_me_click', {
               game_number: puzzle.number,

@@ -118,8 +118,17 @@ vi.mock('./screens/ArchiveScreen', () => ({
 }));
 
 vi.mock('./screens/AuthScreen', () => ({
-  AuthScreen: ({ contextMessage }: { contextMessage?: string }) => (
-    <div data-testid="auth-screen">{contextMessage ?? 'auth'}</div>
+  AuthScreen: ({
+    contextMessage,
+    showAppDownloadLink,
+  }: {
+    contextMessage?: string;
+    showAppDownloadLink?: boolean;
+  }) => (
+    <div data-testid="auth-screen">
+      <span data-testid="auth-copy">{contextMessage ?? 'auth'}</span>
+      {showAppDownloadLink ? <span data-testid="app-download-link">ios-link</span> : null}
+    </div>
   ),
 }));
 
@@ -211,10 +220,11 @@ test('routes Notify Me from results to auth with reminder copy', async () => {
   fireEvent.click(screen.getByRole('button', { name: 'Notify Me' }));
 
   await waitFor(() => {
-    expect(screen.getByTestId('auth-screen').textContent).toBe(
+    expect(screen.getByTestId('auth-copy').textContent).toBe(
       "Get notified when tomorrow's puzzle drops. No spam. Unsubscribe anytime.",
     );
   });
+  expect(screen.getByTestId('app-download-link')).toBeTruthy();
   expect(window.location.search).toContain('returnTo=results');
   expect(window.location.search).toContain('authReason=reminder');
 });

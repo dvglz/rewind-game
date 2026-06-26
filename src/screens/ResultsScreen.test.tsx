@@ -326,6 +326,6 @@ test('hides the sign-in prompt when in app mode', () => {
 
   expect(screen.queryByRole('button', { name: /^Sign in$/i })).toBeNull();
   expect(screen.queryByRole('button', { name: /Create an Account/i })).toBeNull();
-  expect(screen.getByLabelText('Next Rewind puzzle')).toBeTruthy();
+  expect(screen.queryByLabelText('Next Rewind puzzle')).toBeNull();
   expect(screen.queryByRole('button', { name: 'Notify Me' })).toBeNull();
 });

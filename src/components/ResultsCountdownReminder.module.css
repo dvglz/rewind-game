@@ -17,8 +17,15 @@
 }
 
 [data-theme="dark"] .reminder {
-  background: var(--color-text);
-  color: var(--color-bg);
+  background: var(--color-surface-elevated);
+  color: var(--color-text);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .reminder {
+    background: var(--color-surface-elevated);
+    color: var(--color-text);
+  }
 }
 
 .countdownGroup {

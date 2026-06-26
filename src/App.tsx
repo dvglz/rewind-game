@@ -402,6 +402,7 @@ function AppInner() {
                     ? REMINDER_AUTH_MESSAGE
                     : undefined
             }
+            showAppDownloadLink={getAuthReason() === 'reminder'}
           />
         </>
       )}

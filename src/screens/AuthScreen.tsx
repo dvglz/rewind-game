@@ -10,15 +10,17 @@ import styles from './AuthScreen.module.css';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CODE_LENGTH = 6;
+const CLUTCHPOINTS_IOS_URL = 'https://apps.apple.com/us/app/clutchpoints-nba-nfl-mlb/id1044413150';
 
 interface AuthScreenProps {
   onBack: () => void;
   onSuccess: () => void;
   returnTo: string | null;
   contextMessage?: string;
+  showAppDownloadLink?: boolean;
 }
 
-export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage }: AuthScreenProps) {
+export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage, showAppDownloadLink = false }: AuthScreenProps) {
   void returnTo; // navigation state is handled by the caller via onSuccess
   const { setUser } = useAuth();
   const [email, setEmail] = useState('');
@@ -187,6 +189,15 @@ export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage }: Auth
                 </button>
               </form>
             </div>
+
+            {showAppDownloadLink && (
+              <p className={styles.appPrompt}>
+                Want to play in the app?{' '}
+                <a className={styles.appLink} href={CLUTCHPOINTS_IOS_URL}>
+                  Download ClutchPoints for iOS
+                </a>
+              </p>
+            )}
           </>
         )}
       </div>
