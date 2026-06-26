@@ -56,11 +56,11 @@ test('enums, themes and priority are valid', () => {
   }
 });
 
-test('DAY_DEFINITIONS: 10 days of 5 eligible, unique ids', () => {
-  expect(DAY_DEFINITIONS).toHaveLength(10);
+test('DAY_DEFINITIONS: 20 days of 5 eligible, unique ids', () => {
+  expect(DAY_DEFINITIONS).toHaveLength(20);
   const all = DAY_DEFINITIONS.flat();
-  expect(all).toHaveLength(50);
-  expect(new Set(all).size).toBe(50);
+  expect(all).toHaveLength(100);
+  expect(new Set(all).size).toBe(100);
   for (const id of all) {
     const q = questionById.get(id);
     expect(q, `unknown id ${id}`).toBeDefined();

@@ -13,11 +13,11 @@ const daySignature = (day: string[]) => [...day].sort().join(',');
 
 const days = buildDayDefinitions();
 
-test('produces 10 days of 5 unique ids, all eligible', () => {
-  expect(days).toHaveLength(10);
+test('produces 20 days of 5 unique ids, all eligible', () => {
+  expect(days).toHaveLength(20);
   const all = days.flat();
-  expect(all).toHaveLength(50);
-  expect(new Set(all).size).toBe(50); // no cross-day repeats
+  expect(all).toHaveLength(100);
+  expect(new Set(all).size).toBe(100); // no cross-day repeats
   for (const id of all) {
     const q = questionById.get(id);
     expect(q?.eligibleForMain).toBe(true);
@@ -47,8 +47,8 @@ test('determinism: two runs are identical', () => {
 
 test('a seeded run is valid and differs from the default arrangement', () => {
   const seeded = buildDayDefinitions(REWIND_QUESTION_BANK, { seed: 1234 });
-  expect(seeded.flat()).toHaveLength(50);
-  expect(new Set(seeded.flat()).size).toBe(50);
+  expect(seeded.flat()).toHaveLength(100);
+  expect(new Set(seeded.flat()).size).toBe(100);
   for (const day of seeded) {
     const diffs = day.map((id) => questionById.get(id)!.difficulty);
     expect(diffs).toEqual(['easy', 'easy', 'medium', 'hard', 'hard']);
@@ -63,7 +63,7 @@ test.runIf(process.env.WRITE_DAYS === '1')('writes src/data/dayDefinitions.ts', 
   if (!wantRandom) {
     generated = buildDayDefinitions();
   } else {
-    // Randomized: find a seed whose 10 days reuse no previous day's exact lineup.
+    // Randomized: find a seed whose days reuse no previous day's exact lineup.
     const prevSigs = new Set(PREVIOUS_DAYS.map(daySignature));
     const baseSeed = process.env.SEED !== undefined ? Number(process.env.SEED) : Date.now();
     let best: string[][] | null = null;

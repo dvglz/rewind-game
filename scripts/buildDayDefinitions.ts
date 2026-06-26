@@ -3,8 +3,8 @@ import {
   type RewindQuestion,
 } from '../src/data/questionBank';
 
-const DAYS = 10;
-const NEED = { easy: 20, medium: 10, hard: 20 } as const;
+const DAYS = 20;
+const NEED = { easy: 40, medium: 20, hard: 40 } as const;
 type Diff = keyof typeof NEED;
 
 const primaryTeam = (q: RewindQuestion) => q.teams[0] ?? `__team_${q.id}`;
