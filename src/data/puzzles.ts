@@ -291,10 +291,14 @@ export function beginPuzzleSession(): void {
 
 function getPuzzleSeedSource(dateStr: string, sport: Sport): string {
   const randomSeed = sessionStorage.getItem(RANDOM_SEED_KEY);
-  if (isRandomModeEnabled() && randomSeed) {
+  if (shouldUseRandomMode() && randomSeed) {
     return `random-${randomSeed}-${sport}`;
   }
   return `${dateStr}-${sport}`;
+}
+
+function shouldUseRandomMode(): boolean {
+  return isRandomModeEnabled() && !isRewindLabMode() && !isPracticeMode();
 }
 
 export function getPuzzleForDate(dateStr: string, sport: Sport = 'american'): Puzzle {
@@ -303,7 +307,7 @@ export function getPuzzleForDate(dateStr: string, sport: Sport = 'american'): Pu
 
   let picked: RawEvent[];
 
-  if (isRandomModeEnabled()) {
+  if (shouldUseRandomMode()) {
     // Random mode: seeded shuffle from entire flat pool
     const pool = FLAT_POOLS[sport] || FLAT_POOLS.american;
     const seed = hashString(seedSource);

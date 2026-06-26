@@ -24,6 +24,39 @@ test('rewindLab selects a puzzle by one-based puzzle number', () => {
   expect(puzzle.events[0].text.length).toBeGreaterThan(0);
 });
 
+test('rewindLab selects expanded puzzle numbers beyond day 10', () => {
+  window.history.replaceState({}, '', '/?rewindLab=011');
+
+  const puzzle = getTodaysPuzzle();
+
+  expect(isRewindLabMode()).toBe(true);
+  expect(puzzle.id).toBe('lab-2026-06-28-american');
+  expect(puzzle.number).toBe(11);
+  expect(puzzle.events.map((event) => event.text)).toEqual([
+    'LeBron signs with the Lakers in free agency',
+    'Harden is named MVP after his 30-point Rockets season',
+    "Zion's shoe explodes during Duke-UNC",
+    'Milwaukee drafts Giannis with the 15th pick out of Greece',
+    "Paul Pierce's wheelchair game becomes NBA Finals folklore",
+  ]);
+});
+
+test('rewindLab ignores random mode and selects the exact numbered puzzle', () => {
+  window.history.replaceState({}, '', '/?rewindLab=011');
+  localStorage.setItem('rewind_random_mode', 'true');
+
+  const puzzle = getTodaysPuzzle();
+
+  expect(puzzle.number).toBe(11);
+  expect(puzzle.events.map((event) => event.text)).toEqual([
+    'LeBron signs with the Lakers in free agency',
+    'Harden is named MVP after his 30-point Rockets season',
+    "Zion's shoe explodes during Duke-UNC",
+    'Milwaukee drafts Giannis with the 15th pick out of Greece',
+    "Paul Pierce's wheelchair game becomes NBA Finals folklore",
+  ]);
+});
+
 test('rewindLab selects a puzzle by date', () => {
   window.history.replaceState({}, '', '/?sport=soccer&rewindLab=2026-06-22');
 
