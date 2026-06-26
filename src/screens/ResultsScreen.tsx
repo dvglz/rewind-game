@@ -228,7 +228,7 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
           <>
             <button
               className={styles.secondaryButton}
-              onClick={onRequireAuth}
+              onClick={() => onRequireAuth()}
               type="button"
               style={{ animationDelay: '660ms' }}
             >
@@ -239,7 +239,7 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
             </p>
             <p className={styles.contextLine} style={{ animationDelay: '740ms' }}>
               Already member?{' '}
-              <button className={styles.inlineLink} onClick={onRequireAuth} type="button">
+              <button className={styles.inlineLink} onClick={() => onRequireAuth()} type="button">
                 Sign in
               </button>
             </p>
