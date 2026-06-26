@@ -6,6 +6,7 @@ const previewAllowedHosts = [
   'rewind-game-dqkul.ondigitalocean.app',
   'clutchpoints-rewind-test.4taps.me',
   'rewindgame.com',
+  'rewind.clutchpoints.com',
   'clutchpoints-rewind-7rcvt.ondigitalocean.app',
   'rewind-game-prod-xise3.ondigitalocean.app',
   ...(process.env.VITE_PREVIEW_ALLOWED_HOSTS
