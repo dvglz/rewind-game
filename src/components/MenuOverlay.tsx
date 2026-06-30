@@ -243,7 +243,7 @@ export function MenuOverlay({
             aria-current={isGroupsActive ? 'page' : undefined}
             style={{ '--stagger-index': 2 } as CSSProperties}
           >
-            My Group
+            My Groups
           </button>
           <button
             type="button"

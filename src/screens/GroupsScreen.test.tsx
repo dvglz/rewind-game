@@ -2,19 +2,20 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { GroupsScreen } from './GroupsScreen';
 
-const { fetchGroup, fetchLeaderboard, joinGroup } = vi.hoisted(() => ({
-  fetchGroup: vi.fn(),
+const { fetchGroups, fetchLeaderboard, joinGroup, leaveGroup } = vi.hoisted(() => ({
+  fetchGroups: vi.fn(),
   fetchLeaderboard: vi.fn(),
   joinGroup: vi.fn(),
+  leaveGroup: vi.fn(),
 }));
 
 vi.stubEnv('VITE_PUBLIC_APP_URL', 'https://clutchpoints-rewind-test.4taps.me');
 
 vi.mock('../lib/playhub', () => ({
-  fetchGroup,
+  fetchGroups,
   createGroup: vi.fn(),
   joinGroup,
-  leaveGroup: vi.fn(),
+  leaveGroup,
 }));
 
 vi.mock('../lib/leaderboard', async (importOriginal) => {
@@ -31,10 +32,33 @@ vi.mock('../context/AuthContext', () => ({
   }),
 }));
 
+const smallGroup = {
+  id: 42,
+  name: 'the boys',
+  invite_link: 'https://some-backend.test/?invite=YPWFZC',
+  members_count: 3,
+  members: [
+    { group: 42, user: { id: 7, username: 'You', email: 'you@test.dev' }, joined_at: '2026-06-01T00:00:00Z' },
+    { group: 42, user: { id: 9, username: 'Mike', email: 'mike@test.dev' }, joined_at: '2026-06-02T00:00:00Z' },
+    { group: 42, user: { id: 11, username: 'Sarah', email: 'sarah@test.dev' }, joined_at: '2026-06-03T00:00:00Z' },
+  ],
+};
+
+const bigGroup = {
+  id: 88,
+  name: 'office sickos',
+  invite_link: 'OFFICE',
+  members_count: 12,
+  members: [
+    { group: 88, user: { id: 7, username: 'You', email: 'you@test.dev' }, joined_at: '2026-06-01T00:00:00Z' },
+  ],
+};
+
 beforeEach(() => {
-  fetchGroup.mockReset();
+  fetchGroups.mockReset();
   fetchLeaderboard.mockReset();
   joinGroup.mockReset();
+  leaveGroup.mockReset();
   Object.defineProperty(window, 'isSecureContext', {
     configurable: true,
     value: false,
@@ -45,35 +69,37 @@ beforeEach(() => {
   });
 });
 
-test('keeps all group members visible while merging backend scores', async () => {
-  fetchGroup.mockResolvedValueOnce({
-    id: 42,
-    name: 'the boys',
-    invite_link: 'YPWFZC',
-    members: [
-      { group: 42, user: { id: 7, username: 'You', email: 'you@test.dev' }, joined_at: '2026-06-01T00:00:00Z' },
-      { group: 42, user: { id: 9, username: 'Mike', email: 'mike@test.dev' }, joined_at: '2026-06-02T00:00:00Z' },
-      { group: 42, user: { id: 11, username: 'Sarah', email: 'sarah@test.dev' }, joined_at: '2026-06-03T00:00:00Z' },
-    ],
-  });
+test('shows groups sorted by member count before opening one group', async () => {
+  fetchGroups.mockResolvedValueOnce([smallGroup, bigGroup]);
 
+  render(<GroupsScreen onBack={() => {}} onRequireAuth={() => {}} isAuthenticated />);
+
+  const rows = await screen.findAllByRole('button', { name: /members/i });
+  expect(rows).toHaveLength(2);
+  expect(rows[0].textContent).toContain('office sickos');
+  expect(rows[0].textContent).toContain('12 members');
+  expect(rows[1].textContent).toContain('the boys');
+  expect(rows[1].textContent).toContain('3 members');
+  expect(screen.getByRole('button', { name: /join by code/i })).not.toBeNull();
+  expect(screen.getByRole('button', { name: /create group/i })).not.toBeNull();
+  expect(fetchLeaderboard).not.toHaveBeenCalled();
+});
+
+test('opens a selected group and keeps DNP members visible while merging scores by user id', async () => {
+  fetchGroups.mockResolvedValueOnce([smallGroup, bigGroup]);
   fetchLeaderboard.mockResolvedValueOnce({
     date: '2026-06-12',
-    currentUser: null,
+    currentUser: { rank: 2, userId: 7, displayName: 'You', score: 820, timeMs: 156000, isCurrentUser: true },
     entries: [
-      { rank: 1, displayName: 'Mike', score: 940, timeMs: 72000, isCurrentUser: false },
-      { rank: 2, displayName: 'You', score: 820, timeMs: 156000, isCurrentUser: true },
+      { rank: 1, userId: 9, displayName: 'Changed Name', score: 940, timeMs: 72000, isCurrentUser: false },
     ],
   });
 
-  render(
-    <GroupsScreen
-      onBack={() => {}}
-      onRequireAuth={() => {}}
-      isAuthenticated
-    />,
-  );
+  render(<GroupsScreen onBack={() => {}} onRequireAuth={() => {}} isAuthenticated />);
 
+  fireEvent.click(await screen.findByRole('button', { name: /the boys/i }));
+
+  expect(fetchLeaderboard).toHaveBeenCalledWith(expect.any(Number), 42);
   expect(await screen.findByText('Mike')).not.toBeNull();
   expect(await screen.findByText('You')).not.toBeNull();
   expect(await screen.findByText('Sarah')).not.toBeNull();
@@ -82,30 +108,17 @@ test('keeps all group members visible while merging backend scores', async () =>
   expect(await screen.findByText('820')).not.toBeNull();
 });
 
-test('shares group invite links with the configured public app url', async () => {
-  fetchGroup.mockResolvedValueOnce({
-    id: 42,
-    name: 'the boys',
-    invite_link: 'https://some-backend.test/?invite=YPWFZC',
-    members: [
-      { group: 42, user: { id: 7, username: 'You', email: 'you@test.dev' }, joined_at: '2026-06-01T00:00:00Z' },
-    ],
-  });
-
+test('shares selected group invite links with the configured public app url', async () => {
+  fetchGroups.mockResolvedValueOnce([smallGroup]);
   fetchLeaderboard.mockResolvedValueOnce({
     date: '2026-06-12',
     currentUser: null,
     entries: [],
   });
 
-  render(
-    <GroupsScreen
-      onBack={() => {}}
-      onRequireAuth={() => {}}
-      isAuthenticated
-    />,
-  );
+  render(<GroupsScreen onBack={() => {}} onRequireAuth={() => {}} isAuthenticated />);
 
+  fireEvent.click(await screen.findByRole('button', { name: /the boys/i }));
   fireEvent.click(await screen.findByRole('button', { name: /invite friends/i }));
 
   expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
@@ -113,16 +126,9 @@ test('shares group invite links with the configured public app url', async () =>
   );
 });
 
-test('shows a success toast after joining by invite link', async () => {
-  joinGroup.mockResolvedValueOnce(undefined);
-  fetchGroup.mockResolvedValueOnce({
-    id: 42,
-    name: 'the boys',
-    invite_link: 'YPWFZC',
-    members: [
-      { group: 42, user: { id: 7, username: 'You', email: 'you@test.dev' }, joined_at: '2026-06-01T00:00:00Z' },
-    ],
-  });
+test('opens the joined group after joining by invite link', async () => {
+  joinGroup.mockResolvedValueOnce(smallGroup);
+  fetchGroups.mockResolvedValueOnce([smallGroup, bigGroup]);
   fetchLeaderboard.mockResolvedValueOnce({
     date: '2026-06-12',
     currentUser: null,
@@ -139,76 +145,73 @@ test('shows a success toast after joining by invite link', async () => {
   );
 
   expect(await screen.findByText('Joined group')).not.toBeNull();
+  expect(await screen.findByRole('heading', { name: 'the boys' })).not.toBeNull();
 });
 
-test('back arrow navigates home via onBack', async () => {
-  const onBack = vi.fn();
-  fetchGroup.mockResolvedValueOnce({
-    id: 42,
-    name: 'the boys',
-    invite_link: 'YPWFZC',
-    members: [
-      { group: 42, user: { id: 7, username: 'You', email: 'you@test.dev' }, joined_at: '2026-06-01T00:00:00Z' },
-    ],
+test('leaves only the selected group and returns to the groups list', async () => {
+  fetchGroups.mockResolvedValueOnce([smallGroup, bigGroup]);
+  fetchLeaderboard.mockResolvedValueOnce({
+    date: '2026-06-12',
+    currentUser: null,
+    entries: [],
   });
+  leaveGroup.mockResolvedValueOnce(undefined);
+
+  render(<GroupsScreen onBack={() => {}} onRequireAuth={() => {}} isAuthenticated />);
+
+  fireEvent.click(await screen.findByRole('button', { name: /the boys/i }));
+  fireEvent.click(await screen.findByRole('button', { name: /^leave group$/i }));
+  fireEvent.click(await screen.findByRole('button', { name: /tap again to leave/i }));
+
+  expect(leaveGroup).toHaveBeenCalledWith(42);
+  expect(await screen.findByRole('heading', { name: 'My Groups' })).not.toBeNull();
+  expect(screen.queryByRole('button', { name: /the boys/i })).toBeNull();
+  expect(screen.getByRole('button', { name: /office sickos/i })).not.toBeNull();
+});
+
+test('shows the existing empty state when the user has no groups', async () => {
+  fetchGroups.mockResolvedValueOnce([]);
+
+  render(<GroupsScreen onBack={() => {}} onRequireAuth={() => {}} isAuthenticated />);
+
+  expect(await screen.findByText(/Bring Rewind/)).not.toBeNull();
+  expect(screen.getByRole('button', { name: /join by code/i })).not.toBeNull();
+  expect(screen.getByRole('button', { name: /create group/i })).not.toBeNull();
+});
+
+test('top back arrow returns from group detail to the groups list', async () => {
+  fetchGroups.mockResolvedValueOnce([smallGroup, bigGroup]);
   fetchLeaderboard.mockResolvedValueOnce({
     date: '2026-06-12',
     currentUser: null,
     entries: [],
   });
 
-  render(
-    <GroupsScreen
-      onBack={onBack}
-      onRequireAuth={() => {}}
-      isAuthenticated
-    />,
-  );
+  render(<GroupsScreen onBack={() => {}} onRequireAuth={() => {}} isAuthenticated />);
 
+  fireEvent.click(await screen.findByRole('button', { name: /the boys/i }));
   fireEvent.click(await screen.findByRole('button', { name: 'Back' }));
 
-  expect(onBack).toHaveBeenCalledTimes(1);
+  expect(await screen.findByRole('heading', { name: 'My Groups' })).not.toBeNull();
 });
 
 test('wordmark navigates home via onBack', async () => {
   const onBack = vi.fn();
-  fetchGroup.mockResolvedValueOnce({
-    id: 42,
-    name: 'the boys',
-    invite_link: 'YPWFZC',
-    members: [
-      { group: 42, user: { id: 7, username: 'You', email: 'you@test.dev' }, joined_at: '2026-06-01T00:00:00Z' },
-    ],
-  });
-  fetchLeaderboard.mockResolvedValueOnce({
-    date: '2026-06-12',
-    currentUser: null,
-    entries: [],
-  });
+  fetchGroups.mockResolvedValueOnce([smallGroup]);
 
-  render(
-    <GroupsScreen
-      onBack={onBack}
-      onRequireAuth={() => {}}
-      isAuthenticated
-    />,
-  );
+  render(<GroupsScreen onBack={onBack} onRequireAuth={() => {}} isAuthenticated />);
 
   fireEvent.click(await screen.findByRole('button', { name: 'REWIND' }));
 
   expect(onBack).toHaveBeenCalledTimes(1);
 });
 
-test('shows the loading overlay until the group resolves', async () => {
-  fetchGroup.mockResolvedValueOnce({
-    id: 1, name: 'the boys', invite_link: 'ABC',
-    members: [{ group: 1, user: { id: 7, username: 'You', email: 'you@test.dev' }, joined_at: '2026-06-01T00:00:00Z' }],
-  });
-  fetchLeaderboard.mockResolvedValueOnce({ date: '2026-06-12', currentUser: null, entries: [] });
+test('shows the loading overlay until the groups resolve', async () => {
+  fetchGroups.mockResolvedValueOnce([smallGroup]);
 
   render(<GroupsScreen onBack={() => {}} onRequireAuth={() => {}} isAuthenticated />);
 
   expect(screen.getByRole('status', { name: 'Loading' })).toBeTruthy();
-  await screen.findByText('the boys');
+  await screen.findByText('My Groups');
   expect(screen.queryByRole('status', { name: 'Loading' })).toBeNull();
 });

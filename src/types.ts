@@ -43,7 +43,7 @@ export interface PlayerStats {
 export interface GroupMemberUser {
   id: number;
   username: string;
-  email: string;
+  email?: string;
 }
 
 export interface GroupMember {
@@ -56,6 +56,8 @@ export interface PlayhubGroup {
   id: number;
   name: string;
   invite_link: string;
+  joined_at?: string;
+  members_count?: number | string;
   members: GroupMember[];
 }
 
@@ -70,6 +72,8 @@ export interface GroupLeaderboardEntry {
 export interface GlobalLeaderboardEntry {
   /** Server-assigned global rank (1-based). */
   rank: number;
+  /** Backend user id, when available. Used to merge group rosters with score rows. */
+  userId?: number;
   displayName: string;
   score: number;
   /** Total completion time in milliseconds (tiebreaker + displayed per row). */

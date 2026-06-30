@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getDateOverride } from '../data/puzzles';
-import { fetchGroup, createGroup, joinGroup, leaveGroup } from '../lib/playhub';
+import { fetchGroups, createGroup, joinGroup, leaveGroup } from '../lib/playhub';
 import { fetchLeaderboard, getDayOffsetFromToday } from '../lib/leaderboard';
 import { formatTime } from '../lib/formatTime';
 import { GroupLeaderboard } from '../components/GroupLeaderboard';
@@ -16,6 +16,11 @@ import { getPublicAppUrl } from '../lib/share';
 import type { GlobalLeaderboard, PlayhubGroup, GroupLeaderboardEntry, GroupMember } from '../types';
 import styles from './GroupsScreen.module.css';
 
+interface GroupBoardState {
+  groupId: number;
+  board: GlobalLeaderboard | null;
+}
+
 function extractInviteCode(inviteLink: string): string {
   const match = inviteLink.match(/invite=([A-Za-z0-9]+)/);
   if (match) return match[1];
@@ -30,6 +35,20 @@ function getMemberId(m: GroupMember): number | null {
   return typeof m.user === 'string' ? null : m.user.id;
 }
 
+function getMemberCount(group: PlayhubGroup): number {
+  const count = group.members_count;
+  if (typeof count === 'number') return count;
+  if (typeof count === 'string') {
+    const parsed = Number.parseInt(count, 10);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return group.members.length;
+}
+
+function sortGroups(groups: PlayhubGroup[]): PlayhubGroup[] {
+  return [...groups].sort((a, b) => getMemberCount(b) - getMemberCount(a));
+}
+
 interface GroupsScreenProps {
   onBack: () => void;
   onRequireAuth: () => void;
@@ -42,30 +61,48 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
   const { user: authUser } = useAuth();
   const activeDate = getDateOverride();
   const activeDateOffset = getDayOffsetFromToday(activeDate);
-  const [group, setGroup] = useState<PlayhubGroup | null>(null);
+  const [groups, setGroups] = useState<PlayhubGroup[]>([]);
+  const [selectedGroupId, setSelectedGroupId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [toast, setToast] = useState('');
   const [dayOffset, setDayOffset] = useState(0);
-  const [groupBoard, setGroupBoard] = useState<GlobalLeaderboard | null>(null);
+  const [groupBoardState, setGroupBoardState] = useState<GroupBoardState | null>(null);
+  const group = selectedGroupId == null ? null : groups.find((g) => g.id === selectedGroupId) ?? null;
+  const groupBoard = group && groupBoardState?.groupId === group.id ? groupBoardState.board : null;
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(''), 3000);
+  };
 
   useEffect(() => {
     let cancelled = false;
     if (pendingInvite) {
       joinGroup(pendingInvite)
-        .then(() => { track('group_join', { via: 'invite_link' }); return fetchGroup(); })
-        .then((g) => {
+        .then((joinedGroup) => {
+          track('group_join', { via: 'invite_link' });
+          return fetchGroups().then((nextGroups) => ({ joinedGroup, nextGroups }));
+        })
+        .then(({ joinedGroup, nextGroups }) => {
           if (!cancelled) {
-            setGroup(g);
+            const hasJoinedGroup = nextGroups.some((g) => g.id === joinedGroup.id);
+            setGroups(sortGroups(hasJoinedGroup ? nextGroups : [joinedGroup, ...nextGroups]));
+            setSelectedGroupId(joinedGroup.id);
             showToast('Joined group');
           }
         })
         .catch((err) => {
           if (cancelled) return;
           showToast(err instanceof Error ? err.message : 'Failed to join group');
-          return fetchGroup().then((g) => { if (!cancelled) setGroup(g); });
+          return fetchGroups().then((nextGroups) => {
+            if (cancelled) return;
+            setGroups(sortGroups(nextGroups));
+            const existingGroup = nextGroups.find((g) => extractInviteCode(g.invite_link) === pendingInvite);
+            if (existingGroup) setSelectedGroupId(existingGroup.id);
+          });
         })
         .finally(() => {
           if (cancelled) return;
@@ -73,27 +110,25 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
           onInviteHandled?.();
         });
     } else {
-      fetchGroup()
-        .then((g) => { if (!cancelled) setGroup(g); })
-        .catch(() => { if (!cancelled) setGroup(null); })
+      fetchGroups()
+        .then((nextGroups) => { if (!cancelled) setGroups(sortGroups(nextGroups)); })
+        .catch(() => { if (!cancelled) setGroups([]); })
         .finally(() => { if (!cancelled) setLoading(false); });
     }
     return () => { cancelled = true; };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (!group) {
-      setGroupBoard(null);
-      return;
-    }
+    if (!group) return;
 
     let cancelled = false;
+    const groupId = group.id;
     fetchLeaderboard(activeDateOffset + dayOffset, group.id)
       .then((board) => {
-        if (!cancelled) setGroupBoard(board);
+        if (!cancelled) setGroupBoardState({ groupId, board });
       })
       .catch(() => {
-        if (!cancelled) setGroupBoard(null);
+        if (!cancelled) setGroupBoardState({ groupId, board: null });
       });
 
     return () => {
@@ -107,26 +142,25 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [group?.id, dayOffset]);
 
-  const showToast = (msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(''), 3000);
-  };
-
   const handleCreate = async (name: string) => {
-    await createGroup(name);
+    const createdGroup = await createGroup(name);
     track('group_create');
     setShowCreate(false);
-    const g = await fetchGroup();
-    setGroup(g);
+    const nextGroups = await fetchGroups();
+    const hasCreatedGroup = nextGroups.some((g) => g.id === createdGroup.id);
+    setGroups(sortGroups(hasCreatedGroup ? nextGroups : [createdGroup, ...nextGroups]));
+    setSelectedGroupId(createdGroup.id);
     showToast('Group created');
   };
 
   const handleJoin = async (code: string) => {
-    await joinGroup(code);
+    const joinedGroup = await joinGroup(code);
     track('group_join', { via: 'code' });
     setShowJoin(false);
-    const g = await fetchGroup();
-    setGroup(g);
+    const nextGroups = await fetchGroups();
+    const hasJoinedGroup = nextGroups.some((g) => g.id === joinedGroup.id);
+    setGroups(sortGroups(hasJoinedGroup ? nextGroups : [joinedGroup, ...nextGroups]));
+    setSelectedGroupId(joinedGroup.id);
     showToast('Joined group');
   };
 
@@ -135,10 +169,12 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
       setConfirmLeave(true);
       return;
     }
-    await leaveGroup();
+    if (!group) return;
+    await leaveGroup(group.id);
     track('group_leave');
     setConfirmLeave(false);
-    setGroup(null);
+    setGroups((currentGroups) => currentGroups.filter((g) => g.id !== group.id));
+    setSelectedGroupId(null);
     showToast('You left the group');
   };
 
@@ -197,16 +233,25 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
 
   if (loading) return <LoadingOverlay />;
 
+  const scoreRows = [
+    ...(groupBoard?.entries ?? []),
+    ...(groupBoard?.currentUser ? [groupBoard.currentUser] : []),
+  ];
+  const scoreByUserId = new Map(
+    scoreRows
+      .filter((entry) => entry.userId != null)
+      .map((entry) => [entry.userId as number, entry] as const),
+  );
   const scoreByName = new Map(
-    (groupBoard?.entries ?? []).map((entry) => [entry.displayName, entry] as const),
+    scoreRows.map((entry) => [entry.displayName, entry] as const),
   );
 
   const leaderboardEntries: GroupLeaderboardEntry[] = (group?.members ?? []).map((member) => {
     const name = getMemberName(member);
     const memberId = getMemberId(member);
     const isMe = memberId != null && authUser != null && memberId === authUser.id;
-    const scoreEntry = isMe
-      ? groupBoard?.currentUser ?? groupBoard?.entries.find((entry) => entry.isCurrentUser) ?? scoreByName.get(name)
+    const scoreEntry = memberId != null
+      ? scoreByUserId.get(memberId) ?? (isMe ? groupBoard?.currentUser : undefined)
       : scoreByName.get(name);
 
     return {
@@ -217,13 +262,21 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
     };
   });
 
-  const memberCount = group?.members.length ?? 0;
+  const memberCount = group ? getMemberCount(group) : 0;
   const memberLabel = `${memberCount} member${memberCount !== 1 ? 's' : ''}`;
+  const handleBack = () => {
+    if (group) {
+      setSelectedGroupId(null);
+      setConfirmLeave(false);
+      return;
+    }
+    onBack();
+  };
 
   return (
     <div className={styles.screen}>
       <div className={styles.topBar}>
-        <button className={styles.backButton} onClick={onBack} type="button" aria-label="Back">
+        <button className={styles.backButton} onClick={handleBack} type="button" aria-label="Back">
           <ArrowLeft />
         </button>
         <button className={styles.wordmarkButton} onClick={onBack} type="button">
@@ -263,6 +316,47 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
           >
             {confirmLeave ? 'Tap Again to Leave' : 'Leave Group'}
           </button>
+        </div>
+      ) : groups.length > 0 ? (
+        <div className={styles.content}>
+          <h1 className={styles.listTitle}>My Groups</h1>
+          <div className={styles.groupList}>
+            {groups.map((g) => {
+              const count = getMemberCount(g);
+              const label = `${count} member${count !== 1 ? 's' : ''}`;
+              return (
+                <button
+                  key={g.id}
+                  className={styles.groupRow}
+                  onClick={() => {
+                    setSelectedGroupId(g.id);
+                    setDayOffset(0);
+                    setConfirmLeave(false);
+                  }}
+                  type="button"
+                >
+                  <span className={styles.groupRowName}>{g.name}</span>
+                  <span className={styles.groupRowCount}>{label}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className={styles.listActions}>
+            <button
+              className={styles.emptyButtonPrimary}
+              onClick={() => isAuthenticated ? setShowJoin(true) : onRequireAuth()}
+              type="button"
+            >
+              Join by Code
+            </button>
+            <button
+              className={styles.emptyButtonSecondary}
+              onClick={() => isAuthenticated ? setShowCreate(true) : onRequireAuth()}
+              type="button"
+            >
+              Create Group
+            </button>
+          </div>
         </div>
       ) : (
         <div className={styles.content}>
