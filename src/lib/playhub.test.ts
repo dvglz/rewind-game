@@ -54,6 +54,23 @@ describe('playhub API', () => {
       const result = await fetchGroups();
       expect(result).toEqual([]);
     });
+
+    it('returns seeded local groups in mock mode', async () => {
+      try {
+        vi.stubEnv('VITE_MOCK_API', 'true');
+        vi.resetModules();
+        const mod = await import('./playhub');
+
+        const result = await mod.fetchGroups();
+
+        expect(result.length).toBeGreaterThan(1);
+        expect(result.map((group) => group.name)).toContain('the boys');
+        expect(result.every((group) => Array.isArray(group.members))).toBe(true);
+        expect(mockFetch).not.toHaveBeenCalled();
+      } finally {
+        vi.stubEnv('VITE_MOCK_API', 'false');
+      }
+    });
   });
 
   describe('createGroup', () => {

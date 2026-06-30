@@ -6,10 +6,11 @@ const USE_MOCK = import.meta.env.VITE_MOCK_API === 'true';
 
 // ── Mock data ──────────────────────────────────────────────
 
-const MOCK_GROUP: PlayhubGroup = {
+const MOCK_GROUPS: PlayhubGroup[] = [{
   id: 1,
   name: 'the boys',
   invite_link: 'YPWFZC',
+  members_count: 5,
   members: [
     { group: 1, user: 'you', joined_at: '2026-06-01T00:00:00Z' },
     { group: 1, user: 'Mike', joined_at: '2026-06-02T00:00:00Z' },
@@ -17,9 +18,31 @@ const MOCK_GROUP: PlayhubGroup = {
     { group: 1, user: 'Jordan', joined_at: '2026-06-04T00:00:00Z' },
     { group: 1, user: 'Alex', joined_at: '2026-06-05T00:00:00Z' },
   ],
-};
+}, {
+  id: 2,
+  name: 'office sickos',
+  invite_link: 'OFFICE',
+  members_count: 12,
+  members: [
+    { group: 2, user: 'you', joined_at: '2026-06-01T00:00:00Z' },
+    { group: 2, user: 'Riley', joined_at: '2026-06-02T00:00:00Z' },
+    { group: 2, user: 'Casey', joined_at: '2026-06-03T00:00:00Z' },
+    { group: 2, user: 'Morgan', joined_at: '2026-06-04T00:00:00Z' },
+  ],
+}, {
+  id: 3,
+  name: 'group chat legends',
+  invite_link: 'LEGEND',
+  members_count: 4,
+  members: [
+    { group: 3, user: 'you', joined_at: '2026-06-01T00:00:00Z' },
+    { group: 3, user: 'Sarah', joined_at: '2026-06-02T00:00:00Z' },
+    { group: 3, user: 'Devin', joined_at: '2026-06-03T00:00:00Z' },
+    { group: 3, user: 'Taylor', joined_at: '2026-06-04T00:00:00Z' },
+  ],
+}];
 
-let mockGroups: PlayhubGroup[] = [MOCK_GROUP];
+let mockGroups: PlayhubGroup[] = [...MOCK_GROUPS];
 
 const mock = {
   async fetchGroups(): Promise<PlayhubGroup[]> {
@@ -29,17 +52,25 @@ const mock = {
   async createGroup(groupName: string): Promise<PlayhubGroup> {
     await delay(400);
     if (groupName.toLowerCase() === 'error') throw new Error('Group name is already taken');
-    const group = { ...MOCK_GROUP, id: Date.now(), name: groupName };
+    const id = Date.now();
+    const group: PlayhubGroup = {
+      id,
+      name: groupName,
+      invite_link: groupName.replace(/[^A-Za-z0-9]/g, '').slice(0, 8).toUpperCase() || 'MOCK',
+      members_count: 1,
+      members: [{ group: id, user: 'you', joined_at: new Date().toISOString() }],
+    };
     mockGroups = [group, ...mockGroups];
     return normalizeGroup(group);
   },
   async joinGroup(inviteCode: string): Promise<PlayhubGroup> {
     await delay(400);
     if (inviteCode === 'ZZZZZZ') throw new Error('Check the code again');
-    if (!mockGroups.some((group) => group.id === MOCK_GROUP.id)) {
-      mockGroups = [MOCK_GROUP, ...mockGroups];
+    const group = MOCK_GROUPS.find((g) => extractInviteCode(g.invite_link) === inviteCode) ?? MOCK_GROUPS[0];
+    if (!mockGroups.some((existingGroup) => existingGroup.id === group.id)) {
+      mockGroups = [group, ...mockGroups];
     }
-    return normalizeGroup(MOCK_GROUP);
+    return normalizeGroup(group);
   },
   async leaveGroup(groupId: number): Promise<void> {
     await delay(300);
@@ -61,6 +92,12 @@ function normalizeGroup(group: PlayhubGroup): PlayhubGroup {
     ...group,
     members: Array.isArray(group.members) ? group.members : [],
   };
+}
+
+function extractInviteCode(inviteLink: string): string {
+  const match = inviteLink.match(/invite=([A-Za-z0-9]+)/);
+  if (match) return match[1];
+  return inviteLink.replace(/[^A-Za-z0-9]/g, '');
 }
 
 // ── Real API ───────────────────────────────────────────────
