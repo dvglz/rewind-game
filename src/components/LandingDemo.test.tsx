@@ -86,6 +86,23 @@ test('drives the burst from the five demo examples so the prompts stay in sync',
   expect(source).toMatch(/const BURST_LAYOUT = \[/);
 });
 
+test('uses the requested demo sequence and scoring beats', () => {
+  const source = readFileSync(resolve(__dirname, './LandingDemo.tsx'), 'utf8');
+
+  expect(source).toMatch(/MJ Flu Game takes place[\s\S]*actualYear: 1997, guessYear: 1997/);
+  expect(source).toMatch(/Shaq is drafted by Orlando[\s\S]*actualYear: 1992, guessYear: 1993/);
+  expect(source).toMatch(/Cavs come back from 3-1[\s\S]*actualYear: 2016, guessYear: 2016/);
+  expect(source).toMatch(/Pierce's Wheelchair game[\s\S]*actualYear: 2008, guessYear: 2017/);
+  expect(source).toMatch(/Zion's shoe explodes[\s\S]*actualYear: 2019, guessYear: 2021/);
+  expect([
+    getLandingDemoResultColor(1997 - 1997),
+    getLandingDemoResultColor(1993 - 1992),
+    getLandingDemoResultColor(2016 - 2016),
+    getLandingDemoResultColor(2017 - 2008),
+    getLandingDemoResultColor(2021 - 2019),
+  ]).toEqual(['perfect', 'ballpark', 'perfect', 'wrong-era', 'ballpark']);
+});
+
 test('keeps timeline continuity when moving between demo examples', () => {
   const source = readFileSync(resolve(__dirname, './LandingDemo.tsx'), 'utf8');
 
@@ -102,7 +119,7 @@ test('keeps the demo compact on short mobile screens', () => {
   expect(compactBlock?.[1] ?? '').toMatch(/height:\s*248px;/);
   expect(compactCardRowBlock?.[1] ?? '').toMatch(/height:\s*70px;/);
   expect(css).toMatch(/--timeline-height:\s*140px;/);
-  expect(css).toMatch(/bottom:\s*28px;/);
+  expect(css).toMatch(/bottom:\s*48px;/);
 });
 
 test('floats the landing tier label like the in-game toast', () => {
@@ -142,6 +159,13 @@ test('hands off from the burst by lifting it away as the timeline fades in', () 
   const burstHiddenBlock = css.match(/\.burstHidden\s*\{([^}]*)\}/);
 
   expect(burstHiddenBlock?.[1] ?? '').toMatch(/transform:\s*translateZ\(0\) translateY\(-10px\);/);
+});
+
+test('parks the first timeline before revealing the first active card', () => {
+  const source = readFileSync(resolve(__dirname, './LandingDemo.tsx'), 'utf8');
+
+  expect(source).toMatch(/setTimelineReady\(false\);[\s\S]*await scrollToYear\(firstStart, false, true\);[\s\S]*setShowPile\(false\);[\s\S]*await wait\(360\);[\s\S]*setTimelineReady\(true\);/);
+  expect(source).toMatch(/!\s*effShowPile && timelineReady && \(/);
 });
 
 test('keeps the burst layer compositor-stable while it fades out', () => {

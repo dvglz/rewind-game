@@ -19,10 +19,10 @@ interface DemoExample {
 // demo opens on the satisfying reveal, then mixes in looser guesses for variety.
 const EXAMPLES: DemoExample[] = [
   { prompt: 'MJ Flu Game takes place', actualYear: 1997, guessYear: 1997, startOffset: 4 },
-  { prompt: 'Shaq is drafted by Orlando', actualYear: 1992, guessYear: 1990, startOffset: -5 },
-  { prompt: 'Cavs come back from 3-1', actualYear: 2016, guessYear: 2019, startOffset: -7 },
-  { prompt: "Zion's shoe explodes", actualYear: 2019, guessYear: 2018, startOffset: 6 },
-  { prompt: "Pierce's Wheelchair game", actualYear: 2008, guessYear: 2008, startOffset: -8 },
+  { prompt: 'Shaq is drafted by Orlando', actualYear: 1992, guessYear: 1993, startOffset: -5 },
+  { prompt: 'Cavs come back from 3-1', actualYear: 2016, guessYear: 2016, startOffset: -6 },
+  { prompt: "Pierce's Wheelchair game", actualYear: 2008, guessYear: 2017, startOffset: -5 },
+  { prompt: "Zion's shoe explodes", actualYear: 2019, guessYear: 2021, startOffset: -6 },
 ];
 
 // Opening burst: the five demo questions pop in one-by-one in a lively
@@ -90,6 +90,7 @@ export function LandingDemo() {
   const { scrollToYear, rangeStart, rangeEnd } = timeline;
 
   const [showPile, setShowPile] = useState(true);
+  const [timelineReady, setTimelineReady] = useState(true);
   const [burstCycle, setBurstCycle] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
   const [revealedIndex, setRevealedIndex] = useState<number | null>(null);
@@ -124,10 +125,23 @@ export function LandingDemo() {
       while (!cancelled) {
         setBurstCycle((cycle) => cycle + 1);
         setShowPile(true);
+        setTimelineReady(false);
         setRevealedIndex(null);
+        setScrub(null);
         await wait(2600);
         if (cancelled) return;
+
+        const firstStart = Math.min(
+          rangeEnd,
+          Math.max(rangeStart, EXAMPLES[0].guessYear + EXAMPLES[0].startOffset),
+        );
+        await scrollToYear(firstStart, false, true);
+        parkedYear = firstStart;
+        setActiveIndex(0);
         setShowPile(false);
+        await wait(360);
+        if (cancelled) return;
+        setTimelineReady(true);
 
         for (let i = 0; i < EXAMPLES.length && !cancelled; i += 1) {
           const ex = EXAMPLES[i];
@@ -177,7 +191,7 @@ export function LandingDemo() {
   return (
     <div className={styles.demo} aria-hidden="true">
       <div className={styles.cardRow}>
-        {!effShowPile && (
+        {!effShowPile && timelineReady && (
           <p key={effActiveIndex} className={`${styles.card} ${styles.activeCard}`}>
             {active.prompt}
           </p>
