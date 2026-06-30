@@ -1,26 +1,49 @@
 .container {
   position: relative;
-  height: 100dvh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: var(--space-xl);
-  gap: var(--space-2xl);
+  /* Spread intro / demo / actions across the viewport instead of clustering
+     them in the middle, which left big dead zones on taller phones. */
+  justify-content: space-between;
+  padding: calc(var(--space-xl) + env(safe-area-inset-top, 0px) + 20px) var(--space-xl) 80px;
+  gap: var(--space-lg);
 }
 
-.top {
+.containerCompact {
+  justify-content: center;
+  gap: 44px;
+}
+
+.containerCompact .actions {
+  gap: 16px;
+}
+
+.intro {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-md);
+  gap: var(--space-sm);
+  text-align: center;
 }
 
 .wordmark {
   font-family: var(--font-display);
-  font-size: 48px;
+  font-size: 20px;
+  letter-spacing: -0.02em;
   text-transform: uppercase;
+  color: var(--color-text);
   cursor: default;
+}
+
+.headline {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(40px, 12vw, 56px);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  margin: 0;
 }
 
 .sportPicker {
@@ -59,28 +82,66 @@
 }
 
 .description {
+  font-family: var(--font-body);
+  font-size: 18px;
+  color: var(--color-text);
+  text-align: center;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.actions {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-xs);
-  font-family: var(--font-body);
-  font-size: 17px;
+  gap: var(--space-md);
+}
+
+.meta {
+  font-family: var(--font-display);
+  font-size: 20px;
   color: var(--color-text);
+  margin: 0;
+}
+
+.groupsCta {
+  margin: 0;
+  max-width: 280px;
   text-align: center;
-  line-height: 1.5;
+  font-family: var(--font-display);
+  font-size: 18px;
+  line-height: 1.12;
+  color: color-mix(in srgb, var(--color-text) 58%, transparent);
+}
+
+.groupsLink {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--color-text);
+  text-decoration: underline;
+  text-decoration-skip-ink: none;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.groupsLink:hover {
+  opacity: 0.7;
 }
 
 .playButton {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: 20px;
-  padding: var(--space-md) var(--space-2xl);
+  font-size: 28px;
+  line-height: 1.3;
+  padding: 16px 60px;
   border: none;
   background: var(--color-text);
   color: var(--color-bg);
   border-radius: 999px;
   cursor: pointer;
-  min-width: 200px;
+  min-width: 240px;
 }
 
 .debugToggle {
@@ -126,20 +187,94 @@
   font-size: 15px;
 }
 
-.howToLink {
+.footerCta {
   position: absolute;
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  border: none;
-  background: transparent;
-  color: var(--color-muted);
-  font-family: var(--font-body);
-  font-size: 13px;
-  letter-spacing: 0.02em;
+  width: min(280px, calc(100vw - 48px));
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 1.1;
+  color: color-mix(in srgb, var(--color-text) 50%, transparent);
+}
+
+.footerLink {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 1.1;
+  color: var(--color-text);
+  text-decoration: underline;
+  text-decoration-skip-ink: none;
+  text-underline-offset: 2px;
   cursor: pointer;
 }
 
-.howToLink:hover {
-  color: var(--color-text);
+.footerLink:hover {
+  opacity: 0.7;
+}
+
+@media (max-height: 760px) {
+  .container {
+    padding: calc(28px + env(safe-area-inset-top, 0px)) 18px 76px;
+    gap: 12px;
+  }
+
+  .intro {
+    gap: 6px;
+  }
+
+  .wordmark {
+    font-size: 18px;
+  }
+
+  .headline {
+    font-size: clamp(36px, 11vw, 52px);
+  }
+
+  .description {
+    font-size: 18px;
+    line-height: 1.3;
+    margin-top: 4px;
+  }
+
+  .actions {
+    gap: 8px;
+  }
+
+  .containerCompact {
+    gap: 32px;
+  }
+
+  .containerCompact .actions {
+    gap: 10px;
+  }
+
+  .playButton {
+    font-size: 24px;
+    padding: 13px 48px;
+    min-width: 220px;
+  }
+
+  .meta {
+    font-size: 18px;
+  }
+
+  .groupsCta {
+    font-size: 16px;
+  }
+
+  .footerCta {
+    bottom: 16px;
+    font-size: 16px;
+  }
+
+  .footerLink {
+    font-size: 16px;
+  }
 }

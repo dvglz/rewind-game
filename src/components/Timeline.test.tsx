@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { createRef } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { expect, test, vi } from 'vitest';
@@ -36,6 +38,43 @@ test('renders the year label above the tick line', () => {
   const tick = label.parentElement;
 
   expect(tick?.firstElementChild?.tagName).toBe('SPAN');
+});
+
+test('uses container-relative spacers so scroll math centers the selected tick', () => {
+  render(
+    <Timeline
+      containerRef={createRef<HTMLDivElement>()}
+      rangeStart={2010}
+      rangeEnd={2016}
+      yearWidth={60}
+      onScroll={() => {}}
+    />
+  );
+
+  const scroller = screen.getByTestId('timeline-scroller');
+  expect((scroller.firstElementChild as HTMLElement).style.minWidth).toBe('50%');
+  expect((scroller.lastElementChild as HTMLElement).style.minWidth).toBe('50%');
+});
+
+test('places the indicator above the year labels', () => {
+  const css = readFileSync(resolve(__dirname, './Timeline.module.css'), 'utf8');
+  const indicatorBlock = css.match(/\.centerIndicator\s*\{([^}]*)\}/);
+  const desktopBlock = css.match(/@media \(min-width: 900px\)[\s\S]*?\.centerIndicator\s*\{([^}]*)\}/);
+
+  expect(indicatorBlock?.[1] ?? '').toMatch(/top:\s*-2px;/);
+  expect(indicatorBlock?.[1] ?? '').toMatch(/border-left:\s*8px solid transparent;/);
+  expect(indicatorBlock?.[1] ?? '').toMatch(/border-right:\s*8px solid transparent;/);
+  expect(indicatorBlock?.[1] ?? '').toMatch(/border-top:\s*12px solid var\(--color-text\);/);
+  expect(indicatorBlock?.[1] ?? '').toMatch(/z-index:\s*2;/);
+  expect(desktopBlock?.[1] ?? '').toMatch(/top:\s*2px;/);
+});
+
+test('keeps desktop tick lines shorter than the game timeline', () => {
+  const css = readFileSync(resolve(__dirname, './Timeline.module.css'), 'utf8');
+  const desktopBlock = css.match(/@media \(min-width: 900px\)\s*\{([\s\S]*)\n\}/);
+
+  expect(desktopBlock?.[1] ?? '').toMatch(/\.tickMinor \.tickLine\s*\{\s*height:\s*76px;/);
+  expect(desktopBlock?.[1] ?? '').toMatch(/\.tickMajor \.tickLine\s*\{\s*height:\s*96px;/);
 });
 
 test('applies dimmed class to ticks outside spotlight window', () => {

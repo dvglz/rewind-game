@@ -11,7 +11,7 @@ import { AuthScreen } from './screens/AuthScreen';
 import { HowToScreen, type HowToEntryPoint } from './screens/HowToScreen';
 import { Toast } from './components/Toast';
 import { ToastRegion } from './components/ToastRegion';
-import { clearGameState, loadGameState, pruneOldGameStates, hasSeenRules, hasUsedArchiveFreePlay, markArchiveFreePlayUsed } from './engine/storage';
+import { clearGameState, loadGameState, pruneOldGameStates, hasUsedArchiveFreePlay, markArchiveFreePlayUsed } from './engine/storage';
 import { beginPuzzleSession, getDateOverride, getSport, getTodaysPuzzle, isRewindLabMode, isPracticeMode } from './data/puzzles';
 import { useWebHaptics } from 'web-haptics/react';
 import { initHaptics } from './lib/haptics';
@@ -22,6 +22,7 @@ import { fetchMyScore, flushPendingScore } from './lib/api';
 import { initAnalytics, trackPageView, track } from './lib/analytics';
 import { archiveGateAction } from './lib/archiveGate';
 import { computeNavSearch } from './lib/navigation';
+import { markHomeIntroSeen } from './lib/homeIntro';
 import { LoadingOverlay } from './components/LoadingOverlay';
 import './styles/global.css';
 
@@ -221,6 +222,7 @@ function AppInner() {
     const sport = getSport();
     const puzzle = getTodaysPuzzle(sport);
     const saved = loadGameState(puzzle.id);
+    markHomeIntroSeen();
     if (saved && !saved.completed) {
       navigate('game');
       return;
@@ -299,13 +301,7 @@ function AppInner() {
             const saved = loadGameState(puzzle.id);
             return !!saved && !saved.completed;
           })()}
-          onPlay={() => {
-            if (!hasSeenRules()) {
-              openHowTo('first_run');
-              return;
-            }
-            startGame();
-          }}
+          onPlay={startGame}
           hasCompletedGame={(() => {
             const sport = getSport();
             const puzzle = getTodaysPuzzle(sport);

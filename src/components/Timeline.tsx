@@ -106,7 +106,7 @@ export function Timeline({
           userSelect: isDragging ? 'none' : 'auto',
         }}
       >
-        <div style={{ minWidth: '50vw', flexShrink: 0 }} />
+        <div style={{ minWidth: '50%', flexShrink: 0 }} />
         <div className={styles.track}>
           {years.map((year) => {
             const isMajor = year % 5 === 0;
@@ -139,7 +139,7 @@ export function Timeline({
             );
           })}
         </div>
-        <div style={{ minWidth: '50vw', flexShrink: 0 }} />
+        <div style={{ minWidth: '50%', flexShrink: 0 }} />
       </div>
       <div
         className={styles.centerIndicator}

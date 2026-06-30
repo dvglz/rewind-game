@@ -1,16 +1,19 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   getDateOverride,
   getSport,
+  getTodaysPuzzle,
   isRandomModeEnabled,
   setRandomModeEnabled,
   SPORT_LABELS,
   type Sport,
 } from '../data/puzzles';
 import { BurgerMenu } from '../components/BurgerMenu';
+import { LandingDemo } from '../components/LandingDemo';
 import { Toast } from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
 import { isAppMode } from '../lib/appMode';
+import { hasSeenHomeIntro, markHomeIntroSeen } from '../lib/homeIntro';
 import styles from './HomeScreen.module.css';
 
 interface HomeScreenProps {
@@ -46,6 +49,13 @@ export function HomeScreen({
   const [randomEnabled, setRandomEnabled] = useState(() => isRandomModeEnabled());
   const [signOutToast, setSignOutToast] = useState(false);
   const hideAuthControls = isAppMode();
+  const showIntroDemo = !hideAuthControls && !isAuthenticated && !hasSeenHomeIntro();
+
+  useEffect(() => {
+    if (hideAuthControls) {
+      markHomeIntroSeen();
+    }
+  }, [hideAuthControls]);
 
   const sportOptions = useMemo(() => ['american', 'soccer'] as Sport[], []);
 
@@ -62,15 +72,16 @@ export function HomeScreen({
   };
 
   const dateStr = new Date(`${getDateOverride()}T00:00:00Z`).toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
+    month: 'short',
     day: 'numeric',
     year: 'numeric',
     timeZone: 'UTC',
   });
 
+  const puzzleNumber = String(getTodaysPuzzle(currentSport).number).padStart(3, '0');
+
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${showIntroDemo ? '' : styles.containerCompact}`}>
       <BurgerMenu
         currentScreen="home"
         hasInProgressGame={hasInProgressGame}
@@ -100,29 +111,44 @@ export function HomeScreen({
         }}
         onNavigateHowTo={() => onHowTo('menu')}
       />
-      <div className={styles.top}>
-        <h1 className={styles.wordmark}>Rewind</h1>
-
-        <p className={styles.date}>{dateStr}</p>
+      <div className={styles.intro}>
+        <span className={styles.wordmark}>Rewind</span>
+        <h1 className={styles.headline}>Can you guess<br/>when it happened?</h1>
+        <p className={styles.description}>
+          Ultimate NBA history test.
+          <br />5 new questions, daily.
+        </p>
       </div>
 
-      <div className={styles.description}>
-        <p>Quick daily game.</p>
-        <p>Scroll to the year it happened.</p>
-        <p>5 rounds.</p>
+      {showIntroDemo && <LandingDemo />}
+
+      <div className={styles.actions}>
+        {!hasCompletedGame && (
+          <button className={styles.playButton} onClick={onPlay}>
+            {hasInProgressGame ? 'Resume' : 'Start'}
+          </button>
+        )}
+
+        {hasCompletedGame && (
+          <button className={styles.playButton} onClick={onViewResults}>
+            See Results
+          </button>
+        )}
+
+        <p className={styles.meta}>
+          #{puzzleNumber} · {dateStr}
+        </p>
+
+        {isAuthenticated && (
+          <p className={styles.groupsCta}>
+            Settle who knows ball in{' '}
+            <button type="button" className={styles.groupsLink} onClick={onGroups}>
+              Groups
+            </button>
+            .
+          </p>
+        )}
       </div>
-
-      {!hasCompletedGame && (
-        <button className={styles.playButton} onClick={onPlay}>
-          {hasInProgressGame ? 'Resume' : 'Start'}
-        </button>
-      )}
-
-      {hasCompletedGame && (
-        <button className={styles.playButton} onClick={onViewResults}>
-          See Results
-        </button>
-      )}
 
       {showDebugTools && (
         <>
@@ -161,9 +187,14 @@ export function HomeScreen({
         </>
       )}
       {signOutToast && <Toast message="Signed Out" />}
-      <button type="button" className={styles.howToLink} onClick={() => onHowTo('footer')}>
-        How to Play
-      </button>
+      {!hideAuthControls && (
+        <p className={styles.footerCta}>
+          Played before?{' '}
+          <button type="button" className={styles.footerLink} onClick={() => onNavigateAuth('home')}>
+            Sign In
+          </button>
+        </p>
+      )}
     </div>
   );
 }

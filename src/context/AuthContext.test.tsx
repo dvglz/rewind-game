@@ -13,18 +13,39 @@ vi.mock('../engine/storage', () => ({
   clearAllGameStates: vi.fn(),
 }));
 
+vi.mock('../lib/homeIntro', () => ({
+  markHomeIntroSeen: vi.fn(),
+  clearHomeIntroSeen: vi.fn(),
+}));
+
 vi.mock('../lib/api', () => ({
   clearScoreSyncState: vi.fn(),
 }));
 
 function TestConsumer() {
-  const { user, loading, isAuthenticated, signOut } = useAuth();
+  const { user, loading, isAuthenticated, signOut, setUser } = useAuth();
   if (loading) return <div>loading</div>;
   return (
     <div>
       <span data-testid="authed">{String(isAuthenticated)}</span>
       <span data-testid="name">{user?.firstName ?? 'none'}</span>
       <button onClick={signOut} type="button">sign out</button>
+      <button
+        onClick={() => setUser({
+          id: 2,
+          objectId: 'def',
+          username: 'directuser',
+          email: 'direct@example.com',
+          firstName: 'Direct',
+          lastName: 'User',
+          accessToken: 'tok_456',
+          avatarUrl: null,
+          thumbnailUrl: null,
+        })}
+        type="button"
+      >
+        set user
+      </button>
     </div>
   );
 }
@@ -72,9 +93,31 @@ describe('AuthProvider', () => {
     expect(screen.getByTestId('name').textContent).toBe('Test');
   });
 
+  it('marks the home intro as seen when auth succeeds through setUser', async () => {
+    const { fetchProfile } = await import('../lib/auth');
+    const { markHomeIntroSeen } = await import('../lib/homeIntro');
+    (fetchProfile as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+
+    render(
+      <AuthProvider>
+        <TestConsumer />
+      </AuthProvider>,
+    );
+
+    await act(async () => {});
+    await act(async () => {
+      screen.getByText('set user').click();
+    });
+
+    expect(markHomeIntroSeen).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('authed').textContent).toBe('true');
+    expect(screen.getByTestId('name').textContent).toBe('Direct');
+  });
+
   it('clears auth and local game state on sign out', async () => {
     const { fetchProfile, clearAccessToken } = await import('../lib/auth');
     const { clearAllGameStates } = await import('../engine/storage');
+    const { clearHomeIntroSeen } = await import('../lib/homeIntro');
     const { clearScoreSyncState } = await import('../lib/api');
     (fetchProfile as ReturnType<typeof vi.fn>).mockResolvedValue({
       id: 1, objectId: 'abc', username: 'testuser', email: 'test@example.com',
@@ -95,6 +138,7 @@ describe('AuthProvider', () => {
 
     expect(clearAccessToken).toHaveBeenCalledTimes(1);
     expect(clearAllGameStates).toHaveBeenCalledTimes(1);
+    expect(clearHomeIntroSeen).toHaveBeenCalledTimes(1);
     expect(clearScoreSyncState).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId('authed').textContent).toBe('false');
   });

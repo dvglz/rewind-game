@@ -5,6 +5,7 @@ import { fetchProfile, setAccessToken as storeToken, clearAccessToken } from '..
 import { clearAllGameStates } from '../engine/storage';
 import { clearScoreSyncState } from '../lib/api';
 import { setUser as setAnalyticsUser, clearUser as clearAnalyticsUser } from '../lib/analytics';
+import { clearHomeIntroSeen, markHomeIntroSeen } from '../lib/homeIntro';
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -31,12 +32,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const setUser = useCallback((u: AuthUser) => {
     storeToken(u.accessToken);
+    markHomeIntroSeen();
     setUserState(u);
   }, []);
 
   const signOut = useCallback(() => {
     clearAccessToken();
     clearAllGameStates();
+    clearHomeIntroSeen();
     clearScoreSyncState();
     clearAnalyticsUser();
     setUserState(null);

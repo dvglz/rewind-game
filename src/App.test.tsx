@@ -59,12 +59,19 @@ vi.mock('./lib/api', () => ({
 vi.mock('./lib/analytics', () => ({
   initAnalytics: vi.fn(),
   trackPageView: trackPageViewMock,
+  track: vi.fn(),
+}));
+
+vi.mock('./lib/homeIntro', () => ({
+  markHomeIntroSeen: vi.fn(),
 }));
 
 vi.mock('./engine/storage', () => ({
   clearGameState: vi.fn(),
   loadGameState: vi.fn().mockReturnValue(null),
   pruneOldGameStates: vi.fn(),
+  hasSeenRules: vi.fn().mockReturnValue(true),
+  markRulesSeen: vi.fn(),
   hasUsedArchiveFreePlay: vi.fn().mockReturnValue(false),
   markArchiveFreePlayUsed: vi.fn(),
 }));
@@ -84,9 +91,16 @@ vi.mock('./lib/testMode', () => ({
 }));
 
 vi.mock('./screens/HomeScreen', () => ({
-  HomeScreen: ({ onLeaderboard }: { onLeaderboard: () => void }) => (
+  HomeScreen: ({
+    onPlay,
+    onLeaderboard,
+  }: {
+    onPlay: () => void;
+    onLeaderboard: () => void;
+  }) => (
     <div data-testid="home-screen">
       home
+      <button type="button" onClick={onPlay}>Start</button>
       <button type="button" onClick={onLeaderboard}>Leaderboard</button>
     </div>
   ),
@@ -138,10 +152,14 @@ vi.mock('./screens/GroupsScreen', () => ({
   ),
 }));
 
-beforeEach(() => {
+beforeEach(async () => {
   trackPageViewMock.mockClear();
   sessionStorage.clear();
   window.history.replaceState({}, '', '/?invite=EMNRLJ2G&returnTo=groups');
+  const storage = await import('./engine/storage');
+  vi.mocked(storage.hasSeenRules).mockReturnValue(true);
+  const homeIntro = await import('./lib/homeIntro');
+  vi.mocked(homeIntro.markHomeIntroSeen).mockClear();
 });
 
 test('shows the loading overlay while auth resolves, then lands on groups for an invite link', async () => {
@@ -180,6 +198,46 @@ test('updates the URL before tracking SPA navigation pageviews', async () => {
   await waitFor(() => {
     expect(trackPageViewMock).toHaveBeenCalledWith('leaderboard');
   });
+});
+
+test('marks the home intro as seen when Start enters the game', async () => {
+  window.history.replaceState({}, '', '/');
+  const { markHomeIntroSeen } = await import('./lib/homeIntro');
+  const { App } = await import('./App');
+
+  render(<App />);
+
+  await waitFor(() => {
+    expect(screen.getByTestId('home-screen')).toBeTruthy();
+  });
+
+  fireEvent.click(screen.getByRole('button', { name: 'Start' }));
+
+  await waitFor(() => {
+    expect(screen.getByTestId('game-screen')).toBeTruthy();
+  });
+  expect(markHomeIntroSeen).toHaveBeenCalledTimes(1);
+});
+
+test('starts the game even when first-run rules have not been seen', async () => {
+  window.history.replaceState({}, '', '/');
+  const storage = await import('./engine/storage');
+  vi.mocked(storage.hasSeenRules).mockReturnValue(false);
+  const { markHomeIntroSeen } = await import('./lib/homeIntro');
+  const { App } = await import('./App');
+
+  render(<App />);
+
+  await waitFor(() => {
+    expect(screen.getByTestId('home-screen')).toBeTruthy();
+  });
+
+  fireEvent.click(screen.getByRole('button', { name: 'Start' }));
+
+  await waitFor(() => {
+    expect(screen.getByTestId('game-screen')).toBeTruthy();
+  });
+  expect(markHomeIntroSeen).toHaveBeenCalledTimes(1);
 });
 
 test('does not render the auth screen in app mode even with mode=auth', async () => {

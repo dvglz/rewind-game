@@ -1,0 +1,299 @@
+/* Ambient landing demo. Reuses the real Timeline component; styling values are
+   taken from the Figma frames (262:911 / 262:783). Fixed heights keep the
+   surrounding interface from shifting between phases. */
+
+.demo {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  height: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  user-select: none;
+  padding-top: 0px;
+}
+
+/* ── Active prompt card (shown during timeline cycles) ─────────── */
+.cardRow {
+  position: relative;
+  width: 100%;
+  height: 54px;
+  display: flex;
+  align-items: start;
+  justify-content: center;
+  z-index: 2;
+}
+
+.card {
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 1.4;
+  color: var(--color-text);
+  background: var(--color-border);
+  padding: 10px 14px;
+  border-radius: 15px;
+  text-align: center;
+  max-width: 320px;
+}
+
+.activeCard {
+  animation: cardIn 320ms ease both;
+}
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Timeline (real component lives here) ──────────────────────── */
+.timelineBox {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  /* Breathing room so the arrow indicator doesn't crowd the question card. */
+  margin-top: 8px;
+  /* Constrain the reused Timeline to the landing's compact height. */
+  --timeline-height: 190px;
+}
+
+.timelineInner {
+  width: 100%;
+  height: 100%;
+  transition: opacity 300ms ease;
+}
+
+.timelineDim {
+  opacity: 0;
+}
+
+.labelRow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.pill {
+  position: absolute;
+  left: 50%;
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--pill-color, var(--color-correct));
+  padding: 4px 12px;
+  border-radius: 4px;
+  transform: translateX(-50%);
+  animation: pillFloat 1600ms linear forwards;
+}
+
+/* Yellow needs dark text for contrast (mirrors the game's reveal toast). */
+.pillDark {
+  color: var(--color-text);
+}
+
+@keyframes pillFloat {
+  0% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-72px);
+  }
+}
+
+/* ── Question burst (opening beat) ──────────────────────────────── */
+.burst {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  transition: opacity 360ms ease, transform 360ms ease;
+  transform: translateZ(0);
+  top: -40px;
+  will-change: opacity;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* On exit the pile lifts away as the timeline fades in — a clean handoff that
+   replaces the old abrupt jump between the burst and the first round. */
+.burstHidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateZ(0) translateY(-10px);
+}
+
+/* Touch cue: a soft thumb that presses and drags the strip while it scrolls, so
+   the auto-motion reads as a real scrub instead of an ignored gesture. */
+.scrubCue {
+  position: absolute;
+  left: 50%;
+  top: 54%;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-text) 24%, transparent);
+  border: 2px solid color-mix(in srgb, var(--color-text) 46%, transparent);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1;
+  animation: scrubGesture var(--scrub-dur, 1200ms) cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes scrubGesture {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateX(var(--from, 0)) scale(1);
+  }
+  16% {
+    opacity: 0.72;
+    transform: translate(-50%, -50%) translateX(var(--from, 0)) scale(0.84);
+  }
+  84% {
+    opacity: 0.72;
+    transform: translate(-50%, -50%) translateX(var(--to, 0)) scale(0.84);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateX(var(--to, 0)) scale(1);
+  }
+}
+
+.burstCard {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max-content;
+  max-width: min(320px, calc(100% - 16px));
+  font-size: 17px;
+  padding: 9px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(var(--r));
+  opacity: 0;
+  animation: burstPop 360ms cubic-bezier(0.18, 0.89, 0.32, 1.18) both;
+  animation-delay: var(--delay, 0ms);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.14);
+}
+
+.burstCard:nth-child(1) {
+  z-index: 6;
+}
+
+.burstCard:nth-child(2) {
+  z-index: 5;
+}
+
+.burstCard:nth-child(3) {
+  z-index: 4;
+}
+
+.burstCard:nth-child(4) {
+  z-index: 3;
+}
+
+.burstCard:nth-child(5) {
+  z-index: 2;
+}
+
+.burstCard:nth-child(6) {
+  z-index: 1;
+}
+
+@keyframes burstPop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(var(--r)) scale(0.72);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate(var(--x), var(--y)) rotate(var(--r)) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .activeCard,
+  .pill,
+  .burstCard {
+    animation: none;
+    opacity: 1;
+  }
+
+  .pill {
+    transform: translateX(-50%);
+  }
+
+  .scrubCue {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+@media (max-height: 760px) {
+  .demo {
+    height: 248px;
+    max-width: 340px;
+    padding-top: 24px;
+  }
+
+  .cardRow {
+    height: 70px;
+  }
+
+  .card {
+    font-size: 16px;
+    padding: 8px 12px;
+    max-width: 292px;
+  }
+
+  .timelineBox {
+    margin-top: 8px;
+    --timeline-height: 140px;
+  }
+
+  .labelRow {
+    bottom: 28px;
+  }
+
+  .pill {
+    font-size: 17px;
+    padding: 4px 10px;
+  }
+
+  .burstCard {
+    font-size: 15px;
+    padding: 8px 12px;
+  }
+
+  /* Shrink the whole scatter so all five cards fit the shorter band. */
+  .burst {
+    transform: translateZ(0) scale(1);
+  }
+
+  .burstHidden {
+    transform: translateZ(0) scale(0.8) translateY(-10px);
+  }
+}
