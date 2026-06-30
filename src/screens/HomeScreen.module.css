@@ -104,32 +104,6 @@
   margin: 0;
 }
 
-.groupsCta {
-  margin: 0;
-  max-width: 280px;
-  text-align: center;
-  font-family: var(--font-display);
-  font-size: 18px;
-  line-height: 1.12;
-  color: color-mix(in srgb, var(--color-text) 58%, transparent);
-}
-
-.groupsLink {
-  background: none;
-  border: 0;
-  padding: 0;
-  font: inherit;
-  color: var(--color-text);
-  text-decoration: underline;
-  text-decoration-skip-ink: none;
-  text-underline-offset: 2px;
-  cursor: pointer;
-}
-
-.groupsLink:hover {
-  opacity: 0.7;
-}
-
 .playButton {
   font-family: var(--font-display);
   font-weight: 400;
@@ -263,10 +237,6 @@
 
   .meta {
     font-size: 18px;
-  }
-
-  .groupsCta {
-    font-size: 16px;
   }
 
   .footerCta {

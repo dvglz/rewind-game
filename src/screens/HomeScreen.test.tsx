@@ -172,6 +172,7 @@ test('shows a groups prompt for signed-in players', async () => {
     expect(screen.getByText(/Settle who knows ball in/)).not.toBeNull();
   });
 
+  expect(screen.getByText(/Settle who knows ball in/).className).toContain('footerCta');
   expect(screen.queryByText('Played before?')).toBeNull();
   expect(screen.queryByRole('button', { name: 'Sign In' })).toBeNull();
 

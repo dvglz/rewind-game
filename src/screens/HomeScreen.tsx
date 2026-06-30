@@ -139,15 +139,6 @@ export function HomeScreen({
           #{puzzleNumber} · {dateStr}
         </p>
 
-        {isAuthenticated && (
-          <p className={styles.groupsCta}>
-            Settle who knows ball in{' '}
-            <button type="button" className={styles.groupsLink} onClick={onGroups}>
-              Groups
-            </button>
-            .
-          </p>
-        )}
       </div>
 
       {showDebugTools && (
@@ -187,6 +178,15 @@ export function HomeScreen({
         </>
       )}
       {signOutToast && <Toast message="Signed Out" />}
+      {!hideAuthControls && isAuthenticated && (
+        <p className={styles.footerCta}>
+          Settle who knows ball in{' '}
+          <button type="button" className={styles.footerLink} onClick={onGroups}>
+            Groups
+          </button>
+          .
+        </p>
+      )}
       {!hideAuthControls && !isAuthenticated && (
         <p className={styles.footerCta}>
           Played before?{' '}
