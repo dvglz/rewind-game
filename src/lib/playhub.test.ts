@@ -16,7 +16,7 @@ beforeEach(() => {
 
 describe('playhub API', () => {
   // Dynamic import to pick up env stub
-  let fetchGroup: typeof import('./playhub').fetchGroup;
+  let fetchGroups: typeof import('./playhub').fetchGroups;
   let createGroup: typeof import('./playhub').createGroup;
   let joinGroup: typeof import('./playhub').joinGroup;
   let leaveGroup: typeof import('./playhub').leaveGroup;
@@ -25,28 +25,34 @@ describe('playhub API', () => {
   beforeEach(async () => {
     vi.resetModules();
     const mod = await import('./playhub');
-    fetchGroup = mod.fetchGroup;
+    fetchGroups = mod.fetchGroups;
     createGroup = mod.createGroup;
     joinGroup = mod.joinGroup;
     leaveGroup = mod.leaveGroup;
     claimReward = mod.claimReward;
   });
 
-  describe('fetchGroup', () => {
-    it('returns group data on 201', async () => {
+  describe('fetchGroups', () => {
+    it('returns groups from the multi-group response', async () => {
       mockFetch.mockResolvedValueOnce({
-        status: 201,
+        status: 200,
         ok: true,
-        json: async () => ({ id: 1, name: 'test', invite_link: 'ABC123', members: [] }),
+        json: async () => ({
+          groups: [
+            { id: 1, name: 'test', invite_link: 'ABC123', members_count: 1, members: [] },
+            { id: 2, name: 'bigger', invite_link: 'XYZ987', members_count: 3, members: [] },
+          ],
+        }),
       });
-      const result = await fetchGroup();
-      expect(result).toEqual({ id: 1, name: 'test', invite_link: 'ABC123', members: [] });
+      const result = await fetchGroups();
+      expect(result).toHaveLength(2);
+      expect(result[0].name).toBe('test');
     });
 
-    it('returns null on 204 (no group)', async () => {
+    it('returns an empty list on 204 (no groups)', async () => {
       mockFetch.mockResolvedValueOnce({ status: 204, ok: true });
-      const result = await fetchGroup();
-      expect(result).toBeNull();
+      const result = await fetchGroups();
+      expect(result).toEqual([]);
     });
   });
 
@@ -76,14 +82,14 @@ describe('playhub API', () => {
   });
 
   describe('joinGroup', () => {
-    it('joins with invite code', async () => {
+    it('returns the joined group', async () => {
       mockFetch.mockResolvedValueOnce({
         status: 200,
         ok: true,
-        json: async () => ({ group: 1, user: 'u1', joined_at: '2026-01-01T00:00:00Z' }),
+        json: async () => ({ id: 1, name: 'joined', invite_link: 'ABC123', members_count: 1, members: [] }),
       });
       const result = await joinGroup('ABC123');
-      expect(result.group).toBe(1);
+      expect(result.name).toBe('joined');
     });
 
     it('throws on 400 (invalid code)', async () => {
@@ -97,9 +103,13 @@ describe('playhub API', () => {
   });
 
   describe('leaveGroup', () => {
-    it('resolves on 204', async () => {
+    it('leaves the requested group by id', async () => {
       mockFetch.mockResolvedValueOnce({ status: 204, ok: true });
-      await expect(leaveGroup()).resolves.toBeUndefined();
+      await expect(leaveGroup(42)).resolves.toBeUndefined();
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://clutchpoints.4taps.me/playhub/groups/42/',
+        expect.objectContaining({ method: 'DELETE' }),
+      );
     });
   });
 

@@ -1,4 +1,4 @@
-import type { PlayhubGroup, GroupMember } from '../types';
+import type { PlayhubGroup } from '../types';
 import { GAME_TYPE, GAME_MODE } from './api';
 
 const BASE_URL = (import.meta.env.VITE_BASE_URL as string) ?? '';
@@ -19,28 +19,31 @@ const MOCK_GROUP: PlayhubGroup = {
   ],
 };
 
-let mockGroup: PlayhubGroup | null = MOCK_GROUP;
+let mockGroups: PlayhubGroup[] = [MOCK_GROUP];
 
 const mock = {
-  async fetchGroup(): Promise<PlayhubGroup | null> {
+  async fetchGroups(): Promise<PlayhubGroup[]> {
     await delay(300);
-    return mockGroup;
+    return mockGroups;
   },
   async createGroup(groupName: string): Promise<PlayhubGroup> {
     await delay(400);
     if (groupName.toLowerCase() === 'error') throw new Error('Group name is already taken');
-    mockGroup = { ...MOCK_GROUP, name: groupName };
-    return mockGroup;
+    const group = { ...MOCK_GROUP, id: Date.now(), name: groupName };
+    mockGroups = [group, ...mockGroups];
+    return group;
   },
-  async joinGroup(inviteCode: string): Promise<GroupMember> {
+  async joinGroup(inviteCode: string): Promise<PlayhubGroup> {
     await delay(400);
     if (inviteCode === 'ZZZZZZ') throw new Error('Check the code again');
-    mockGroup = MOCK_GROUP;
-    return MOCK_GROUP.members[0];
+    if (!mockGroups.some((group) => group.id === MOCK_GROUP.id)) {
+      mockGroups = [MOCK_GROUP, ...mockGroups];
+    }
+    return MOCK_GROUP;
   },
-  async leaveGroup(): Promise<void> {
+  async leaveGroup(groupId: number): Promise<void> {
     await delay(300);
-    mockGroup = null;
+    mockGroups = mockGroups.filter((group) => group.id !== groupId);
   },
   async claimReward(rewardKey: string): Promise<boolean> {
     void rewardKey;
@@ -72,11 +75,14 @@ function getHeaders(): Record<string, string> {
 }
 
 const real = {
-  async fetchGroup(): Promise<PlayhubGroup | null> {
+  async fetchGroups(): Promise<PlayhubGroup[]> {
     const res = await fetch(`${BASE_URL}/playhub/groups/`, { headers: getHeaders() });
-    if (res.status === 204) return null;
+    if (res.status === 204) return [];
     if (!res.ok) throw new Error('Failed to fetch group');
-    return res.json();
+    const body = await res.json();
+    if (Array.isArray(body.groups)) return body.groups;
+    if (body && typeof body === 'object' && typeof body.id === 'number') return [body as PlayhubGroup];
+    return [];
   },
   async createGroup(groupName: string): Promise<PlayhubGroup> {
     const res = await fetch(`${BASE_URL}/playhub/groups/`, {
@@ -90,7 +96,7 @@ const real = {
     }
     return res.json();
   },
-  async joinGroup(inviteCode: string): Promise<GroupMember> {
+  async joinGroup(inviteCode: string): Promise<PlayhubGroup> {
     const res = await fetch(`${BASE_URL}/playhub/groups/join/?invite=${encodeURIComponent(inviteCode)}`, {
       method: 'POST',
       headers: getHeaders(),
@@ -101,8 +107,8 @@ const real = {
     }
     return res.json();
   },
-  async leaveGroup(): Promise<void> {
-    const res = await fetch(`${BASE_URL}/playhub/groups/`, {
+  async leaveGroup(groupId: number): Promise<void> {
+    const res = await fetch(`${BASE_URL}/playhub/groups/${groupId}/`, {
       method: 'DELETE',
       headers: getHeaders(),
     });
@@ -131,7 +137,7 @@ const real = {
 
 const api = USE_MOCK ? mock : real;
 
-export const fetchGroup = api.fetchGroup;
+export const fetchGroups = api.fetchGroups;
 export const createGroup = api.createGroup;
 export const joinGroup = api.joinGroup;
 export const leaveGroup = api.leaveGroup;

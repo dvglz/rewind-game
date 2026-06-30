@@ -115,6 +115,7 @@ function mapRow(row: Record<string, unknown>, index: number, isCurrent: boolean)
       : typeof row.rank === 'number'
         ? row.rank
         : index + 1,
+    userId: typeof row.user_id === 'number' ? row.user_id : undefined,
     displayName: typeof row.username === 'string'
       ? row.username
       : typeof row.display_name === 'string'

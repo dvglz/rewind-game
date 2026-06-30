@@ -41,7 +41,7 @@ describe('BurgerMenu', () => {
     expect(dialog).not.toBeNull();
     expect(screen.getByRole('button', { name: "Today's Game" })).not.toBeNull();
     expect(screen.getByRole('button', { name: 'Leaderboard' })).not.toBeNull();
-    expect(screen.getByRole('button', { name: 'My Group' })).not.toBeNull();
+    expect(screen.getByRole('button', { name: 'My Groups' })).not.toBeNull();
     expect(screen.queryByText('Sound & Haptics')).toBeNull();
     expect(screen.queryByText('Appearance')).toBeNull();
     expect(screen.getByRole('button', { name: 'Close menu' }) === document.activeElement).toBe(true);
