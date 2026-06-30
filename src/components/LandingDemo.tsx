@@ -90,7 +90,6 @@ export function LandingDemo() {
   const { scrollToYear, rangeStart, rangeEnd } = timeline;
 
   const [showPile, setShowPile] = useState(true);
-  const [timelineReady, setTimelineReady] = useState(true);
   const [burstCycle, setBurstCycle] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
   const [revealedIndex, setRevealedIndex] = useState<number | null>(null);
@@ -125,7 +124,6 @@ export function LandingDemo() {
       while (!cancelled) {
         setBurstCycle((cycle) => cycle + 1);
         setShowPile(true);
-        setTimelineReady(false);
         setRevealedIndex(null);
         setScrub(null);
         await wait(2600);
@@ -139,9 +137,6 @@ export function LandingDemo() {
         parkedYear = firstStart;
         setActiveIndex(0);
         setShowPile(false);
-        await wait(360);
-        if (cancelled) return;
-        setTimelineReady(true);
 
         for (let i = 0; i < EXAMPLES.length && !cancelled; i += 1) {
           const ex = EXAMPLES[i];
@@ -191,7 +186,7 @@ export function LandingDemo() {
   return (
     <div className={styles.demo} aria-hidden="true">
       <div className={styles.cardRow}>
-        {!effShowPile && timelineReady && (
+        {!effShowPile && (
           <p key={effActiveIndex} className={`${styles.card} ${styles.activeCard}`}>
             {active.prompt}
           </p>

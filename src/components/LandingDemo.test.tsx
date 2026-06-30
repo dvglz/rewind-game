@@ -161,11 +161,12 @@ test('hands off from the burst by lifting it away as the timeline fades in', () 
   expect(burstHiddenBlock?.[1] ?? '').toMatch(/transform:\s*translateZ\(0\) translateY\(-10px\);/);
 });
 
-test('parks the first timeline before revealing the first active card', () => {
+test('parks the first timeline before revealing the first card and timeline together', () => {
   const source = readFileSync(resolve(__dirname, './LandingDemo.tsx'), 'utf8');
 
-  expect(source).toMatch(/setTimelineReady\(false\);[\s\S]*await scrollToYear\(firstStart, false, true\);[\s\S]*setShowPile\(false\);[\s\S]*await wait\(360\);[\s\S]*setTimelineReady\(true\);/);
-  expect(source).toMatch(/!\s*effShowPile && timelineReady && \(/);
+  expect(source).toMatch(/await scrollToYear\(firstStart, false, true\);[\s\S]*setActiveIndex\(0\);[\s\S]*setShowPile\(false\);/);
+  expect(source).toMatch(/!\s*effShowPile && \(/);
+  expect(source).not.toMatch(/timelineReady/);
 });
 
 test('keeps the burst layer compositor-stable while it fades out', () => {
