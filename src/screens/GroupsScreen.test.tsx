@@ -2,9 +2,10 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { GroupsScreen } from './GroupsScreen';
 
-const { fetchGroups, fetchLeaderboard, joinGroup, leaveGroup } = vi.hoisted(() => ({
+const { fetchGroups, fetchLeaderboard, createGroup, joinGroup, leaveGroup } = vi.hoisted(() => ({
   fetchGroups: vi.fn(),
   fetchLeaderboard: vi.fn(),
+  createGroup: vi.fn(),
   joinGroup: vi.fn(),
   leaveGroup: vi.fn(),
 }));
@@ -13,7 +14,7 @@ vi.stubEnv('VITE_PUBLIC_APP_URL', 'https://clutchpoints-rewind-test.4taps.me');
 
 vi.mock('../lib/playhub', () => ({
   fetchGroups,
-  createGroup: vi.fn(),
+  createGroup,
   joinGroup,
   leaveGroup,
 }));
@@ -57,6 +58,7 @@ const bigGroup = {
 beforeEach(() => {
   fetchGroups.mockReset();
   fetchLeaderboard.mockReset();
+  createGroup.mockReset();
   joinGroup.mockReset();
   leaveGroup.mockReset();
   Object.defineProperty(window, 'isSecureContext', {
@@ -177,6 +179,33 @@ test('shows the existing empty state when the user has no groups', async () => {
   expect(await screen.findByText(/Bring Rewind/)).not.toBeNull();
   expect(screen.getByRole('button', { name: /join by code/i })).not.toBeNull();
   expect(screen.getByRole('button', { name: /create group/i })).not.toBeNull();
+});
+
+test('opens the created group even when the follow-up groups refresh fails', async () => {
+  const createdGroup = {
+    id: 99,
+    name: 'new crew',
+    invite_link: 'NEWCREW',
+    members_count: 1,
+    members: [{ group: 99, user: { id: 7, username: 'You', email: 'you@test.dev' }, joined_at: '2026-06-30T00:00:00Z' }],
+  };
+  fetchGroups.mockResolvedValueOnce([]);
+  createGroup.mockResolvedValueOnce(createdGroup);
+  fetchGroups.mockRejectedValueOnce(new Error('Failed to load'));
+  fetchLeaderboard.mockResolvedValueOnce({
+    date: '2026-06-12',
+    currentUser: null,
+    entries: [],
+  });
+
+  render(<GroupsScreen onBack={() => {}} onRequireAuth={() => {}} isAuthenticated />);
+
+  fireEvent.click(await screen.findByRole('button', { name: /create group/i }));
+  fireEvent.change(screen.getByPlaceholderText('Group name'), { target: { value: 'new crew' } });
+  fireEvent.click(screen.getByRole('button', { name: /^create$/i }));
+
+  expect(await screen.findByRole('heading', { name: 'new crew' })).not.toBeNull();
+  expect(screen.queryByText('Failed to load')).toBeNull();
 });
 
 test('top back arrow returns from group detail to the groups list', async () => {

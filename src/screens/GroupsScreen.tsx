@@ -49,6 +49,10 @@ function sortGroups(groups: PlayhubGroup[]): PlayhubGroup[] {
   return [...groups].sort((a, b) => getMemberCount(b) - getMemberCount(a));
 }
 
+function mergeGroup(groups: PlayhubGroup[], group: PlayhubGroup): PlayhubGroup[] {
+  return sortGroups([group, ...groups.filter((g) => g.id !== group.id)]);
+}
+
 interface GroupsScreenProps {
   onBack: () => void;
   onRequireAuth: () => void;
@@ -146,22 +150,24 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
     const createdGroup = await createGroup(name);
     track('group_create');
     setShowCreate(false);
-    const nextGroups = await fetchGroups();
-    const hasCreatedGroup = nextGroups.some((g) => g.id === createdGroup.id);
-    setGroups(sortGroups(hasCreatedGroup ? nextGroups : [createdGroup, ...nextGroups]));
+    setGroups((currentGroups) => mergeGroup(currentGroups, createdGroup));
     setSelectedGroupId(createdGroup.id);
     showToast('Group created');
+    fetchGroups()
+      .then((nextGroups) => setGroups(mergeGroup(nextGroups, createdGroup)))
+      .catch(() => undefined);
   };
 
   const handleJoin = async (code: string) => {
     const joinedGroup = await joinGroup(code);
     track('group_join', { via: 'code' });
     setShowJoin(false);
-    const nextGroups = await fetchGroups();
-    const hasJoinedGroup = nextGroups.some((g) => g.id === joinedGroup.id);
-    setGroups(sortGroups(hasJoinedGroup ? nextGroups : [joinedGroup, ...nextGroups]));
+    setGroups((currentGroups) => mergeGroup(currentGroups, joinedGroup));
     setSelectedGroupId(joinedGroup.id);
     showToast('Joined group');
+    fetchGroups()
+      .then((nextGroups) => setGroups(mergeGroup(nextGroups, joinedGroup)))
+      .catch(() => undefined);
   };
 
   const handleLeave = async () => {

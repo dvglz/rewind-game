@@ -187,7 +187,7 @@ export function HomeScreen({
         </>
       )}
       {signOutToast && <Toast message="Signed Out" />}
-      {!hideAuthControls && (
+      {!hideAuthControls && !isAuthenticated && (
         <p className={styles.footerCta}>
           Played before?{' '}
           <button type="button" className={styles.footerLink} onClick={() => onNavigateAuth('home')}>

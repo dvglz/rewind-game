@@ -24,14 +24,14 @@ let mockGroups: PlayhubGroup[] = [MOCK_GROUP];
 const mock = {
   async fetchGroups(): Promise<PlayhubGroup[]> {
     await delay(300);
-    return mockGroups;
+    return mockGroups.map(normalizeGroup);
   },
   async createGroup(groupName: string): Promise<PlayhubGroup> {
     await delay(400);
     if (groupName.toLowerCase() === 'error') throw new Error('Group name is already taken');
     const group = { ...MOCK_GROUP, id: Date.now(), name: groupName };
     mockGroups = [group, ...mockGroups];
-    return group;
+    return normalizeGroup(group);
   },
   async joinGroup(inviteCode: string): Promise<PlayhubGroup> {
     await delay(400);
@@ -39,7 +39,7 @@ const mock = {
     if (!mockGroups.some((group) => group.id === MOCK_GROUP.id)) {
       mockGroups = [MOCK_GROUP, ...mockGroups];
     }
-    return MOCK_GROUP;
+    return normalizeGroup(MOCK_GROUP);
   },
   async leaveGroup(groupId: number): Promise<void> {
     await delay(300);
@@ -54,6 +54,13 @@ const mock = {
 
 function delay(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
+}
+
+function normalizeGroup(group: PlayhubGroup): PlayhubGroup {
+  return {
+    ...group,
+    members: Array.isArray(group.members) ? group.members : [],
+  };
 }
 
 // ── Real API ───────────────────────────────────────────────
@@ -80,8 +87,8 @@ const real = {
     if (res.status === 204) return [];
     if (!res.ok) throw new Error('Failed to fetch group');
     const body = await res.json();
-    if (Array.isArray(body.groups)) return body.groups;
-    if (body && typeof body === 'object' && typeof body.id === 'number') return [body as PlayhubGroup];
+    if (Array.isArray(body.groups)) return body.groups.map((group: PlayhubGroup) => normalizeGroup(group));
+    if (body && typeof body === 'object' && typeof body.id === 'number') return [normalizeGroup(body as PlayhubGroup)];
     return [];
   },
   async createGroup(groupName: string): Promise<PlayhubGroup> {
@@ -94,7 +101,7 @@ const real = {
       const body = await res.json().catch(() => ({}));
       throw new Error(body.detail ?? 'Failed to create group');
     }
-    return res.json();
+    return normalizeGroup(await res.json());
   },
   async joinGroup(inviteCode: string): Promise<PlayhubGroup> {
     const res = await fetch(`${BASE_URL}/playhub/groups/join/?invite=${encodeURIComponent(inviteCode)}`, {
@@ -105,7 +112,7 @@ const real = {
       const body = await res.json().catch(() => ({}));
       throw new Error(body.detail ?? 'Failed to join group');
     }
-    return res.json();
+    return normalizeGroup(await res.json());
   },
   async leaveGroup(groupId: number): Promise<void> {
     const res = await fetch(`${BASE_URL}/playhub/groups/${groupId}/`, {
