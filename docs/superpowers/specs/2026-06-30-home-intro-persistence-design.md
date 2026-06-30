@@ -54,9 +54,9 @@ const appMode = isAppMode();
 const showIntroDemo = !appMode && !isAuthenticated && !hasSeenHomeIntro();
 ```
 
-Button handlers should mark the intro before delegating to existing navigation:
+Game-start handling should mark the intro only after the app knows the Start or Resume action will actually enter the game:
 
-- Start/Resume: `markHomeIntroSeen(); onPlay();`
+- Start/Resume: mark from the app-owned game start path, after the first-run rules gate has passed and before navigating to game.
 - Footer Sign In: route with `onNavigateAuth('home')`; do not mark intro seen until auth succeeds.
 - Sign Out: call existing sign-out behavior, then clear the intro flag and show the current toast.
 
@@ -81,7 +81,7 @@ Add focused tests for:
 - users with the intro-seen flag do not see `LandingDemo`;
 - authenticated users do not see `LandingDemo`;
 - app-mode users do not see `LandingDemo` and do not see "Played before? Sign In";
-- Start/Resume marks intro seen before calling `onPlay`;
+- successful Start/Resume marks intro seen before entering the game;
 - footer Sign In routes to auth without marking intro seen;
 - auth success marks intro seen for footer-driven and direct sign-in paths;
 - sign-out clears the intro-seen flag.
