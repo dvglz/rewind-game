@@ -228,7 +228,7 @@ test('shows the landing demo for anonymous first-time web users', () => {
     </AuthProvider>
   );
 
-  expect(screen.getByText('Shaq is drafted by Orlando')).not.toBeNull();
+  expect(screen.getByText('Rose becomes the youngest MVP')).not.toBeNull();
 });
 
 test('hides the landing demo after the intro has been seen', async () => {

@@ -77,7 +77,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 112px;
+  bottom: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -249,6 +249,37 @@
   .scrubCue {
     animation: none;
     opacity: 0;
+  }
+}
+
+/* Wide screens: let the demo stand taller and use more vertical space, but
+   center its content so the extra height reads as balanced breathing room
+   above and below — not a void dumped under the timeline. The timeline box is
+   sized to its content (rather than filling the band) to keep it tidy. */
+@media (min-width: 900px) {
+  .demo {
+    /* Cap so the demo + the fixed intro/actions/padding always fit the
+       viewport (no overflow); taller on roomy screens, smaller on tight ones. */
+    height: min(360px, calc(100dvh - 500px));
+    justify-content: center;
+  }
+
+  .timelineBox {
+    flex: none;
+    height: 184px;
+  }
+
+  /* The centered desktop band has more room above, so the pile can lift higher. */
+  .burst {
+    top: -48px;
+  }
+}
+
+/* Only lift the full amount when the window is tall enough that it won't crowd
+   the description (short desktop windows like 1366x768 keep the smaller lift). */
+@media (min-width: 900px) and (min-height: 840px) {
+  .burst {
+    top: -80px;
   }
 }
 

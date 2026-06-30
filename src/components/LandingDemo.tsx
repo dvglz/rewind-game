@@ -18,11 +18,11 @@ interface DemoExample {
 // Curated pool, decoupled from today's puzzle. Leads with a perfect guess so the
 // demo opens on the satisfying reveal, then mixes in looser guesses for variety.
 const EXAMPLES: DemoExample[] = [
-  { prompt: 'MJ Flu Game takes place', actualYear: 1997, guessYear: 1997, startOffset: 4 },
-  { prompt: 'Shaq is drafted by Orlando', actualYear: 1992, guessYear: 1993, startOffset: -5 },
   { prompt: 'Cavs come back from 3-1', actualYear: 2016, guessYear: 2016, startOffset: -6 },
-  { prompt: "Pierce's Wheelchair game", actualYear: 2008, guessYear: 2017, startOffset: -5 },
-  { prompt: "Zion's shoe explodes", actualYear: 2019, guessYear: 2021, startOffset: -6 },
+  { prompt: "Rose becomes the youngest MVP", actualYear: 2011, guessYear: 2010, startOffset: 5 },
+  { prompt: "Seattle's final NBA season", actualYear: 2008, guessYear: 2008, startOffset: -6 },
+  { prompt: "Pierce's Wheelchair Game", actualYear: 2008, guessYear: 2011, startOffset: -5 },
+  { prompt: "Orlando knocks out MJ's Bulls", actualYear: 1995, guessYear: 1997, startOffset: -5 },
 ];
 
 // Opening burst: the five demo questions pop in one-by-one in a lively

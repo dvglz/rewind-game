@@ -89,18 +89,18 @@ test('drives the burst from the five demo examples so the prompts stay in sync',
 test('uses the requested demo sequence and scoring beats', () => {
   const source = readFileSync(resolve(__dirname, './LandingDemo.tsx'), 'utf8');
 
-  expect(source).toMatch(/MJ Flu Game takes place[\s\S]*actualYear: 1997, guessYear: 1997/);
-  expect(source).toMatch(/Shaq is drafted by Orlando[\s\S]*actualYear: 1992, guessYear: 1993/);
   expect(source).toMatch(/Cavs come back from 3-1[\s\S]*actualYear: 2016, guessYear: 2016/);
-  expect(source).toMatch(/Pierce's Wheelchair game[\s\S]*actualYear: 2008, guessYear: 2017/);
-  expect(source).toMatch(/Zion's shoe explodes[\s\S]*actualYear: 2019, guessYear: 2021/);
+  expect(source).toMatch(/Rose becomes the youngest MVP[\s\S]*actualYear: 2011, guessYear: 2010/);
+  expect(source).toMatch(/Seattle's final NBA season[\s\S]*actualYear: 2008, guessYear: 2008/);
+  expect(source).toMatch(/Pierce's Wheelchair Game[\s\S]*actualYear: 2008, guessYear: 2011/);
+  expect(source).toMatch(/Orlando knocks out MJ's Bulls[\s\S]*actualYear: 1995, guessYear: 1997/);
   expect([
-    getLandingDemoResultColor(1997 - 1997),
-    getLandingDemoResultColor(1993 - 1992),
     getLandingDemoResultColor(2016 - 2016),
-    getLandingDemoResultColor(2017 - 2008),
-    getLandingDemoResultColor(2021 - 2019),
-  ]).toEqual(['perfect', 'ballpark', 'perfect', 'wrong-era', 'ballpark']);
+    getLandingDemoResultColor(2010 - 2011),
+    getLandingDemoResultColor(2008 - 2008),
+    getLandingDemoResultColor(2011 - 2008),
+    getLandingDemoResultColor(1997 - 1995),
+  ]).toEqual(['perfect', 'ballpark', 'perfect', 'ballpark', 'ballpark']);
 });
 
 test('keeps timeline continuity when moving between demo examples', () => {
