@@ -130,6 +130,7 @@ test('shares selected group invite links with the configured public app url', as
 
 test('opens the joined group after joining by invite link', async () => {
   joinGroup.mockResolvedValueOnce(smallGroup);
+  fetchGroups.mockResolvedValueOnce([bigGroup]);
   fetchGroups.mockResolvedValueOnce([smallGroup, bigGroup]);
   fetchLeaderboard.mockResolvedValueOnce({
     date: '2026-06-12',
@@ -148,6 +149,27 @@ test('opens the joined group after joining by invite link', async () => {
 
   expect(await screen.findByText('Joined group')).not.toBeNull();
   expect(await screen.findByRole('heading', { name: 'the boys' })).not.toBeNull();
+});
+
+test('opens an existing invited group without rejoining it', async () => {
+  fetchGroups.mockResolvedValueOnce([smallGroup, bigGroup]);
+  fetchLeaderboard.mockResolvedValueOnce({
+    date: '2026-06-12',
+    currentUser: null,
+    entries: [],
+  });
+
+  render(
+    <GroupsScreen
+      onBack={() => {}}
+      onRequireAuth={() => {}}
+      isAuthenticated
+      pendingInvite="YPWFZC"
+    />,
+  );
+
+  expect(await screen.findByRole('heading', { name: 'the boys' })).not.toBeNull();
+  expect(joinGroup).not.toHaveBeenCalled();
 });
 
 test('leaves only the selected group and returns to the groups list', async () => {

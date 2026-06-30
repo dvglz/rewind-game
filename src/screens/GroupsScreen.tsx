@@ -85,18 +85,30 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
   useEffect(() => {
     let cancelled = false;
     if (pendingInvite) {
-      joinGroup(pendingInvite)
-        .then((joinedGroup) => {
-          track('group_join', { via: 'invite_link' });
-          return fetchGroups().then((nextGroups) => ({ joinedGroup, nextGroups }));
-        })
-        .then(({ joinedGroup, nextGroups }) => {
-          if (!cancelled) {
-            const hasJoinedGroup = nextGroups.some((g) => g.id === joinedGroup.id);
-            setGroups(sortGroups(hasJoinedGroup ? nextGroups : [joinedGroup, ...nextGroups]));
-            setSelectedGroupId(joinedGroup.id);
-            showToast('Joined group');
+      fetchGroups()
+        .then((initialGroups) => {
+          if (cancelled) return;
+          const sortedGroups = sortGroups(initialGroups);
+          const existingGroup = sortedGroups.find((g) => extractInviteCode(g.invite_link) === pendingInvite);
+          if (existingGroup) {
+            setGroups(sortedGroups);
+            setSelectedGroupId(existingGroup.id);
+            return;
           }
+          return joinGroup(pendingInvite)
+            .then((joinedGroup) => {
+              track('group_join', { via: 'invite_link' });
+              return fetchGroups()
+                .then((nextGroups) => ({ joinedGroup, nextGroups }))
+                .catch(() => ({ joinedGroup, nextGroups: initialGroups }));
+            })
+            .then(({ joinedGroup, nextGroups }) => {
+              if (!cancelled) {
+                setGroups(mergeGroup(nextGroups, joinedGroup));
+                setSelectedGroupId(joinedGroup.id);
+                showToast('Joined group');
+              }
+            });
         })
         .catch((err) => {
           if (cancelled) return;
@@ -349,14 +361,14 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
           </div>
           <div className={styles.listActions}>
             <button
-              className={styles.emptyButtonPrimary}
+              className={styles.listButtonPrimary}
               onClick={() => isAuthenticated ? setShowJoin(true) : onRequireAuth()}
               type="button"
             >
               Join by Code
             </button>
             <button
-              className={styles.emptyButtonSecondary}
+              className={styles.listButtonSecondary}
               onClick={() => isAuthenticated ? setShowCreate(true) : onRequireAuth()}
               type="button"
             >

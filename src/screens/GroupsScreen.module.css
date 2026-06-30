@@ -113,30 +113,32 @@
 
 .listTitle {
   font-family: var(--font-display);
-  font-size: clamp(40px, 14vw, 64px);
-  text-align: center;
-  line-height: 0.95;
+  font-size: 34px;
+  text-align: left;
+  line-height: 1;
+  align-self: flex-start;
+  margin: 4px 0 8px;
 }
 
 .groupList {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  gap: 10px;
 }
 
 .groupRow {
   width: 100%;
-  min-height: 72px;
+  min-height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-md);
-  border: 0;
+  border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent);
   border-radius: 8px;
-  background: var(--color-surface-elevated);
+  background: color-mix(in srgb, var(--color-text) 5%, var(--color-bg));
   color: var(--color-text);
-  padding: 14px 16px;
+  padding: 12px 14px;
   cursor: pointer;
   text-align: left;
   transition: transform 0.1s ease;
@@ -152,7 +154,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: 24px;
   line-height: 1;
 }
 
@@ -166,11 +168,41 @@
 
 .listActions {
   width: 100%;
-  max-width: 240px;
   margin-top: auto;
   display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
+  flex-direction: row;
+  gap: 10px;
+}
+
+.listButtonPrimary,
+.listButtonSecondary {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 13px 10px;
+  border: 0;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 21px;
+  line-height: 1.1;
+  cursor: pointer;
+  text-align: center;
+  transition: transform 0.1s ease;
+}
+
+.listButtonPrimary {
+  background: var(--color-text);
+  color: var(--color-bg);
+}
+
+.listButtonSecondary {
+  background: color-mix(in srgb, var(--color-text) 8%, var(--color-bg));
+  color: var(--color-text);
+  border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent);
+}
+
+.listButtonPrimary:active,
+.listButtonSecondary:active {
+  transform: scale(0.97);
 }
 
 .sectionTitle {
