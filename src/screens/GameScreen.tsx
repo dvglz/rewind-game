@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef, type CSSProperties } from 'react';
 import { Confetti } from '../components/Confetti';
 import { Header } from '../components/Header';
+import { RulesSheet } from '../components/RulesSheet';
 import { Timeline } from '../components/Timeline';
 import { ConfirmButton } from '../components/ConfirmButton';
 import { useGame } from '../hooks/useGame';
@@ -30,6 +31,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
   const game = useGame(puzzle, { scoringEnabled: !isRewindLabMode() && !isPracticeMode() });
   const timeline = useTimeline(puzzle.events);
   const elapsedMs = useElapsedTimer(game.state.startedAt ?? Date.now(), game.isComplete);
+  const [rulesOpen, setRulesOpen] = useState(false);
   const [pendingResult, setPendingResult] = useState<RoundResult | null>(null);
   const [revealResult, setRevealResult] = useState<RoundResult | null>(null);
   const [isResolving, setIsResolving] = useState(false);
@@ -308,7 +310,9 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
         rightLabel="Score:"
         scorePopping={scorePopping}
         onScoreAnimationEnd={() => setScorePopping(false)}
+        onRules={() => setRulesOpen(true)}
       />
+      {rulesOpen && <RulesSheet onClose={() => setRulesOpen(false)} />}
 
       <div className={styles.topSection}>
         <div className={styles.contentWidth}>
