@@ -22,14 +22,6 @@
   margin: 0 auto;
 }
 
-.roundCounter {
-  font-family: var(--font-body);
-  font-weight: 400;
-  font-size: 14px;
-  line-height: 1;
-  margin-bottom: 12px;
-}
-
 .promptShell {
   min-height: 138px;
 }
@@ -337,11 +329,6 @@
 
   .contentWidth {
     max-width: min(80vw, 1200px);
-  }
-
-  .roundCounter {
-    margin-bottom: 28px;
-    font-size: 16px;
   }
 
   .question {

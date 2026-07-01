@@ -1,9 +1,7 @@
-import type { Sport } from '../data/puzzles';
-import { SPORT_ICONS } from '../data/puzzles';
+import { RoundDots } from './RoundDots';
 import styles from './Header.module.css';
 
 interface HeaderProps {
-  sport?: Sport;
   onHome?: () => void;
   leftMeta?: string;
   gameNumber?: number;
@@ -13,61 +11,78 @@ interface HeaderProps {
   onScoreAnimationEnd?: () => void;
   onRules?: () => void;
   timerText?: string;
+  roundState?: { results: { diff: number }[]; currentRound: number; totalRounds: number };
 }
 
-export function Header({ sport, onHome, leftMeta, gameNumber, rightText, rightLabel, scorePopping, onScoreAnimationEnd, onRules, timerText }: HeaderProps) {
+export function Header({
+  onHome,
+  leftMeta,
+  gameNumber,
+  rightText,
+  rightLabel,
+  scorePopping,
+  onScoreAnimationEnd,
+  onRules,
+  timerText,
+  roundState,
+}: HeaderProps) {
   const today = new Date();
-  const formatted = today.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).toUpperCase();
+  const formatted = today
+    .toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    .toUpperCase();
 
   return (
     <header className={styles.header}>
       <div className={styles.inner}>
-        <div className={styles.brand}>
-          {onHome ? (
-            <button className={`${styles.wordmark} ${styles.wordmarkAction}`} onClick={onHome} type="button">
-              REWIND
-            </button>
-          ) : (
-            <span className={styles.wordmark}>REWIND</span>
-          )}
-          {gameNumber != null && (
-            <span className={styles.gameNumber}>#{String(gameNumber).padStart(3, '0')}</span>
-          )}
-          {leftMeta && <span className={styles.meta}>{leftMeta}</span>}
-          {sport && SPORT_ICONS[sport] && (
-            <span className={styles.sportIcon} aria-hidden="true">
-              {SPORT_ICONS[sport]}
-            </span>
-          )}
-          {onRules && (
-            <button
-              type="button"
-              className={styles.rulesButton}
-              onClick={onRules}
-              aria-label="How to play"
-            >
-              ?
-            </button>
+        <div className={styles.headerLeft}>
+          <div className={styles.brand}>
+            {onHome ? (
+              <button
+                className={`${styles.wordmark} ${styles.wordmarkAction}`}
+                onClick={onHome}
+                type="button"
+              >
+                REWIND
+              </button>
+            ) : (
+              <span className={styles.wordmark}>REWIND</span>
+            )}
+            {gameNumber != null && (
+              <span className={styles.gameNumber}>#{String(gameNumber).padStart(3, '0')}</span>
+            )}
+            {leftMeta && <span className={styles.meta}>{leftMeta}</span>}
+            {onRules && (
+              <button
+                type="button"
+                className={styles.rulesButton}
+                onClick={onRules}
+                aria-label="How to play"
+              >
+                ?
+              </button>
+            )}
+          </div>
+          {roundState && (
+            <RoundDots
+              results={roundState.results}
+              currentRound={roundState.currentRound}
+              totalRounds={roundState.totalRounds}
+            />
           )}
         </div>
-        <div className={styles.scoreCol}>
-          <div className={styles.scoreWrap}>
-            {rightLabel && <span className={styles.scoreLabel}>{rightLabel}</span>}
-            <span
-              className={`${styles.date} ${scorePopping ? styles.scorePop : ''}`}
-              onAnimationEnd={onScoreAnimationEnd}
-              data-testid="header-score"
-            >
-              {rightText ?? formatted}
-            </span>
-          </div>
+        <div className={styles.headerRight}>
+          {rightLabel && <span className={styles.scoreLabel}>{rightLabel}</span>}
+          <span
+            className={`${styles.date} ${scorePopping ? styles.scorePop : ''}`}
+            onAnimationEnd={onScoreAnimationEnd}
+            data-testid="header-score"
+          >
+            {rightText ?? formatted}
+          </span>
           {timerText && (
-            <span className={styles.timer} data-testid="game-timer">
-              {timerText}
+            <span className={styles.totalTime}>
+              <span className={styles.totalTimeLabel}>TOTAL TIME:</span>{' '}
+              <span data-testid="game-timer">{timerText}</span>
             </span>
           )}
         </div>

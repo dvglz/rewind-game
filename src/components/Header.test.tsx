@@ -34,4 +34,20 @@ describe('Header', () => {
     render(<Header />);
     expect(screen.queryByRole('button', { name: /how to play/i })).toBeNull();
   });
+
+  it('renders round dots when roundState is provided', () => {
+    render(
+      <Header
+        gameNumber={14}
+        roundState={{ results: [{ diff: 0 }, { diff: 1 }], currentRound: 2, totalRounds: 5 }}
+      />
+    );
+    expect(screen.getAllByTestId('round-dot')).toHaveLength(5);
+  });
+
+  it('renders a labeled MM:SS timer when timerText is provided', () => {
+    render(<Header gameNumber={14} timerText="02:39" />);
+    expect(screen.getByText('TOTAL TIME:')).toBeInTheDocument();
+    expect(screen.getByTestId('game-timer')).toHaveTextContent('02:39');
+  });
 });

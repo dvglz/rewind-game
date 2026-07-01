@@ -60,9 +60,6 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
   const rafRef = useRef<number | null>(null);
   const completeFired = useRef(false);
   const activeResult = revealResult ?? pendingResult;
-  const displayRound = activeResult
-    ? Math.min(game.currentRound, game.totalRounds)
-    : Math.min(game.currentRound + 1, game.totalRounds);
 
   const handleScroll = useCallback(() => {
     timeline.handleScroll();
@@ -306,7 +303,6 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
         />
       )}
       <Header
-        sport={puzzle.sport}
         onHome={onHome}
         gameNumber={puzzle.number}
         rightText={`${displayedScore} PTS`}
@@ -315,18 +311,16 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
         onScoreAnimationEnd={() => setScorePopping(false)}
         onRules={() => setRulesOpen(true)}
         timerText={formatTime(elapsedMs)}
+        roundState={{
+          results: game.results,
+          currentRound: game.currentRound,
+          totalRounds: game.totalRounds,
+        }}
       />
       {rulesOpen && <RulesSheet onClose={() => setRulesOpen(false)} />}
 
       <div className={styles.topSection}>
         <div className={styles.contentWidth}>
-          <p
-            className={`${styles.roundCounter} ${
-              micropause ? styles.micropauseDim : ''
-            } ${!micropause && revealResult ? styles.micropauseRestore : ''}`}
-          >
-            Round {displayRound} of {game.totalRounds}
-          </p>
           <div className={styles.promptShell}>
             {!!displayText && (
               <h2
