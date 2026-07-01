@@ -49,8 +49,8 @@ test('renders the title and a pinned row for an out-of-page user', async () => {
   // Pinned "You" row (rank 34 is outside the 2-row mock page).
   expect(await screen.findByText('34')).not.toBeNull();
   expect(await screen.findByText('You')).not.toBeNull();
-  // Run time formatted next to the pinned user (159000ms -> "2m 39s").
-  expect(await screen.findByText('2m 39s')).not.toBeNull();
+  // Run time formatted next to the pinned user (159000ms -> "02:39").
+  expect(await screen.findByText('02:39')).not.toBeNull();
 });
 
 test('wordmark navigates home via onBack', () => {

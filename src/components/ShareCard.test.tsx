@@ -24,7 +24,7 @@ test('renders the redesigned header and round list', () => {
   expect(screen.getByText('June 10, 2026')).not.toBeNull();
   expect(screen.getByText('888')).not.toBeNull();
   expect(screen.getByText('/ 1,000')).not.toBeNull();
-  expect(screen.getByText('2m 36s')).not.toBeNull();
+  expect(screen.getByText('02:36')).not.toBeNull();
   expect(screen.getAllByTestId('tier-dot')).toHaveLength(5);
 
   const roundList = screen.getByTestId('round-list');
@@ -36,5 +36,5 @@ test('renders the redesigned header and round list', () => {
 
 test('hides the time pill when elapsedMs is omitted', () => {
   render(<ShareCard results={results} totalScore={888} maxScore={1000} />);
-  expect(screen.queryByText('2m 36s')).toBeNull();
+  expect(screen.queryByText('02:36')).toBeNull();
 });

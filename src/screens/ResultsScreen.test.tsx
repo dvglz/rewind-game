@@ -70,7 +70,7 @@ test('logged-in users get friends CTA plus inline leaderboard link', () => {
   expect(screen.getByRole('button', { name: /See Friends' Scores/i })).not.toBeNull();
   expect(screen.getByRole('button', { name: /^Leaderboard$/i })).not.toBeNull();
   expect(screen.queryByRole('button', { name: /Create an Account/i })).toBeNull();
-  expect(screen.getByText('2m 36s')).not.toBeNull();
+  expect(screen.getByText('02:36')).not.toBeNull();
 
   fireEvent.click(screen.getByRole('button', { name: /^Leaderboard$/i }));
   expect(onLeaderboard).toHaveBeenCalledTimes(1);
@@ -173,7 +173,7 @@ test('falls back to backend score when local state is missing', async () => {
   );
 
   expect(await screen.findByText('777')).not.toBeNull();
-  expect(await screen.findByText('1m 23s')).not.toBeNull();
+  expect(await screen.findByText('01:23')).not.toBeNull();
 });
 
 test('does not keep the previous user remote score after sign out and sign in as another user', async () => {
