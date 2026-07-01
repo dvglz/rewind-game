@@ -12,9 +12,10 @@ interface HeaderProps {
   scorePopping?: boolean;
   onScoreAnimationEnd?: () => void;
   onRules?: () => void;
+  timerText?: string;
 }
 
-export function Header({ sport, onHome, leftMeta, gameNumber, rightText, rightLabel, scorePopping, onScoreAnimationEnd, onRules }: HeaderProps) {
+export function Header({ sport, onHome, leftMeta, gameNumber, rightText, rightLabel, scorePopping, onScoreAnimationEnd, onRules, timerText }: HeaderProps) {
   const today = new Date();
   const formatted = today.toLocaleDateString('en-US', {
     month: 'short',
@@ -42,8 +43,18 @@ export function Header({ sport, onHome, leftMeta, gameNumber, rightText, rightLa
               {SPORT_ICONS[sport]}
             </span>
           )}
+          {onRules && (
+            <button
+              type="button"
+              className={styles.rulesButton}
+              onClick={onRules}
+              aria-label="How to play"
+            >
+              ?
+            </button>
+          )}
         </div>
-        <div className={styles.headerRight}>
+        <div className={styles.scoreCol}>
           <div className={styles.scoreWrap}>
             {rightLabel && <span className={styles.scoreLabel}>{rightLabel}</span>}
             <span
@@ -54,15 +65,10 @@ export function Header({ sport, onHome, leftMeta, gameNumber, rightText, rightLa
               {rightText ?? formatted}
             </span>
           </div>
-          {onRules && (
-            <button
-              type="button"
-              className={styles.rulesButton}
-              onClick={onRules}
-              aria-label="How to play"
-            >
-              ?
-            </button>
+          {timerText && (
+            <span className={styles.timer} data-testid="game-timer">
+              {timerText}
+            </span>
           )}
         </div>
       </div>

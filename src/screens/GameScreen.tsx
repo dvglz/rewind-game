@@ -314,24 +314,19 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
         scorePopping={scorePopping}
         onScoreAnimationEnd={() => setScorePopping(false)}
         onRules={() => setRulesOpen(true)}
+        timerText={formatTime(elapsedMs)}
       />
       {rulesOpen && <RulesSheet onClose={() => setRulesOpen(false)} />}
 
       <div className={styles.topSection}>
         <div className={styles.contentWidth}>
-          <div className={styles.roundRow}>
-            <span className={styles.roundRowSpacer} aria-hidden="true" />
-            <p
-              className={`${styles.roundCounter} ${
-                micropause ? styles.micropauseDim : ''
-              } ${!micropause && revealResult ? styles.micropauseRestore : ''}`}
-            >
-              Round {displayRound} of {game.totalRounds}
-            </p>
-            <span className={styles.timerPill} data-testid="game-timer">
-              {formatTime(elapsedMs)}
-            </span>
-          </div>
+          <p
+            className={`${styles.roundCounter} ${
+              micropause ? styles.micropauseDim : ''
+            } ${!micropause && revealResult ? styles.micropauseRestore : ''}`}
+          >
+            Round {displayRound} of {game.totalRounds}
+          </p>
           <div className={styles.promptShell}>
             {!!displayText && (
               <h2

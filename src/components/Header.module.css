@@ -93,23 +93,34 @@
   100% { transform: scale(1); }
 }
 
-.headerRight {
+.scoreCol {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.timer {
+  font-family: var(--font-display);
+  font-size: 13px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: var(--color-muted);
 }
 
 .rulesButton {
   appearance: none;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   flex-shrink: 0;
+  margin-left: 6px;
   border: 0.5px solid var(--color-border);
   border-radius: 50%;
   background: transparent;
   color: var(--color-muted);
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1;
   cursor: pointer;
   display: flex;
