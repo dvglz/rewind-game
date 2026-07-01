@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react';
 import { RewindGlyph } from '../components/icons';
 import { markRulesSeen } from '../engine/storage';
 import { track } from '../lib/analytics';
+import { RULES_LINES, RULES_HOOK } from '../lib/rulesCopy';
 import styles from './HowToScreen.module.css';
 
 export type HowToEntryPoint = 'first_run' | 'menu' | 'footer';
@@ -39,21 +40,21 @@ export function HowToScreen({ mode, entryPoint, onPlay, onHome }: HowToScreenPro
           className={`${styles.body} ${styles.item}`}
           style={{ '--stagger-index': 2 } as CSSProperties}
         >
-          <p>5 iconic sports moments. Scroll the timeline, lock the year. Closer guess, higher score.</p>
+          <p>{RULES_LINES[0]}</p>
         </div>
 
         <div
           className={`${styles.body} ${styles.item}`}
           style={{ '--stagger-index': 3 } as CSSProperties}
         >
-          <p>NBA, NFL, MLB, college, and more. Later rounds are worth more. Fastest time breaks ties.</p>
+          <p>{RULES_LINES[1]}</p>
         </div>
 
         <p
           className={`${styles.hook} ${styles.item}`}
           style={{ '--stagger-index': 4 } as CSSProperties}
         >
-          Can you hit perfect 1,000?
+          {RULES_HOOK}
         </p>
 
         <p
