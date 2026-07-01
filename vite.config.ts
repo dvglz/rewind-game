@@ -37,7 +37,7 @@ export default defineConfig(() => {
     test: {
       globals: true,
       environment: 'jsdom',
-      setupFiles: [],
+      setupFiles: ['./src/setupTests.ts'],
       // Keep analytics a no-op in tests regardless of .env.local.
       env: { VITE_GA_MEASUREMENT_ID: '' },
     },
