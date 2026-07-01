@@ -30,7 +30,10 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
   const puzzle = getTodaysPuzzle();
   const game = useGame(puzzle, { scoringEnabled: !isRewindLabMode() && !isPracticeMode() });
   const timeline = useTimeline(puzzle.events);
-  const elapsedMs = useElapsedTimer(game.state.startedAt ?? Date.now(), game.isComplete);
+  // Capture the game's start once so the timer base is stable across renders.
+  // startedAt is set at game creation; the fallback only covers legacy saves.
+  const [timerStart] = useState(() => game.state.startedAt ?? Date.now());
+  const elapsedMs = useElapsedTimer(game.state.startedAt ?? timerStart, game.isComplete);
   const [rulesOpen, setRulesOpen] = useState(false);
   const [pendingResult, setPendingResult] = useState<RoundResult | null>(null);
   const [revealResult, setRevealResult] = useState<RoundResult | null>(null);
