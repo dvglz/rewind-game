@@ -40,6 +40,10 @@ vi.mock('../hooks/useTimeline', () => ({
   useTimeline: vi.fn(),
 }));
 
+vi.mock('../hooks/useElapsedTimer', () => ({
+  useElapsedTimer: vi.fn(() => 0),
+}));
+
 vi.mock('../data/puzzles', () => ({
   getTodaysPuzzle: vi.fn(),
   isRewindLabMode: vi.fn(() => false),

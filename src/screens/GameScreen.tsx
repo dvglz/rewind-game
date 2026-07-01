@@ -5,6 +5,8 @@ import { Timeline } from '../components/Timeline';
 import { ConfirmButton } from '../components/ConfirmButton';
 import { useGame } from '../hooks/useGame';
 import { useTimeline } from '../hooks/useTimeline';
+import { useElapsedTimer } from '../hooks/useElapsedTimer';
+import { formatTime } from '../lib/formatTime';
 import { getTodaysPuzzle, isRewindLabMode, isPracticeMode } from '../data/puzzles';
 import { getResultColor, getResultColorVar, getResultLabel, getMaxPossibleScore, ROUND_WEIGHTS } from '../engine/scoring';
 import { vibrateConfirm, vibrateError, vibrateMedium } from '../lib/haptics';
@@ -27,6 +29,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
   const puzzle = getTodaysPuzzle();
   const game = useGame(puzzle, { scoringEnabled: !isRewindLabMode() && !isPracticeMode() });
   const timeline = useTimeline(puzzle.events);
+  const elapsedMs = useElapsedTimer(game.state.startedAt ?? Date.now(), game.isComplete);
   const [pendingResult, setPendingResult] = useState<RoundResult | null>(null);
   const [revealResult, setRevealResult] = useState<RoundResult | null>(null);
   const [isResolving, setIsResolving] = useState(false);
@@ -309,13 +312,19 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
 
       <div className={styles.topSection}>
         <div className={styles.contentWidth}>
-          <p
-            className={`${styles.roundCounter} ${
-              micropause ? styles.micropauseDim : ''
-            } ${!micropause && revealResult ? styles.micropauseRestore : ''}`}
-          >
-            Round {displayRound} of {game.totalRounds}
-          </p>
+          <div className={styles.roundRow}>
+            <span className={styles.roundRowSpacer} aria-hidden="true" />
+            <p
+              className={`${styles.roundCounter} ${
+                micropause ? styles.micropauseDim : ''
+              } ${!micropause && revealResult ? styles.micropauseRestore : ''}`}
+            >
+              Round {displayRound} of {game.totalRounds}
+            </p>
+            <span className={styles.timerPill} data-testid="game-timer">
+              {formatTime(elapsedMs)}
+            </span>
+          </div>
           <div className={styles.promptShell}>
             {!!displayText && (
               <h2
