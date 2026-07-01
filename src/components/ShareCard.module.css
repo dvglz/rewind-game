@@ -60,6 +60,8 @@
   font-size: 20px;
   line-height: normal;
   color: var(--color-text);
+  animation: timePillShimmer 0.55s ease-in-out 0.4s 2;
+  will-change: opacity, transform;
 }
 
 .tierDots {
@@ -112,6 +114,12 @@
   font-family: var(--font-display);
   font-size: 22px;
   text-align: right;
+}
+
+@keyframes timePillShimmer {
+  0% { opacity: 1; transform: translateX(100%) scale(1); }
+  50% { opacity: 0.55; transform: translateX(100%) scale(1.12); }
+  100% { opacity: 1; transform: translateX(100%) scale(1); }
 }
 
 @keyframes fadeInUp {
