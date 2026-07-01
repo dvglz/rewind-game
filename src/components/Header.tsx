@@ -11,9 +11,10 @@ interface HeaderProps {
   rightLabel?: string;
   scorePopping?: boolean;
   onScoreAnimationEnd?: () => void;
+  onRules?: () => void;
 }
 
-export function Header({ sport, onHome, leftMeta, gameNumber, rightText, rightLabel, scorePopping, onScoreAnimationEnd }: HeaderProps) {
+export function Header({ sport, onHome, leftMeta, gameNumber, rightText, rightLabel, scorePopping, onScoreAnimationEnd, onRules }: HeaderProps) {
   const today = new Date();
   const formatted = today.toLocaleDateString('en-US', {
     month: 'short',
@@ -42,15 +43,27 @@ export function Header({ sport, onHome, leftMeta, gameNumber, rightText, rightLa
             </span>
           )}
         </div>
-        <div className={styles.scoreWrap}>
-          {rightLabel && <span className={styles.scoreLabel}>{rightLabel}</span>}
-          <span
-            className={`${styles.date} ${scorePopping ? styles.scorePop : ''}`}
-            onAnimationEnd={onScoreAnimationEnd}
-            data-testid="header-score"
-          >
-            {rightText ?? formatted}
-          </span>
+        <div className={styles.headerRight}>
+          <div className={styles.scoreWrap}>
+            {rightLabel && <span className={styles.scoreLabel}>{rightLabel}</span>}
+            <span
+              className={`${styles.date} ${scorePopping ? styles.scorePop : ''}`}
+              onAnimationEnd={onScoreAnimationEnd}
+              data-testid="header-score"
+            >
+              {rightText ?? formatted}
+            </span>
+          </div>
+          {onRules && (
+            <button
+              type="button"
+              className={styles.rulesButton}
+              onClick={onRules}
+              aria-label="How to play"
+            >
+              ?
+            </button>
+          )}
         </div>
       </div>
     </header>

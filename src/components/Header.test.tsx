@@ -21,4 +21,17 @@ describe('Header', () => {
 
     expect(onHome).toHaveBeenCalledTimes(1);
   });
+
+  it('renders a rules button when onRules is provided and calls it on click', () => {
+    const onRules = vi.fn();
+    render(<Header onRules={onRules} />);
+    const btn = screen.getByRole('button', { name: /how to play/i });
+    fireEvent.click(btn);
+    expect(onRules).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders no rules button when onRules is omitted', () => {
+    render(<Header />);
+    expect(screen.queryByRole('button', { name: /how to play/i })).toBeNull();
+  });
 });
