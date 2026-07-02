@@ -1,0 +1,18 @@
+.bar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 0;
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+.time {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+.dot { opacity: 0.5; }

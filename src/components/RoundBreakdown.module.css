@@ -1,0 +1,36 @@
+.list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 4px;
+  border-bottom: 0.5px solid var(--color-border);
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.label {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--color-text);
+}
+
+.accuracy {
+  font-family: var(--font-body);
+  font-size: 13px;
+}
+
+.score {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--color-text);
+}
