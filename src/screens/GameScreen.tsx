@@ -35,6 +35,8 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
   const [timerStart] = useState(() => game.state.startedAt ?? Date.now());
   const elapsedMs = useElapsedTimer(game.state.startedAt ?? timerStart, game.isComplete);
   const [rulesOpen, setRulesOpen] = useState(false);
+  // Rounds whose answer has been revealed — dots color at reveal, not on lock.
+  const [revealedRounds, setRevealedRounds] = useState(() => game.results.length);
   const [pendingResult, setPendingResult] = useState<RoundResult | null>(null);
   const [revealResult, setRevealResult] = useState<RoundResult | null>(null);
   const [isResolving, setIsResolving] = useState(false);
@@ -60,6 +62,9 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
   const rafRef = useRef<number | null>(null);
   const completeFired = useRef(false);
   const activeResult = revealResult ?? pendingResult;
+  const displayRound = activeResult
+    ? Math.min(game.currentRound, game.totalRounds)
+    : Math.min(game.currentRound + 1, game.totalRounds);
 
   const handleScroll = useCallback(() => {
     timeline.handleScroll();
@@ -134,6 +139,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
     }
 
     setRevealResult(result);
+    setRevealedRounds(roundNumber);
     setPendingResult(null);
     setIsResolving(false);
     setSpotlightActive(false);
@@ -306,14 +312,13 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
         onHome={onHome}
         gameNumber={puzzle.number}
         rightText={`${displayedScore} PTS`}
-        rightLabel="Score:"
         scorePopping={scorePopping}
         onScoreAnimationEnd={() => setScorePopping(false)}
-        onRules={() => setRulesOpen(true)}
         timerText={formatTime(elapsedMs)}
         roundState={{
-          results: game.results,
-          currentRound: game.currentRound,
+          results: game.results.slice(0, revealedRounds),
+          // Only pulse the active round; while viewing a revealed answer, no dot is "current".
+          currentRound: revealResult ? -1 : revealedRounds,
           totalRounds: game.totalRounds,
         }}
       />
@@ -321,6 +326,13 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
 
       <div className={styles.topSection}>
         <div className={styles.contentWidth}>
+          <p
+            className={`${styles.roundCounter} ${
+              micropause ? styles.micropauseDim : ''
+            } ${!micropause && revealResult ? styles.micropauseRestore : ''}`}
+          >
+            Round {displayRound} of {game.totalRounds}
+          </p>
           <div className={styles.promptShell}>
             {!!displayText && (
               <h2

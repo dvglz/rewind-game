@@ -6,7 +6,6 @@ interface HeaderProps {
   leftMeta?: string;
   gameNumber?: number;
   rightText?: string;
-  rightLabel?: string;
   scorePopping?: boolean;
   onScoreAnimationEnd?: () => void;
   onRules?: () => void;
@@ -19,7 +18,6 @@ export function Header({
   leftMeta,
   gameNumber,
   rightText,
-  rightLabel,
   scorePopping,
   onScoreAnimationEnd,
   onRules,
@@ -71,7 +69,6 @@ export function Header({
           )}
         </div>
         <div className={styles.headerRight}>
-          {rightLabel && <span className={styles.scoreLabel}>{rightLabel}</span>}
           <span
             className={`${styles.date} ${scorePopping ? styles.scorePop : ''}`}
             onAnimationEnd={onScoreAnimationEnd}
@@ -81,7 +78,7 @@ export function Header({
           </span>
           {timerText && (
             <span className={styles.totalTime}>
-              <span className={styles.totalTimeLabel}>TOTAL TIME:</span>{' '}
+              <span className={styles.totalTimeLabel}></span>{' '}
               <span data-testid="game-timer">{timerText}</span>
             </span>
           )}

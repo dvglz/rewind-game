@@ -45,9 +45,8 @@ describe('Header', () => {
     expect(screen.getAllByTestId('round-dot')).toHaveLength(5);
   });
 
-  it('renders a labeled MM:SS timer when timerText is provided', () => {
+  it('renders the MM:SS timer when timerText is provided', () => {
     render(<Header gameNumber={14} timerText="02:39" />);
-    expect(screen.getByText('TOTAL TIME:')).toBeInTheDocument();
     expect(screen.getByTestId('game-timer')).toHaveTextContent('02:39');
   });
 });

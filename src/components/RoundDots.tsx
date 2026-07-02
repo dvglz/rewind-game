@@ -15,7 +15,7 @@ export function RoundDots({ results, currentRound, totalRounds }: RoundDotsProps
           return (
             <span
               key={i}
-              className={styles.dot}
+              className={`${styles.dot} ${styles.done}`}
               data-testid="round-dot"
               data-state="done"
               style={{ background: getResultColorVar(getResultColor(results[i].diff)) }}
