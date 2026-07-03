@@ -110,6 +110,28 @@ test('opens a selected group and keeps DNP members visible while merging scores 
   expect(await screen.findByText('820')).not.toBeNull();
 });
 
+test('shows group leaderboard scores when the group roster is missing', async () => {
+  fetchGroups.mockResolvedValueOnce([{ ...smallGroup, members: [] }]);
+  fetchLeaderboard.mockResolvedValueOnce({
+    date: '2026-06-12',
+    currentUser: { rank: 2, userId: 7, displayName: 'You', score: 820, timeMs: 156000, isCurrentUser: true },
+    entries: [
+      { rank: 1, userId: 9, displayName: 'Mike', score: 940, timeMs: 72000, isCurrentUser: false },
+    ],
+  });
+
+  render(<GroupsScreen onBack={() => {}} onRequireAuth={() => {}} isAuthenticated />);
+
+  fireEvent.click(await screen.findByRole('button', { name: /the boys/i }));
+
+  expect(fetchLeaderboard).toHaveBeenCalledWith(expect.any(Number), 42);
+  expect(await screen.findByText('Mike')).not.toBeNull();
+  expect(await screen.findByText('You')).not.toBeNull();
+  expect(await screen.findByText('940')).not.toBeNull();
+  expect(await screen.findByText('820')).not.toBeNull();
+  expect(screen.queryByText(/no one played/i)).toBeNull();
+});
+
 test('shares selected group invite links with the configured public app url', async () => {
   fetchGroups.mockResolvedValueOnce([smallGroup]);
   fetchLeaderboard.mockResolvedValueOnce({

@@ -264,7 +264,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
     scoreRows.map((entry) => [entry.displayName, entry] as const),
   );
 
-  const leaderboardEntries: GroupLeaderboardEntry[] = (group?.members ?? []).map((member) => {
+  const memberRows: GroupLeaderboardEntry[] = (group?.members ?? []).map((member) => {
     const name = getMemberName(member);
     const memberId = getMemberId(member);
     const isMe = memberId != null && authUser != null && memberId === authUser.id;
@@ -279,6 +279,13 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
       isCurrentUser: isMe,
     };
   });
+  const scoreOnlyRows: GroupLeaderboardEntry[] = scoreRows.map((entry) => ({
+    displayName: entry.displayName,
+    score: entry.score,
+    time: formatTime(entry.timeMs),
+    isCurrentUser: entry.isCurrentUser,
+  }));
+  const leaderboardEntries = memberRows.length > 0 ? memberRows : scoreOnlyRows;
 
   const memberCount = group ? getMemberCount(group) : 0;
   const memberLabel = `${memberCount} member${memberCount !== 1 ? 's' : ''}`;
