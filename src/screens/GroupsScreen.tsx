@@ -255,13 +255,21 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
     ...(groupBoard?.entries ?? []),
     ...(groupBoard?.currentUser ? [groupBoard.currentUser] : []),
   ];
+  const uniqueScoreRows = Array.from(
+    new Map(
+      scoreRows.map((entry) => [
+        entry.userId != null ? `user:${entry.userId}` : `name:${entry.displayName}`,
+        entry,
+      ] as const),
+    ).values(),
+  );
   const scoreByUserId = new Map(
-    scoreRows
+    uniqueScoreRows
       .filter((entry) => entry.userId != null)
       .map((entry) => [entry.userId as number, entry] as const),
   );
   const scoreByName = new Map(
-    scoreRows.map((entry) => [entry.displayName, entry] as const),
+    uniqueScoreRows.map((entry) => [entry.displayName, entry] as const),
   );
 
   const memberRows: GroupLeaderboardEntry[] = (group?.members ?? []).map((member) => {
@@ -279,7 +287,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
       isCurrentUser: isMe,
     };
   });
-  const scoreOnlyRows: GroupLeaderboardEntry[] = scoreRows.map((entry) => ({
+  const scoreOnlyRows: GroupLeaderboardEntry[] = uniqueScoreRows.map((entry) => ({
     displayName: entry.displayName,
     score: entry.score,
     time: formatTime(entry.timeMs),

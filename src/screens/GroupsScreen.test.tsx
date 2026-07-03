@@ -132,6 +132,27 @@ test('shows group leaderboard scores when the group roster is missing', async ()
   expect(screen.queryByText(/no one played/i)).toBeNull();
 });
 
+test('deduplicates the current user when falling back to leaderboard scores', async () => {
+  fetchGroups.mockResolvedValueOnce([{ ...smallGroup, members: [] }]);
+  fetchLeaderboard.mockResolvedValueOnce({
+    date: '2026-06-12',
+    currentUser: { rank: 2, userId: 7, displayName: 'You', score: 820, timeMs: 156000, isCurrentUser: true },
+    entries: [
+      { rank: 1, userId: 9, displayName: 'Mike', score: 940, timeMs: 72000, isCurrentUser: false },
+      { rank: 2, userId: 7, displayName: 'You', score: 820, timeMs: 156000, isCurrentUser: true },
+    ],
+  });
+
+  render(<GroupsScreen onBack={() => {}} onRequireAuth={() => {}} isAuthenticated />);
+
+  fireEvent.click(await screen.findByRole('button', { name: /the boys/i }));
+
+  expect(await screen.findByText('Mike')).not.toBeNull();
+  expect(await screen.findByText('You')).not.toBeNull();
+  expect(screen.getAllByText('You')).toHaveLength(1);
+  expect(screen.getAllByText('820')).toHaveLength(1);
+});
+
 test('shares selected group invite links with the configured public app url', async () => {
   fetchGroups.mockResolvedValueOnce([smallGroup]);
   fetchLeaderboard.mockResolvedValueOnce({
