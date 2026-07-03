@@ -60,19 +60,21 @@ export function GroupLeaderboard({ entries, emptySeed, authCta, pinnedEntry }: G
         </>
       )}
       {sorted.map((entry, i) => {
-        const rank = entry.score !== null ? i + 1 : null;
+        const score = entry.score;
+        const rank = score !== null ? i + 1 : null;
+        const isDnp = score === null;
         return (
           <div
             key={entry.displayName}
-            className={`${styles.row} ${entry.isCurrentUser ? styles.rowHighlight : ''}`}
+            className={`${styles.row} ${entry.isCurrentUser ? styles.rowHighlight : ''} ${isDnp ? styles.rowNotPlayed : ''}`}
           >
             <div className={styles.userInfo}>
               <span className={`${styles.rank} ${rank === null ? styles.rankMuted : ''}`}>{rank ?? '––'}</span>
               <span className={styles.name}>{entry.displayName}</span>
               {entry.time && <span className={styles.meta}>{entry.time}</span>}
             </div>
-            <span className={`${styles.score} ${entry.score === null ? styles.notPlayed : ''}`}>
-              {entry.score !== null ? entry.score.toLocaleString() : 'DNP'}
+            <span className={`${styles.score} ${isDnp ? styles.notPlayed : ''}`}>
+              {score === null ? 'DNP' : score.toLocaleString()}
             </span>
           </div>
         );

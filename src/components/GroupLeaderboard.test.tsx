@@ -23,3 +23,9 @@ test('does not render a pinned row when pinnedEntry is absent', () => {
   render(<GroupLeaderboard entries={entries} />);
   expect(screen.queryByText('You')).toBeNull();
 });
+
+test('marks DNP rows as muted', () => {
+  render(<GroupLeaderboard entries={[{ displayName: 'Sarah', score: null, isCurrentUser: false }]} />);
+
+  expect(screen.getByText('Sarah').closest('div[class*="row"]')?.className).toContain('rowNotPlayed');
+});

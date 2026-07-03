@@ -16,6 +16,11 @@
   background: var(--color-surface-elevated);
 }
 
+.rowNotPlayed .name,
+.rowNotPlayed .meta {
+  color: var(--color-muted);
+}
+
 .userInfo {
   display: flex;
   align-items: center;
