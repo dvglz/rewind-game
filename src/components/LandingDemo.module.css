@@ -271,7 +271,7 @@
 
   /* The centered desktop band has more room above, so the pile can lift higher. */
   .burst {
-    top: -48px;
+    top: -72px;
   }
 }
 
