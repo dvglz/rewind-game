@@ -5,6 +5,7 @@
 }
 
 .dot {
+  display: block;
   width: 14px;
   height: 14px;
   border-radius: 50%;
@@ -25,7 +26,22 @@
 }
 
 .done {
+  transform: scale(1);
+}
+
+.doneAnimated {
   animation: dotPop 0.4s cubic-bezier(0.22, 1.6, 0.36, 1);
+}
+
+@media (min-width: 900px) {
+  .dots {
+    gap: 5px;
+  }
+
+  .dot {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 @keyframes dotPop {

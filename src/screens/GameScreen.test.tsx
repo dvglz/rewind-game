@@ -2,8 +2,15 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { GameScreen } from './GameScreen';
 
+const headerMock = vi.hoisted(() => ({
+  latestProps: null as null | { roundState?: { animatedDoneIndex?: number } },
+}));
+
 vi.mock('../components/Header', () => ({
-  Header: () => <div>Header</div>,
+  Header: (props: { roundState?: { animatedDoneIndex?: number } }) => {
+    headerMock.latestProps = props;
+    return <div>Header</div>;
+  },
 }));
 
 vi.mock('../components/Timeline', () => ({
@@ -62,6 +69,8 @@ const { getTodaysPuzzle } = await import('../data/puzzles');
 let selectedYear = 2025;
 
 beforeEach(() => {
+  headerMock.latestProps = null;
+
   vi.mocked(getTodaysPuzzle).mockReturnValue({
     id: 'puzzle-1',
     number: 1,
@@ -106,6 +115,12 @@ test('shows the currently locked year in the headline year slot before reveal', 
   render(<GameScreen onFinish={() => {}} />);
 
   expect(screen.getByTestId('headline-year').textContent).toBe('2025');
+});
+
+test('does not render puzzle theme metadata in the game screen', () => {
+  render(<GameScreen onFinish={() => {}} />);
+
+  expect(screen.queryByText('NBA Finals')).toBeNull();
 });
 
 test('keeps showing the guessed year while the timeline scrolls to the correct answer', async () => {
@@ -315,6 +330,59 @@ test('shows confetti on a perfect reveal', async () => {
   fireEvent.click(screen.getByRole('button', { name: /lock/i }));
 
   expect(await screen.findByTestId('confetti-active')).not.toBeNull();
+});
+
+test('marks the just-revealed completed dot for animation', async () => {
+  vi.useFakeTimers();
+
+  vi.mocked(useGame).mockReturnValue({
+    state: {
+      puzzleId: 'puzzle-1',
+      currentRound: 0,
+      results: [],
+      totalScore: 0,
+      completed: false,
+    },
+    currentEvent: { text: 'LeBron makes The Block', year: 2016 },
+    currentRound: 0,
+    totalRounds: 5,
+    isComplete: false,
+    results: [],
+    totalScore: 0,
+    submitGuess: vi.fn(() => ({
+      event: { text: 'LeBron makes The Block', year: 2016, detail: 'In 2016, ...' },
+      guessedYear: 2016,
+      actualYear: 2016,
+      diff: 0,
+      score: 100,
+    })),
+  });
+
+  vi.mocked(useTimeline).mockReturnValue({
+    containerRef: { current: null },
+    get selectedYear() {
+      return selectedYear;
+    },
+    scrollToYear: vi.fn(() => Promise.resolve()),
+    snapToClosestYear: vi.fn(() => Promise.resolve()),
+    syncYear: vi.fn(),
+    handleScroll: vi.fn(),
+    rangeStart: 1984,
+    rangeEnd: 2026,
+    yearWidth: 60,
+  });
+
+  render(<GameScreen onFinish={() => {}} />);
+  expect(headerMock.latestProps?.roundState?.animatedDoneIndex).toBeUndefined();
+
+  fireEvent.click(screen.getByRole('button', { name: /lock/i }));
+
+  await act(async () => {
+    await vi.runAllTimersAsync();
+  });
+
+  expect(headerMock.latestProps?.roundState?.animatedDoneIndex).toBe(0);
+  vi.useRealTimers();
 });
 
 test('keeps the reveal indicator green even on a wrong answer', async () => {

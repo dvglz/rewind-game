@@ -69,12 +69,12 @@ test('places the indicator above the year labels', () => {
   expect(desktopBlock?.[1] ?? '').toMatch(/top:\s*2px;/);
 });
 
-test('keeps desktop tick lines shorter than the game timeline', () => {
+test('keeps desktop tick lines tall enough for wide game layouts', () => {
   const css = readFileSync(resolve(__dirname, './Timeline.module.css'), 'utf8');
   const desktopBlock = css.match(/@media \(min-width: 900px\)\s*\{([\s\S]*)\n\}/);
 
-  expect(desktopBlock?.[1] ?? '').toMatch(/\.tickMinor \.tickLine\s*\{\s*height:\s*76px;/);
-  expect(desktopBlock?.[1] ?? '').toMatch(/\.tickMajor \.tickLine\s*\{\s*height:\s*96px;/);
+  expect(desktopBlock?.[1] ?? '').toMatch(/\.tickMinor \.tickLine\s*\{\s*height:\s*132px;/);
+  expect(desktopBlock?.[1] ?? '').toMatch(/\.tickMajor \.tickLine\s*\{\s*height:\s*168px;/);
 });
 
 test('applies dimmed class to ticks outside spotlight window', () => {

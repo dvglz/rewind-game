@@ -142,11 +142,11 @@
   }
 
   .tickMinor .tickLine {
-    height: 76px;
+    height: 132px;
   }
 
   .tickMajor .tickLine {
-    height: 96px;
+    height: 168px;
   }
 
   .centerIndicator {

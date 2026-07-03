@@ -2,7 +2,12 @@
   width: 100%;
   display: flex;
   justify-content: center;
-  padding: 4px var(--space-lg) 32px;
+  padding: 0 var(--space-lg);
+}
+
+.gameHeader {
+  min-height: 64px;
+  padding-top: 8px;
 }
 
 .inner {
@@ -24,6 +29,10 @@
   display: flex;
   align-items: center;
   gap: 2px;
+}
+
+.progress {
+  display: flex;
 }
 
 .wordmark {
@@ -56,7 +65,7 @@
 .date {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: 19px;
+  font-size: 20px;
   line-height: 1;
   text-transform: uppercase;
 }
@@ -71,12 +80,6 @@
 
 .scoreLabel {
   display: none;
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 18px;
-  line-height: 1;
-  text-transform: uppercase;
-  color: var(--color-muted);
 }
 
 .scorePop {
@@ -93,7 +96,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 4px;
+  gap: 2px;
 }
 
 .totalTime {
@@ -102,10 +105,7 @@
   line-height: 1;
   color: var(--color-muted);
   text-transform: uppercase;
-}
-
-.totalTimeLabel {
-  color: var(--color-muted);
+  text-align: right;
 }
 
 .rulesButton {
@@ -142,11 +142,70 @@
     padding: 28px 32px 12px;
   }
 
+  .gameHeader {
+    min-height: 72px;
+    padding: 12px 24px 14px;
+    align-items: flex-start;
+  }
+
   .inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: flex-start;
     max-width: min(80vw, 1200px);
+  }
+
+  .headerLeft {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .headerRight {
+    grid-column: 3;
+    justify-self: end;
   }
 
   .meta {
     font-size: 14px;
+  }
+
+  .gameHeader .inner {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: flex-start;
+    max-width: min(80vw, 1200px);
+  }
+
+  .gameHeader .headerLeft {
+    grid-column: 1;
+    grid-row: 1;
+    gap: 0;
+  }
+
+  .gameHeader .date {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: end;
+    justify-self: end;
+    font-size: 20px;
+  }
+
+  .gameHeader .progress {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+    margin-top: 8px;
+  }
+
+  .gameHeader .headerRight {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-self: flex-start;
+    justify-self: end;
+  }
+
+  .gameHeader .totalTime {
+    color: var(--color-muted);
+    font-size: 20px;
   }
 }

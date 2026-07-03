@@ -10,7 +10,12 @@ interface HeaderProps {
   onScoreAnimationEnd?: () => void;
   onRules?: () => void;
   timerText?: string;
-  roundState?: { results: { diff: number }[]; currentRound: number; totalRounds: number };
+  roundState?: {
+    results: { diff: number }[];
+    currentRound: number;
+    totalRounds: number;
+    animatedDoneIndex?: number;
+  };
 }
 
 export function Header({
@@ -30,9 +35,12 @@ export function Header({
     .toUpperCase();
 
   return (
-    <header className={styles.header}>
+    <header
+      className={`${styles.header} ${roundState ? styles.gameHeader : ''}`}
+      data-testid="app-header"
+    >
       <div className={styles.inner}>
-        <div className={styles.headerLeft}>
+        <div className={styles.headerLeft} data-testid="header-left">
           <div className={styles.brand}>
             {onHome ? (
               <button
@@ -61,24 +69,27 @@ export function Header({
             )}
           </div>
           {roundState && (
-            <RoundDots
-              results={roundState.results}
-              currentRound={roundState.currentRound}
-              totalRounds={roundState.totalRounds}
-            />
+            <div className={styles.progress} data-testid="header-progress">
+              <RoundDots
+                results={roundState.results}
+                currentRound={roundState.currentRound}
+                totalRounds={roundState.totalRounds}
+                animatedDoneIndex={roundState.animatedDoneIndex}
+              />
+            </div>
           )}
         </div>
-        <div className={styles.headerRight}>
+        <div className={styles.headerRight} data-testid="header-right">
           <span
             className={`${styles.date} ${scorePopping ? styles.scorePop : ''}`}
             onAnimationEnd={onScoreAnimationEnd}
             data-testid="header-score"
           >
+            {roundState && rightText ? <span className={styles.scoreLabel}>Score: </span> : null}
             {rightText ?? formatted}
           </span>
           {timerText && (
             <span className={styles.totalTime}>
-              <span className={styles.totalTimeLabel}></span>{' '}
               <span data-testid="game-timer">{timerText}</span>
             </span>
           )}

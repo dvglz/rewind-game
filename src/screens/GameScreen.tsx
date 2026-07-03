@@ -37,6 +37,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
   const [rulesOpen, setRulesOpen] = useState(false);
   // Rounds whose answer has been revealed — dots color at reveal, not on lock.
   const [revealedRounds, setRevealedRounds] = useState(() => game.results.length);
+  const [animatedDoneIndex, setAnimatedDoneIndex] = useState<number | undefined>();
   const [pendingResult, setPendingResult] = useState<RoundResult | null>(null);
   const [revealResult, setRevealResult] = useState<RoundResult | null>(null);
   const [isResolving, setIsResolving] = useState(false);
@@ -88,6 +89,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
     setBadgeVisible(false);
     setIsPerfectReveal(false);
     setShowConfetti(false);
+    setAnimatedDoneIndex(undefined);
     spotlightYearRef.current = null;
 
     const resultColor = getResultColor(result.diff);
@@ -140,6 +142,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
 
     setRevealResult(result);
     setRevealedRounds(roundNumber);
+    setAnimatedDoneIndex(roundNumber - 1);
     setPendingResult(null);
     setIsResolving(false);
     setSpotlightActive(false);
@@ -191,6 +194,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
     setBadgeVisible(false);
     setShowConfetti(false);
     setIsPerfectReveal(false);
+    setAnimatedDoneIndex(undefined);
     setMicropause(false);
     setFlashState('off');
     setShowPointsToast(false);
@@ -320,6 +324,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
           // Only pulse the active round; while viewing a revealed answer, no dot is "current".
           currentRound: revealResult ? -1 : revealedRounds,
           totalRounds: game.totalRounds,
+          animatedDoneIndex,
         }}
       />
       {rulesOpen && <RulesSheet onClose={() => setRulesOpen(false)} />}
@@ -365,10 +370,6 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
                 </div>
               )}
             </div>
-
-            <p className={styles.themeLine}>
-              {!activeResult && puzzle.theme ? puzzle.theme : ''}
-            </p>
           </div>
         </div>
       </div>

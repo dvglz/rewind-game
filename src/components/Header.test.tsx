@@ -45,8 +45,51 @@ describe('Header', () => {
     expect(screen.getAllByTestId('round-dot')).toHaveLength(5);
   });
 
+  it('places round dots with the left brand block', () => {
+    render(
+      <Header
+        gameNumber={14}
+        rightText="300 PTS"
+        roundState={{ results: [], currentRound: 0, totalRounds: 5 }}
+      />
+    );
+
+    expect(screen.getByTestId('header-left')).toContainElement(screen.getByTestId('header-progress'));
+  });
+
   it('renders the MM:SS timer when timerText is provided', () => {
     render(<Header gameNumber={14} timerText="02:39" />);
     expect(screen.getByTestId('game-timer')).toHaveTextContent('02:39');
+  });
+
+  it('places the timer in the right slot', () => {
+    render(<Header gameNumber={14} rightText="300 PTS" timerText="02:39" />);
+
+    const right = screen.getByTestId('header-right');
+    expect(right).toContainElement(screen.getByTestId('header-score'));
+    expect(right).toContainElement(screen.getByTestId('game-timer'));
+  });
+
+  it('labels game scores in the right slot', () => {
+    render(
+      <Header
+        gameNumber={14}
+        rightText="300 PTS"
+        roundState={{ results: [], currentRound: 0, totalRounds: 5 }}
+      />
+    );
+
+    expect(screen.getByTestId('header-score')).toHaveTextContent('Score: 300 PTS');
+  });
+
+  it('marks game headers so desktop can use a distinct top bar', () => {
+    render(
+      <Header
+        gameNumber={14}
+        roundState={{ results: [], currentRound: 0, totalRounds: 5 }}
+      />
+    );
+
+    expect(screen.getByTestId('app-header').className).toContain('gameHeader');
   });
 });

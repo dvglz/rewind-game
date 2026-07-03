@@ -5,17 +5,19 @@ interface RoundDotsProps {
   results: { diff: number }[];
   currentRound: number;
   totalRounds: number;
+  animatedDoneIndex?: number;
 }
 
-export function RoundDots({ results, currentRound, totalRounds }: RoundDotsProps) {
+export function RoundDots({ results, currentRound, totalRounds, animatedDoneIndex }: RoundDotsProps) {
   return (
     <div className={styles.dots} aria-label="Round progress">
       {Array.from({ length: totalRounds }, (_, i) => {
         if (i < results.length) {
+          const newlyCompleted = i === animatedDoneIndex;
           return (
             <span
               key={i}
-              className={`${styles.dot} ${styles.done}`}
+              className={`${styles.dot} ${styles.done} ${newlyCompleted ? styles.doneAnimated : ''}`}
               data-testid="round-dot"
               data-state="done"
               style={{ background: getResultColorVar(getResultColor(results[i].diff)) }}
