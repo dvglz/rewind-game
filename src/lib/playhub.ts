@@ -1,4 +1,4 @@
-import type { PlayhubGroup } from '../types';
+import type { GroupMember, PlayhubGroup } from '../types';
 import { GAME_TYPE, GAME_MODE } from './api';
 
 const BASE_URL = (import.meta.env.VITE_BASE_URL as string) ?? '';
@@ -49,6 +49,10 @@ const mock = {
     await delay(300);
     return mockGroups.map(normalizeGroup);
   },
+  async fetchGroup(groupId: number): Promise<PlayhubGroup> {
+    await delay(200);
+    return normalizeGroup(mockGroups.find((group) => group.id === groupId) ?? MOCK_GROUPS[0]);
+  },
   async createGroup(groupName: string): Promise<PlayhubGroup> {
     await delay(400);
     if (groupName.toLowerCase() === 'error') throw new Error('Group name is already taken');
@@ -87,10 +91,41 @@ function delay(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-function normalizeGroup(group: PlayhubGroup): PlayhubGroup {
+type RawGroupMember = GroupMember | {
+  group?: number;
+  user_id?: number;
+  username?: string | null;
+  joined_at: string;
+};
+
+type RawPlayhubGroup = Omit<PlayhubGroup, 'members'> & {
+  members?: RawGroupMember[];
+};
+
+function normalizeMember(groupId: number, member: RawGroupMember): GroupMember {
+  if ('user' in member) {
+    return {
+      ...member,
+      group: member.group ?? groupId,
+    };
+  }
+
+  const username = member.username?.trim() || 'Player';
+  return {
+    group: member.group ?? groupId,
+    user: typeof member.user_id === 'number'
+      ? { id: member.user_id, username }
+      : username,
+    joined_at: member.joined_at,
+  };
+}
+
+function normalizeGroup(group: RawPlayhubGroup): PlayhubGroup {
   return {
     ...group,
-    members: Array.isArray(group.members) ? group.members : [],
+    members: Array.isArray(group.members)
+      ? group.members.map((member) => normalizeMember(group.id, member))
+      : [],
   };
 }
 
@@ -124,9 +159,14 @@ const real = {
     if (res.status === 204) return [];
     if (!res.ok) throw new Error('Failed to fetch group');
     const body = await res.json();
-    if (Array.isArray(body.groups)) return body.groups.map((group: PlayhubGroup) => normalizeGroup(group));
-    if (body && typeof body === 'object' && typeof body.id === 'number') return [normalizeGroup(body as PlayhubGroup)];
+    if (Array.isArray(body.groups)) return body.groups.map((group: RawPlayhubGroup) => normalizeGroup(group));
+    if (body && typeof body === 'object' && typeof body.id === 'number') return [normalizeGroup(body as RawPlayhubGroup)];
     return [];
+  },
+  async fetchGroup(groupId: number): Promise<PlayhubGroup> {
+    const res = await fetch(`${BASE_URL}/playhub/groups/${groupId}/`, { headers: getHeaders() });
+    if (!res.ok) throw new Error('Failed to fetch group');
+    return normalizeGroup(await res.json());
   },
   async createGroup(groupName: string): Promise<PlayhubGroup> {
     const res = await fetch(`${BASE_URL}/playhub/groups/`, {
@@ -182,6 +222,7 @@ const real = {
 const api = USE_MOCK ? mock : real;
 
 export const fetchGroups = api.fetchGroups;
+export const fetchGroup = api.fetchGroup;
 export const createGroup = api.createGroup;
 export const joinGroup = api.joinGroup;
 export const leaveGroup = api.leaveGroup;

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getDateOverride } from '../data/puzzles';
-import { fetchGroups, createGroup, joinGroup, leaveGroup } from '../lib/playhub';
+import { fetchGroups, fetchGroup, createGroup, joinGroup, leaveGroup } from '../lib/playhub';
 import { fetchLeaderboard, getDayOffsetFromToday } from '../lib/leaderboard';
 import { formatTime } from '../lib/formatTime';
 import { GroupLeaderboard } from '../components/GroupLeaderboard';
@@ -74,6 +74,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
   const [toast, setToast] = useState('');
   const [dayOffset, setDayOffset] = useState(0);
   const [groupBoardState, setGroupBoardState] = useState<GroupBoardState | null>(null);
+  const detailGroupIds = useRef(new Set<number>());
   const group = selectedGroupId == null ? null : groups.find((g) => g.id === selectedGroupId) ?? null;
   const groupBoard = group && groupBoardState?.groupId === group.id ? groupBoardState.board : null;
 
@@ -135,6 +136,25 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
+    if (!group || group.members.length > 0 || detailGroupIds.current.has(group.id)) return;
+
+    let cancelled = false;
+    const groupId = group.id;
+    detailGroupIds.current.add(groupId);
+    fetchGroup(groupId)
+      .then((detailedGroup) => {
+        if (!cancelled) setGroups((currentGroups) => mergeGroup(currentGroups, detailedGroup));
+      })
+      .catch(() => {
+        // Keep the score-only fallback when group detail is unavailable.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [group]);
+
+  useEffect(() => {
     if (!group) return;
 
     let cancelled = false;
@@ -150,7 +170,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
     return () => {
       cancelled = true;
     };
-  }, [activeDateOffset, dayOffset, group]);
+  }, [activeDateOffset, dayOffset, group?.id]);
 
   useEffect(() => {
     if (!group) return;

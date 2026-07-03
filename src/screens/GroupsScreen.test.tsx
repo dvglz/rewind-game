@@ -2,8 +2,9 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { GroupsScreen } from './GroupsScreen';
 
-const { fetchGroups, fetchLeaderboard, createGroup, joinGroup, leaveGroup } = vi.hoisted(() => ({
+const { fetchGroups, fetchGroup, fetchLeaderboard, createGroup, joinGroup, leaveGroup } = vi.hoisted(() => ({
   fetchGroups: vi.fn(),
+  fetchGroup: vi.fn(),
   fetchLeaderboard: vi.fn(),
   createGroup: vi.fn(),
   joinGroup: vi.fn(),
@@ -14,6 +15,7 @@ vi.stubEnv('VITE_PUBLIC_APP_URL', 'https://clutchpoints-rewind-test.4taps.me');
 
 vi.mock('../lib/playhub', () => ({
   fetchGroups,
+  fetchGroup,
   createGroup,
   joinGroup,
   leaveGroup,
@@ -57,6 +59,7 @@ const bigGroup = {
 
 beforeEach(() => {
   fetchGroups.mockReset();
+  fetchGroup.mockReset();
   fetchLeaderboard.mockReset();
   createGroup.mockReset();
   joinGroup.mockReset();
@@ -112,6 +115,7 @@ test('opens a selected group and keeps DNP members visible while merging scores 
 
 test('shows group leaderboard scores when the group roster is missing', async () => {
   fetchGroups.mockResolvedValueOnce([{ ...smallGroup, members: [] }]);
+  fetchGroup.mockRejectedValueOnce(new Error('Detail unavailable'));
   fetchLeaderboard.mockResolvedValueOnce({
     date: '2026-06-12',
     currentUser: { rank: 2, userId: 7, displayName: 'You', score: 820, timeMs: 156000, isCurrentUser: true },
@@ -134,6 +138,7 @@ test('shows group leaderboard scores when the group roster is missing', async ()
 
 test('deduplicates the current user when falling back to leaderboard scores', async () => {
   fetchGroups.mockResolvedValueOnce([{ ...smallGroup, members: [] }]);
+  fetchGroup.mockRejectedValueOnce(new Error('Detail unavailable'));
   fetchLeaderboard.mockResolvedValueOnce({
     date: '2026-06-12',
     currentUser: { rank: 2, userId: 7, displayName: 'You', score: 820, timeMs: 156000, isCurrentUser: true },
@@ -151,6 +156,28 @@ test('deduplicates the current user when falling back to leaderboard scores', as
   expect(await screen.findByText('You')).not.toBeNull();
   expect(screen.getAllByText('You')).toHaveLength(1);
   expect(screen.getAllByText('820')).toHaveLength(1);
+});
+
+test('loads group detail on open to keep DNP members visible when list rows are summary-only', async () => {
+  fetchGroups.mockResolvedValueOnce([{ ...smallGroup, members: [] }]);
+  fetchGroup.mockResolvedValueOnce(smallGroup);
+  fetchLeaderboard.mockResolvedValueOnce({
+    date: '2026-06-12',
+    currentUser: { rank: 2, userId: 7, displayName: 'You', score: 820, timeMs: 156000, isCurrentUser: true },
+    entries: [
+      { rank: 1, userId: 9, displayName: 'Changed Name', score: 940, timeMs: 72000, isCurrentUser: false },
+    ],
+  });
+
+  render(<GroupsScreen onBack={() => {}} onRequireAuth={() => {}} isAuthenticated />);
+
+  fireEvent.click(await screen.findByRole('button', { name: /the boys/i }));
+
+  expect(fetchGroup).toHaveBeenCalledWith(42);
+  expect(await screen.findByText('Mike')).not.toBeNull();
+  expect(await screen.findByText('You')).not.toBeNull();
+  expect(await screen.findByText('Sarah')).not.toBeNull();
+  expect(await screen.findByText('DNP')).not.toBeNull();
 });
 
 test('shares selected group invite links with the configured public app url', async () => {

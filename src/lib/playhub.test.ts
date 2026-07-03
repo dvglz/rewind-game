@@ -17,6 +17,7 @@ beforeEach(() => {
 describe('playhub API', () => {
   // Dynamic import to pick up env stub
   let fetchGroups: typeof import('./playhub').fetchGroups;
+  let fetchGroup: typeof import('./playhub').fetchGroup;
   let createGroup: typeof import('./playhub').createGroup;
   let joinGroup: typeof import('./playhub').joinGroup;
   let leaveGroup: typeof import('./playhub').leaveGroup;
@@ -26,6 +27,7 @@ describe('playhub API', () => {
     vi.resetModules();
     const mod = await import('./playhub');
     fetchGroups = mod.fetchGroups;
+    fetchGroup = mod.fetchGroup;
     createGroup = mod.createGroup;
     joinGroup = mod.joinGroup;
     leaveGroup = mod.leaveGroup;
@@ -70,6 +72,36 @@ describe('playhub API', () => {
       } finally {
         vi.stubEnv('VITE_MOCK_API', 'false');
       }
+    });
+  });
+
+  describe('fetchGroup', () => {
+    it('normalizes group detail members from the backend detail shape', async () => {
+      mockFetch.mockResolvedValueOnce({
+        status: 200,
+        ok: true,
+        json: async () => ({
+          id: 42,
+          name: 'Clutchest',
+          invite_link: 'ABC123',
+          members_count: 2,
+          members: [
+            { user_id: 7, username: 'You', joined_at: '2026-06-01T00:00:00Z' },
+            { user_id: 9, username: 'Mike', joined_at: '2026-06-02T00:00:00Z' },
+          ],
+        }),
+      });
+
+      const result = await fetchGroup(42);
+
+      expect(result.members).toEqual([
+        { group: 42, user: { id: 7, username: 'You' }, joined_at: '2026-06-01T00:00:00Z' },
+        { group: 42, user: { id: 9, username: 'Mike' }, joined_at: '2026-06-02T00:00:00Z' },
+      ]);
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://clutchpoints.4taps.me/playhub/groups/42/',
+        expect.objectContaining({ headers: expect.objectContaining({ 'Content-Type': 'application/json' }) }),
+      );
     });
   });
 
