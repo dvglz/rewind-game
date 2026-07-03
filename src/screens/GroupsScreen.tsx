@@ -339,21 +339,23 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
       </div>
 
       {group ? (
-        <div className={styles.content}>
-          <h1 className={styles.groupName}>{group.name}</h1>
-          <p className={styles.memberCount}>{memberLabel}</p>
+        <div className={`${styles.content} ${styles.detailContent}`}>
+          <div className={styles.detailHeader}>
+            <h1 className={styles.groupName}>{group.name}</h1>
+            <p className={styles.memberCount}>{memberLabel}</p>
 
-          <button className={styles.inviteButton} onClick={handleInvite} type="button">
-            <Plus />
-            Invite Friends
-          </button>
+            <button className={styles.inviteButton} onClick={handleInvite} type="button">
+              <Plus />
+              Invite Friends
+            </button>
 
-          <DateSelector
-            dayOffset={dayOffset}
-            baseDate={activeDate}
-            onPrev={() => setDayOffset((d) => d + 1)}
-            onNext={() => setDayOffset((d) => Math.max(0, d - 1))}
-          />
+            <DateSelector
+              dayOffset={dayOffset}
+              baseDate={activeDate}
+              onPrev={() => setDayOffset((d) => d + 1)}
+              onNext={() => setDayOffset((d) => Math.max(0, d - 1))}
+            />
+          </div>
 
           <div className={styles.leaderboardArea}>
             <GroupLeaderboard
