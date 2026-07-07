@@ -40,23 +40,18 @@ describe('getResultColor', () => {
     expect(getResultColor(0)).toBe('perfect');
   });
 
-  it('returns great for 1-2 years off', () => {
-    expect(getResultColor(1)).toBe('great');
-    expect(getResultColor(2)).toBe('great');
-  });
-
-  it('returns ballpark for 3-5 years off', () => {
+  it('returns ballpark for 1-3 years off', () => {
+    expect(getResultColor(1)).toBe('ballpark');
     expect(getResultColor(3)).toBe('ballpark');
-    expect(getResultColor(5)).toBe('ballpark');
   });
 
-  it('returns wrong era for 6-8 years off', () => {
-    expect(getResultColor(6)).toBe('wrong-era');
-    expect(getResultColor(-8)).toBe('wrong-era');
+  it('returns wrong era for 4-6 years off', () => {
+    expect(getResultColor(4)).toBe('wrong-era');
+    expect(getResultColor(-6)).toBe('wrong-era');
   });
 
-  it('returns not even close for 9+ years off', () => {
-    expect(getResultColor(9)).toBe('not-even-close');
+  it('returns way off for 7+ years off', () => {
+    expect(getResultColor(7)).toBe('not-even-close');
     expect(getResultColor(-10)).toBe('not-even-close');
   });
 });

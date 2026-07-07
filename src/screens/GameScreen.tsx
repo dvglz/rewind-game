@@ -132,7 +132,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
       setFlashState('off');
     }, isPerfect ? 650 : 520);
 
-    if (resultColor === 'perfect' || resultColor === 'great') {
+    if (resultColor === 'perfect') {
       vibrateConfirm();
     } else if (resultColor === 'ballpark') {
       vibrateMedium();

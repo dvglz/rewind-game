@@ -25,16 +25,14 @@ export function normalizePuzzleScore(totalScore: number, rounds: number): number
 export function getResultColor(diff: number): ResultColor {
   const absDiff = Math.abs(diff);
   if (absDiff === 0) return 'perfect';
-  if (absDiff <= 2) return 'great';
-  if (absDiff <= 5) return 'ballpark';
-  if (absDiff <= 8) return 'wrong-era';
+  if (absDiff <= 3) return 'ballpark';
+  if (absDiff <= 6) return 'wrong-era';
   return 'not-even-close';
 }
 
 export function getResultEmoji(color: ResultColor): string {
   switch (color) {
     case 'perfect':
-    case 'great':
       return '🟢';
     case 'ballpark':
       return '🟡';
@@ -49,14 +47,12 @@ export function getResultLabel(color: ResultColor): string {
   switch (color) {
     case 'perfect':
       return 'Perfect';
-    case 'great':
-      return 'Great';
     case 'ballpark':
       return 'Ballpark';
     case 'wrong-era':
       return 'Wrong Era';
     case 'not-even-close':
-      return 'Not Even Close';
+      return 'Way Off';
   }
 }
 
@@ -81,7 +77,6 @@ export function getScoreTierLabel(totalScore: number, maxScore: number): string 
 export function getResultColorVar(color: ResultColor): string {
   switch (color) {
     case 'perfect':
-    case 'great':
       return 'var(--color-correct)';
     case 'ballpark':
       return 'var(--color-close)';

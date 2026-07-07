@@ -9,8 +9,7 @@ const SCORE_500_THRESHOLD = 500;
 const TOTAL_ROUNDS = 5;
 
 function isGreen(result: RoundResult): boolean {
-  const color = getResultColor(result.diff);
-  return color === 'perfect' || color === 'great';
+  return getResultColor(result.diff) === 'perfect';
 }
 
 /** Returns the reward keys earned by a completed daily run. */

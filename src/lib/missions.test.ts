@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { RoundResult } from '../types';
 import { evaluateMissions } from './missions';
 
-// diff drives the color: 0 = perfect, |diff|<=2 = great (both green); |diff|>=3 not green.
+// diff drives the color: green = perfect = 0 only; any non-zero diff is not green.
 function round(diff: number): RoundResult {
   return {
     event: { text: 'e', year: 2000 },
@@ -29,13 +29,13 @@ describe('evaluateMissions', () => {
     expect(earned).not.toContain('mission_2');
   });
 
-  it('awards mission_3 when all 5 rounds are green (mixed perfect + great)', () => {
-    const earned = evaluateMissions(0, [round(0), round(2), round(-2), round(1), round(0)]);
+  it('awards mission_3 when all 5 rounds are exact (perfect)', () => {
+    const earned = evaluateMissions(0, [round(0), round(0), round(0), round(0), round(0)]);
     expect(earned).toContain('mission_3');
   });
 
-  it('does not award mission_3 when one round is 3 years off', () => {
-    const earned = evaluateMissions(0, [round(0), round(0), round(0), round(0), round(3)]);
+  it('does not award mission_3 when one round is even 1 year off', () => {
+    const earned = evaluateMissions(0, [round(0), round(0), round(0), round(0), round(1)]);
     expect(earned).not.toContain('mission_3');
   });
 

@@ -20,7 +20,7 @@ export interface RoundResult {
   score: number;
 }
 
-export type ResultTier = 'perfect' | 'great' | 'ballpark' | 'wrong-era' | 'not-even-close';
+export type ResultTier = 'perfect' | 'ballpark' | 'wrong-era' | 'not-even-close';
 export type ResultColor = ResultTier;
 
 export interface GameState {
