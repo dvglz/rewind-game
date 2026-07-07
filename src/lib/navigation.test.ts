@@ -15,6 +15,11 @@ describe('computeNavSearch (URL params per screen)', () => {
     expect(computeNavSearch('returnTo=results', 'groups')).toBe('mode=groups');
   });
 
+  it('clears stale authReason when leaving auth-only routes', () => {
+    expect(computeNavSearch('mode=auth&returnTo=results&authReason=reminder', 'home')).toBe('');
+    expect(computeNavSearch('authReason=reminder', 'leaderboard')).toBe('mode=leaderboard');
+  });
+
   it('keeps practice context on the game and results screens', () => {
     expect(computeNavSearch('mode=game&date=2026-06-22&practice=1', 'results')).toBe(
       'mode=results&date=2026-06-22&practice=1',

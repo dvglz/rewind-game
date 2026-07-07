@@ -282,3 +282,15 @@ test('routes Notify Me from results to auth with reminder copy', async () => {
   expect(window.location.search).toContain('returnTo=results');
   expect(window.location.search).toContain('authReason=reminder');
 });
+
+test('does not let stale reminder reason affect leaderboard sign-in', async () => {
+  window.history.replaceState({}, '', '/?mode=auth&returnTo=leaderboard&authReason=reminder');
+
+  const { App } = await import('./App');
+  render(<App />);
+
+  await waitFor(() => {
+    expect(screen.getByTestId('auth-screen')).toBeTruthy();
+  });
+  expect(screen.getByTestId('auth-copy').textContent).toBe('auth');
+});

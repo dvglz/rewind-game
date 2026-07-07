@@ -13,6 +13,7 @@ export function computeNavSearch(currentSearch: string, screen: string): string 
   if (screen === 'home') {
     params.delete('mode');
     params.delete('returnTo');
+    params.delete('authReason');
   } else {
     params.set('mode', screen);
   }
@@ -20,6 +21,7 @@ export function computeNavSearch(currentSearch: string, screen: string): string 
   // Preserve returnTo only for the auth screen.
   if (screen !== 'auth') {
     params.delete('returnTo');
+    params.delete('authReason');
   }
 
   // Practice context is scoped to the game/results screens.

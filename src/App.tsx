@@ -150,6 +150,7 @@ function AppInner() {
     const params = new URLSearchParams(window.location.search);
     params.set('mode', 'auth');
     params.set('returnTo', returnTo);
+    params.delete('authReason');
     const nextSearch = params.toString();
     window.history.pushState({}, '', `/?${nextSearch}`);
     setScreen('auth');
@@ -185,6 +186,8 @@ function AppInner() {
     const params = new URLSearchParams(window.location.search);
     return params.get('authReason');
   };
+
+  const isReminderAuth = () => getReturnTo() === 'results' && getAuthReason() === 'reminder';
 
   const showAuthToast = (message = "You're signed in") => {
     setAuthToast(message);
@@ -401,11 +404,11 @@ function AppInner() {
                 ? "You'll join a group right after signing in"
                 : getReturnTo() === 'archive'
                   ? 'Sign in to keep playing past puzzles'
-                  : getAuthReason() === 'reminder'
+                  : isReminderAuth()
                     ? REMINDER_AUTH_MESSAGE
                     : undefined
             }
-            reminderMode={getAuthReason() === 'reminder'}
+            reminderMode={isReminderAuth()}
           />
         </>
       )}
