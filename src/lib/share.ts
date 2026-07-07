@@ -1,6 +1,5 @@
 import type { RoundResult } from '../types';
 import { getResultColor, getResultEmoji } from '../engine/scoring';
-import { getTodayString } from './date';
 
 export type ShareOutcome = 'shared' | 'copied' | 'failed';
 
@@ -20,31 +19,24 @@ export function getPublicAppUrl(): string {
 export function generateShareText(
   puzzleNumber: number,
   results: RoundResult[],
-  totalScore: number,
-  maxScore: number,
+  _totalScore: number,
+  _maxScore: number,
   _streak: number,
   sport: 'american' | 'soccer' = 'american',
-  date?: string,
+  _date?: string,
   archive = false,
 ): string {
   const base = sport === 'soccer' ? 'Rewind ⚽' : 'Rewind';
   const title = archive ? (sport === 'soccer' ? 'Rewind Archive ⚽' : 'Rewind Archive') : base;
   const puzzleLabel = String(puzzleNumber).padStart(3, '0');
-  const dateStr = new Date(`${date ?? getTodayString()}T00:00:00`).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
 
   const emojiRow = results
     .map((r) => getResultEmoji(getResultColor(r.diff)))
     .join('');
 
-  let text = `${title} #${puzzleLabel} / ${dateStr}\n`;
-  text += `${emojiRow}\n`;
-  text += `Score ${totalScore.toLocaleString()} / ${maxScore.toLocaleString()}\n\n`;
-  text += `${getPublicAppUrl()}\n`;
-  text += `Guess 5 sports moments by year.`;
+  let text = `⏪ ${title} #${puzzleLabel} – Guess 5 NBA moments by year\n`;
+  text += `${emojiRow}\n\n`;
+  text += `Top this. ${getPublicAppUrl()}`;
   return text;
 }
 

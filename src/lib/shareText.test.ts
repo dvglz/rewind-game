@@ -3,7 +3,7 @@ import { generateShareText, shareResults } from './share';
 
 vi.stubEnv('VITE_PUBLIC_APP_URL', 'https://clutchpoints-rewind-test.4taps.me');
 
-test('formats the share text with launch date and score line', () => {
+test('formats the share text as an NBA challenge with the emoji row', () => {
   const text = generateShareText(
     6,
     [
@@ -22,12 +22,10 @@ test('formats the share text with launch date and score line', () => {
 
   expect(text).toBe(
     [
-      'Rewind #006 / Jun 6, 2026',
+      '⏪ Rewind #006 – Guess 5 NBA moments by year',
       '🟢🟢🟢🟠🟡',
-      'Score 790 / 1,000',
       '',
-      'https://clutchpoints-rewind-test.4taps.me',
-      'Guess 5 sports moments by year.',
+      'Top this. https://clutchpoints-rewind-test.4taps.me',
     ].join('\n'),
   );
 });
@@ -43,7 +41,7 @@ test('adds the soccer marker only for soccer shares', () => {
     '2026-06-06',
   );
 
-  expect(text.startsWith('Rewind ⚽ #006 / Jun 6, 2026')).toBe(true);
+  expect(text.startsWith('⏪ Rewind ⚽ #006 – Guess 5 NBA moments by year')).toBe(true);
 });
 
 test('normalizes a bare public app url to https for share and invite links', async () => {
@@ -85,6 +83,6 @@ test('native share sends only text to avoid duplicating the Rewind title', async
 
 test('uses the Archive title when the archive flag is set', () => {
   const text = generateShareText(2, [], 800, 1000, 0, 'american', '2026-06-19', true);
-  expect(text.startsWith('Rewind Archive')).toBe(true);
-  expect(text).not.toMatch(/^Rewind #/);
+  expect(text.startsWith('⏪ Rewind Archive #002')).toBe(true);
+  expect(text).not.toContain('Rewind #');
 });
