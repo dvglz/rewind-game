@@ -16,6 +16,9 @@ import { isAppMode } from '../lib/appMode';
 import { hasSeenHomeIntro, markHomeIntroSeen } from '../lib/homeIntro';
 import styles from './HomeScreen.module.css';
 
+// App Store link for the "Play in the iOS app" menu item. Leave empty to hide it.
+const IOS_APP_URL = 'https://apps.apple.com/us/app/clutchpoints-nba-nfl-mlb/id1044413150';
+
 interface HomeScreenProps {
   onPlay: () => void;
   hasInProgressGame: boolean;
@@ -102,6 +105,7 @@ export function HomeScreen({
         onNavigateGroups={onGroups}
         onNavigateArchive={onArchive}
         onNavigateAuth={onNavigateAuth}
+        appStoreHref={hideAuthControls ? undefined : IOS_APP_URL || undefined}
         hideAuthControls={hideAuthControls}
         onSignOut={() => {
           signOut();
@@ -178,7 +182,7 @@ export function HomeScreen({
         </>
       )}
       {signOutToast && <Toast message="Signed Out" />}
-      {!hideAuthControls && isAuthenticated && (
+      {isAuthenticated && (
         <p className={styles.footerCta}>
           Settle who knows ball in{' '}
           <button type="button" className={styles.footerLink} onClick={onGroups}>

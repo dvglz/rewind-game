@@ -7,6 +7,7 @@ export interface BurgerMenuProps {
   hasInProgressGame: boolean;
   feedbackHref: string;
   clutchPlayHref?: string;
+  appStoreHref?: string;
   isAuthenticated: boolean;
   isAuthLoading?: boolean;
   userEmail: string | null;

@@ -181,6 +181,45 @@ test('shows a groups prompt for signed-in players', async () => {
   expect(onGroups).toHaveBeenCalledTimes(1);
 });
 
+test('keeps the groups prompt for signed-in players in app mode', async () => {
+  window.history.replaceState({}, '', '/?from=app');
+  fetchProfileMock.mockResolvedValue({
+    id: 1,
+    objectId: 'abc',
+    username: 'testuser',
+    email: 'test@example.com',
+    firstName: 'Test',
+    lastName: 'User',
+    accessToken: 'tok_123',
+    avatarUrl: null,
+    thumbnailUrl: null,
+  });
+
+  render(
+    <AuthProvider>
+      <HomeScreen
+        onPlay={() => {}}
+        hasInProgressGame={false}
+        hasCompletedGame={false}
+        onViewResults={() => {}}
+        onLeaderboard={() => {}}
+        showDebugTools={false}
+        onGroups={() => {}}
+        onArchive={() => {}}
+        onNavigateAuth={() => {}}
+        onSignOut={() => {}}
+        onHowTo={() => {}}
+      />
+    </AuthProvider>
+  );
+
+  await waitFor(() => {
+    expect(screen.getByText(/Settle who knows ball in/)).not.toBeNull();
+  });
+  // Auth controls stay hidden in app mode, but Groups is a feature link and should remain.
+  expect(screen.queryByRole('button', { name: 'Sign In' })).toBeNull();
+});
+
 test('hides intro demo and footer sign-in in app mode', async () => {
   const { markHomeIntroSeen } = await import('../lib/homeIntro');
   window.history.replaceState({}, '', '/?from=app');

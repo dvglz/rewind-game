@@ -59,6 +59,27 @@ describe('BurgerMenu', () => {
     expect(props.onNavigateArchive).toHaveBeenCalledTimes(1);
   });
 
+  it('shows a "Play in the iOS app" link when an App Store href is provided', () => {
+    const props = createProps();
+    render(<BurgerMenu {...props} appStoreHref="https://apps.apple.com/app/id123" />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
+
+    const link = screen.getByRole('link', { name: 'Play in the iOS app' });
+    expect(link.getAttribute('href')).toBe('https://apps.apple.com/app/id123');
+    expect(link.getAttribute('target')).toBe('_blank');
+    expect(link.getAttribute('rel')).toContain('noopener');
+  });
+
+  it('hides the "Play in the iOS app" link when no App Store href is provided', () => {
+    const props = createProps();
+    render(<BurgerMenu {...props} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
+
+    expect(screen.queryByRole('link', { name: 'Play in the iOS app' })).toBeNull();
+  });
+
   it("keeps Today's Game actionable on Home and routes to the game", () => {
     const props = createProps();
     render(<BurgerMenu {...props} />);

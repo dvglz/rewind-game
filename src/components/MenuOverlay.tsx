@@ -12,6 +12,8 @@ export interface MenuOverlayProps {
   hasInProgressGame: boolean;
   feedbackHref?: string;
   clutchPlayHref?: string;
+  /** App Store URL. When set (and not in app mode), shows a "Play in the iOS app" link. */
+  appStoreHref?: string;
   isAuthenticated: boolean;
   isAuthLoading?: boolean;
   userEmail: string | null;
@@ -74,6 +76,7 @@ export function MenuOverlay({
   onNavigateHowTo,
   onNavigateAuth,
   onSignOut,
+  appStoreHref,
   hideAuthControls = false,
 }: MenuOverlayProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -263,6 +266,18 @@ export function MenuOverlay({
           >
             How to Play
           </button>
+          {appStoreHref ? (
+            <a
+              href={appStoreHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${styles.navButton} ${styles.menuItem}`}
+              style={{ '--stagger-index': 5 } as CSSProperties}
+              onClick={onClose}
+            >
+              Play in the iOS app
+            </a>
+          ) : null}
         </nav>
 
         <div className={styles.bottomSection}>
