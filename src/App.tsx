@@ -31,7 +31,7 @@ type Screen = 'home' | 'game' | 'ordering' | 'results' | 'groups' | 'auth' | 'le
 // In mock mode (local dev) the auth gate is bypassed so screens that normally
 // require a token — e.g. the global leaderboard — can be tested without one.
 const USE_MOCK = import.meta.env.VITE_MOCK_API === 'true';
-const REMINDER_AUTH_MESSAGE = "Get notified when tomorrow's puzzle drops. No spam. Unsubscribe anytime.";
+const REMINDER_AUTH_MESSAGE = "Drop your email and we'll ping you when tomorrow's puzzle drops. No password, no spam.";
 
 function AppInner() {
   const allowReplay = hidesCompletedGameLock(window.location.search);
@@ -181,8 +181,8 @@ function AppInner() {
     return params.get('authReason');
   };
 
-  const showAuthToast = () => {
-    setAuthToast("You're signed in");
+  const showAuthToast = (message = "You're signed in") => {
+    setAuthToast(message);
     setTimeout(() => setAuthToast(''), 3000);
   };
 
@@ -195,6 +195,7 @@ function AppInner() {
       return;
     }
     const returnTo = getReturnTo();
+    const reason = getAuthReason();
     const params = new URLSearchParams(window.location.search);
     params.delete('authReason');
     const nextWithoutReason = params.toString();
@@ -215,7 +216,7 @@ function AppInner() {
     } else {
       navigate('home');
     }
-    showAuthToast();
+    showAuthToast(reason === 'reminder' ? "All set! See you tomorrow" : undefined);
   };
 
   const startGame = () => {
@@ -398,7 +399,7 @@ function AppInner() {
                     ? REMINDER_AUTH_MESSAGE
                     : undefined
             }
-            showAppDownloadLink={getAuthReason() === 'reminder'}
+            reminderMode={getAuthReason() === 'reminder'}
           />
         </>
       )}

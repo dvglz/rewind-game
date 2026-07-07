@@ -10,17 +10,18 @@ import styles from './AuthScreen.module.css';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const CODE_LENGTH = 6;
-const CLUTCHPOINTS_IOS_URL = 'https://apps.apple.com/us/app/clutchpoints-nba-nfl-mlb/id1044413150';
 
 interface AuthScreenProps {
   onBack: () => void;
   onSuccess: () => void;
   returnTo: string | null;
   contextMessage?: string;
-  showAppDownloadLink?: boolean;
+  // Reframes the copy as lightweight email capture ("leave your email") instead
+  // of account sign-in. Same passwordless email-code flow underneath.
+  reminderMode?: boolean;
 }
 
-export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage, showAppDownloadLink = false }: AuthScreenProps) {
+export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage, reminderMode = false }: AuthScreenProps) {
   void returnTo; // navigation state is handled by the caller via onSuccess
   const { setUser } = useAuth();
   const [email, setEmail] = useState('');
@@ -125,7 +126,7 @@ export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage, showAp
       <div className={styles.content}>
         {step === 'code' ? (
           <div className={styles.codeStep}>
-            <h1 className={styles.heading}>Enter code</h1>
+            <h1 className={styles.heading}>{reminderMode ? 'Confirm your email' : 'Enter code'}</h1>
             <p className={styles.subtitle}>
               We sent a {CODE_LENGTH}-digit code to <strong>{email}</strong>
             </p>
@@ -145,7 +146,7 @@ export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage, showAp
               disabled={loading || code.length !== CODE_LENGTH}
               onClick={() => submitCode(code)}
             >
-              {loading ? 'Verifying…' : 'Verify'}
+              {loading ? 'Verifying…' : reminderMode ? 'Confirm' : 'Verify'}
             </button>
 
             <div className={styles.codeActions}>
@@ -159,7 +160,7 @@ export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage, showAp
           </div>
         ) : (
           <>
-            <h1 className={styles.heading}>{'Sign in\nto Rewind'}</h1>
+            <h1 className={styles.heading}>{reminderMode ? 'Get daily reminders' : 'Sign in\nto Rewind'}</h1>
             <p className={styles.subtitle}>
               {contextMessage ?? 'Play with friends, replay past days, track your scores'}
             </p>
@@ -185,19 +186,10 @@ export function AuthScreen({ onBack, onSuccess, returnTo, contextMessage, showAp
                   type="submit"
                   disabled={loading || !isValidEmail}
                 >
-                  {loading ? 'Sending…' : 'Get Code'}
+                  {loading ? 'Sending…' : reminderMode ? 'Remind me' : 'Get Code'}
                 </button>
               </form>
             </div>
-
-            {showAppDownloadLink && (
-              <p className={styles.appPrompt}>
-                Want to play in the app?{' '}
-                <a className={styles.appLink} href={CLUTCHPOINTS_IOS_URL}>
-                  Download ClutchPoints for iOS
-                </a>
-              </p>
-            )}
           </>
         )}
       </div>
