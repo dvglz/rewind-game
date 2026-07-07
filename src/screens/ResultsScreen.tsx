@@ -209,6 +209,11 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
             <p className={styles.practiceNote} style={{ animationDelay: '700ms' }}>
               Practice run — scores aren’t saved.
             </p>
+            {!isAuthenticated && !appMode && (
+              <div className={styles.joinRewindBlock} style={{ animationDelay: '740ms' }}>
+                <JoinRewindCard onSignIn={() => onRequireAuth()} />
+              </div>
+            )}
           </>
         ) : (isAuthenticated || appMode) ? (
           <>
