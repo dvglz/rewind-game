@@ -1,5 +1,5 @@
 // Editorially locked daily schedule.
-// scripts/buildDayDefinitions.ts can generate valid candidates, but Days 11-20
+// scripts/buildDayDefinitions.ts can generate valid candidates, but Days 11-30
 // were manually curated after generation to preserve launch Days 1-10 and tune flow.
 
 export const DAY_DEFINITIONS: string[][] = [
@@ -162,5 +162,85 @@ export const DAY_DEFINITIONS: string[][] = [
     'evt_kd_rookie_seattle_final_season',
     'evt_nba_covid_shutdown',
     'evt_nba_jersey_sponsor_patches',
+  ],
+  // Day 21
+  [
+    'evt_lebron_si_cover',
+    'evt_artest_metta_world_peace',
+    'evt_muggsy_bogues_debut',
+    'evt_nba_three_point_line',
+    'evt_blake_roty_after_injury',
+  ],
+  // Day 22
+  [
+    'evt_air_jordan_1',
+    'evt_nick_young_no_look_miss',
+    'evt_tmac_raptors_high_school',
+    'evt_spud_webb_dunk_contest',
+    'evt_nba_dress_code',
+  ],
+  // Day 23
+  [
+    'evt_melo_syracuse_title',
+    'evt_hakeem_before_jordan_draft',
+    'evt_manute_bol_debut',
+    'evt_sixers_fo_fo_fo_title',
+    'evt_shai_to_okc_pg_trade',
+  ],
+  // Day 24
+  [
+    'evt_curry_davidson_elite_eight',
+    'evt_iverson_reebok_question',
+    'evt_robinson_spurs_navy',
+    'evt_nba_zone_defense_rules',
+    'evt_bird_celtics_1986_title',
+  ],
+  // Day 25
+  [
+    'evt_kg_high_school_draft',
+    'evt_kemba_uconn_title',
+    'evt_nba_2k_debut_iverson',
+    'evt_magic_bird_enter_nba',
+    'evt_nba_steals_blocks_official',
+  ],
+  // Day 26
+  [
+    'evt_yao_no_1_pick',
+    'evt_amare_roty_high_school',
+    'evt_pau_gasol_roty_memphis',
+    'evt_lakers_beat_celtics_1985',
+    'evt_nba_bans_ninja_headbands',
+  ],
+  // Day 27
+  [
+    'evt_shaq_breaks_backboard_rookie',
+    'evt_dirk_passes_wilt_scoring',
+    'evt_first_draft_lottery_ewing',
+    'evt_nbdl_begins_play',
+    'evt_bad_boy_pistons_first_title',
+  ],
+  // Day 28
+  [
+    'evt_kobe_si_cover_pre_draft',
+    'evt_cp3_roty_new_orleans',
+    'evt_mikal_bridges_ironman_streak',
+    'evt_kareem_name_change',
+    'evt_sleeved_jerseys_games',
+  ],
+  // Day 29
+  [
+    'evt_jordan_im_back_fax',
+    'evt_bill_russell_number_retired',
+    'evt_fred_vanvleet_undrafted',
+    'evt_oscar_triple_double_season',
+    'evt_nba_hand_checking_limits',
+  ],
+  // Day 30
+  [
+    'evt_nash_first_mvp_phoenix',
+    'evt_jontay_porter_lifetime_ban',
+    'evt_rasheed_technical_foul_record',
+    'evt_aba_nba_merger',
+    'evt_draymond_second_round_pick',
   ],
 ];

@@ -11,7 +11,7 @@ interface RawEvent {
   revealContext?: string;
 }
 
-// ── American Sports: 20 days × 5 questions, resolved from the question bank ──
+// ── American Sports: 30 days × 5 questions, resolved from the question bank ──
 // Days are generated from the bank via scripts/buildDayDefinitions.ts (committed
 // as DAY_DEFINITIONS). Soccer below stays hand-authored.
 

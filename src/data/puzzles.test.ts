@@ -41,6 +41,23 @@ test('rewindLab selects expanded puzzle numbers beyond day 10', () => {
   ]);
 });
 
+test('rewindLab selects newly added puzzle numbers beyond day 20', () => {
+  window.history.replaceState({}, '', '/?rewindLab=021');
+
+  const puzzle = getTodaysPuzzle();
+
+  expect(isRewindLabMode()).toBe(true);
+  expect(puzzle.id).toBe('lab-2026-07-08-american');
+  expect(puzzle.number).toBe(21);
+  expect(puzzle.events.map((event) => event.text)).toEqual([
+    'LeBron lands on the SI cover as a high school junior',
+    'Ron Artest officially becomes Metta World Peace',
+    'Muggsy Bogues enters the NBA at 5-foot-3',
+    'The NBA brings in the three-point line',
+    'Blake Griffin misses his first NBA season, then wins ROTY',
+  ]);
+});
+
 test('rewindLab ignores random mode and selects the exact numbered puzzle', () => {
   window.history.replaceState({}, '', '/?rewindLab=011');
   localStorage.setItem('rewind_random_mode', 'true');

@@ -47,13 +47,13 @@ describe('getPuzzleForDate', () => {
   });
 
   it('consecutive dates get different day sets', () => {
-    const days = Array.from({ length: 20 }, (_, i) => {
+    const days = Array.from({ length: 30 }, (_, i) => {
       const d = String(i + 1).padStart(2, '0');
       return getPuzzleForDate(`2026-06-${d}`, 'american').events.map(e => e.text);
     });
-    // All 20 American days should be unique sets
+    // All 30 American days should be unique sets
     const unique = new Set(days.map(d => d.join('|')));
-    expect(unique.size).toBe(20);
+    expect(unique.size).toBe(30);
   });
 
   it('2026-06-18 (launch) maps to Day 1', () => {
@@ -70,9 +70,9 @@ describe('getPuzzleForDate', () => {
     expect(puzzle.events[0].text.length).toBeGreaterThan(0);
   });
 
-  it('cycles back after the American pool size (20 days)', () => {
+  it('cycles back after the American pool size (30 days)', () => {
     const a = getPuzzleForDate('2026-06-18', 'american');
-    const b = getPuzzleForDate('2026-07-08', 'american');
+    const b = getPuzzleForDate('2026-07-18', 'american');
     expect(a.events.map(e => e.text)).toEqual(b.events.map(e => e.text));
   });
 

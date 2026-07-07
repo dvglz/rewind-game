@@ -17,12 +17,12 @@ test('bank is non-empty and indexable by id', () => {
   expect(questionById.get(first.id)).toBe(first);
 });
 
-test('eligible pool has enough questions per difficulty for 10 days', () => {
+test('eligible pool has enough questions per difficulty for 30 days', () => {
   const eligible = getEligibleQuestions();
   const count = (d: string) => eligible.filter((q) => q.difficulty === d).length;
-  expect(count('easy')).toBeGreaterThanOrEqual(20);
-  expect(count('medium')).toBeGreaterThanOrEqual(10);
-  expect(count('hard')).toBeGreaterThanOrEqual(20);
+  expect(count('easy')).toBeGreaterThanOrEqual(60);
+  expect(count('medium')).toBeGreaterThanOrEqual(30);
+  expect(count('hard')).toBeGreaterThanOrEqual(60);
 });
 
 test('every id is unique and evt_-prefixed', () => {
@@ -34,6 +34,45 @@ test('every id is unique and evt_-prefixed', () => {
 test('no title leaks a 4-digit year', () => {
   const offenders = REWIND_QUESTION_BANK.filter((q) => YEAR_IN_TEXT.test(q.title));
   expect(offenders.map((q) => q.id)).toEqual([]);
+});
+
+test('newly curated days use final editorial copy', () => {
+  expect(questionById.get('evt_lebron_si_cover')?.title).toBe(
+    'LeBron lands on the SI cover as a high school junior',
+  );
+  expect(questionById.get('evt_blake_roty_after_injury')?.title).toBe(
+    'Blake Griffin misses his first NBA season, then wins ROTY',
+  );
+  expect(questionById.get('evt_kg_high_school_draft')?.title).toBe(
+    'Kevin Garnett jumps straight from high school to the NBA',
+  );
+  expect(questionById.get('evt_curry_davidson_elite_eight')?.title).toBe(
+    'Curry carries Davidson to the Elite Eight',
+  );
+  expect(questionById.get('evt_kemba_uconn_title')?.title).toBe(
+    'Kemba Walker carries UConn through March Madness',
+  );
+  expect(questionById.get('evt_rasheed_technical_foul_record')?.title).toBe(
+    'Rasheed Wallace sets the single-season record for techs',
+  );
+  expect(questionById.get('evt_nba_dress_code')?.title).toBe(
+    'The NBA brings in its controversial business-casual dress code',
+  );
+  expect(questionById.get('evt_nba_2k_debut_iverson')?.title).toBe(
+    'NBA 2K launches with Iverson on the cover',
+  );
+  expect(questionById.get('evt_nba_2k_debut_iverson')?.reveal).toBe(
+    'In 1999, the first NBA 2K debuted with Allen Iverson as its cover star.',
+  );
+  expect(questionById.get('evt_first_draft_lottery_ewing')?.title).toBe(
+    'The first Draft Lottery sends Patrick Ewing to NY',
+  );
+  expect(questionById.get('evt_mikal_bridges_ironman_streak')?.title).toBe(
+    'Mikal Bridges plays 23 sec to keep his ironman streak alive',
+  );
+  expect(questionById.get('evt_fred_vanvleet_undrafted')?.title).toBe(
+    'VanVleet goes undrafted before earning an NBA spot',
+  );
 });
 
 test('date parses and reveal confirms the same year', () => {
@@ -56,11 +95,11 @@ test('enums, themes and priority are valid', () => {
   }
 });
 
-test('DAY_DEFINITIONS: 20 days of 5 eligible, unique ids', () => {
-  expect(DAY_DEFINITIONS).toHaveLength(20);
+test('DAY_DEFINITIONS: 30 days of 5 eligible, unique ids', () => {
+  expect(DAY_DEFINITIONS).toHaveLength(30);
   const all = DAY_DEFINITIONS.flat();
-  expect(all).toHaveLength(100);
-  expect(new Set(all).size).toBe(100);
+  expect(all).toHaveLength(150);
+  expect(new Set(all).size).toBe(150);
   for (const id of all) {
     const q = questionById.get(id);
     expect(q, `unknown id ${id}`).toBeDefined();
