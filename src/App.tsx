@@ -340,6 +340,7 @@ function AppInner() {
             }
             navigateToAuth('results');
           }}
+          onArchive={() => navigate('archive')}
           onBackToArchive={exitToArchive}
           onPlayAgain={() => startPracticeGame(getDateOverride())}
         />

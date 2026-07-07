@@ -78,14 +78,6 @@
   animation: timePillSweep 1.2s ease-in-out 0.45s 1;
 }
 
-.tierDots {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  font-size: 24px;
-  line-height: 1;
-}
-
 .roundList {
   width: 100%;
   border: none;

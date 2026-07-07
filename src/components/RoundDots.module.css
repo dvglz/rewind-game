@@ -1,13 +1,13 @@
 .dots {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--round-dot-gap, 4px);
 }
 
 .dot {
   display: block;
-  width: 14px;
-  height: 14px;
+  width: var(--round-dot-size, 14px);
+  height: var(--round-dot-size, 14px);
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -35,12 +35,12 @@
 
 @media (min-width: 900px) {
   .dots {
-    gap: 5px;
+    gap: var(--round-dot-gap, 5px);
   }
 
   .dot {
-    width: 16px;
-    height: 16px;
+    width: var(--round-dot-size, 16px);
+    height: var(--round-dot-size, 16px);
   }
 }
 

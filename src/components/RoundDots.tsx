@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { getResultColor, getResultColorVar } from '../engine/scoring';
 import styles from './RoundDots.module.css';
 
@@ -6,11 +7,13 @@ interface RoundDotsProps {
   currentRound: number;
   totalRounds: number;
   animatedDoneIndex?: number;
+  /** Override --round-dot-size / --round-dot-gap to resize the row (e.g. on results). */
+  style?: CSSProperties;
 }
 
-export function RoundDots({ results, currentRound, totalRounds, animatedDoneIndex }: RoundDotsProps) {
+export function RoundDots({ results, currentRound, totalRounds, animatedDoneIndex, style }: RoundDotsProps) {
   return (
-    <div className={styles.dots} aria-label="Round progress">
+    <div className={styles.dots} aria-label="Round progress" style={style}>
       {Array.from({ length: totalRounds }, (_, i) => {
         if (i < results.length) {
           const newlyCompleted = i === animatedDoneIndex;

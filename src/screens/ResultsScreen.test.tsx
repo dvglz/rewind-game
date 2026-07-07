@@ -69,7 +69,8 @@ test('logged-in users get friends CTA plus inline leaderboard link', () => {
 
   expect(screen.getByRole('button', { name: /See Friends' Scores/i })).not.toBeNull();
   expect(screen.getByRole('button', { name: /^Leaderboard$/i })).not.toBeNull();
-  expect(screen.queryByRole('button', { name: /Create an Account/i })).toBeNull();
+  expect(screen.queryByRole('button', { name: /Play Past Days/i })).toBeNull();
+  expect(screen.queryByText(/Sign in to unlock/i)).toBeNull();
   expect(screen.getByText('02:36')).not.toBeNull();
 
   fireEvent.click(screen.getByRole('button', { name: /^Leaderboard$/i }));
@@ -93,23 +94,43 @@ test('wordmark navigates home via onHome', () => {
   expect(onHome).toHaveBeenCalledTimes(1);
 });
 
-test('logged-out users get account CTA, benefits sentence, and sign-in link', () => {
+test('logged-out users get play-past-days CTA and the join-Rewind sign-in card', () => {
   const onRequireAuth = vi.fn();
+  const onArchive = vi.fn();
+  const onGroups = vi.fn();
+  const onLeaderboard = vi.fn();
 
   mockAuthed = false;
   render(
     <ResultsScreen
       onHome={() => {}}
-      onGroups={() => {}}
-      onLeaderboard={() => {}}
+      onGroups={onGroups}
+      onLeaderboard={onLeaderboard}
       onRequireAuth={onRequireAuth}
+      onArchive={onArchive}
     />
   );
 
-  expect(screen.getByRole('button', { name: /Create an Account/i })).not.toBeNull();
-  expect(screen.getByText(/rank worldwide/i)).not.toBeNull();
-  expect(screen.getByRole('button', { name: /^Sign in$/i })).not.toBeNull();
+  expect(screen.getByRole('button', { name: /Play Past Days/i })).not.toBeNull();
+  expect(screen.queryByText(/rank worldwide/i)).toBeNull();
   expect(screen.queryByRole('button', { name: /See Friends' Scores/i })).toBeNull();
+
+  // The Join Rewind upsell card carries the sign-in path via its "Sign In" button.
+  expect(screen.getByText(/Sign in to unlock/i)).not.toBeNull();
+  expect(screen.getByText('Play in private groups')).not.toBeNull();
+
+  fireEvent.click(screen.getByRole('button', { name: /Play Past Days/i }));
+  expect(onArchive).toHaveBeenCalledTimes(1);
+
+  fireEvent.click(screen.getByRole('button', { name: 'Sign In' }));
+  expect(onRequireAuth).toHaveBeenCalledTimes(1);
+
+  // Teaser terms link out: Group score -> groups, Global Rank -> leaderboard.
+  fireEvent.click(screen.getByRole('button', { name: 'Group score' }));
+  expect(onGroups).toHaveBeenCalledTimes(1);
+
+  fireEvent.click(screen.getByRole('button', { name: 'Global Rank' }));
+  expect(onLeaderboard).toHaveBeenCalledTimes(1);
 });
 
 test('logged-out daily results show Notify Me and route to auth', () => {
@@ -325,7 +346,8 @@ test('hides the sign-in prompt when in app mode', () => {
   );
 
   expect(screen.queryByRole('button', { name: /^Sign in$/i })).toBeNull();
-  expect(screen.queryByRole('button', { name: /Create an Account/i })).toBeNull();
+  expect(screen.queryByRole('button', { name: /Play Past Days/i })).toBeNull();
+  expect(screen.queryByText(/Sign in to unlock/i)).toBeNull();
   expect(screen.queryByLabelText('Next Rewind puzzle')).toBeNull();
   expect(screen.queryByRole('button', { name: 'Notify Me' })).toBeNull();
 });

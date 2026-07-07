@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ShareCard } from '../components/ShareCard';
+import { JoinRewindCard } from '../components/JoinRewindCard';
 import { loadGameState, loadStats, hasSeenGrade, markGradeSeen } from '../engine/storage';
 import { getTodaysPuzzle, getSport, getDateOverride, isPracticeMode } from '../data/puzzles';
 import { getMaxPossibleScore, getScoreTierLabel } from '../engine/scoring';
@@ -20,11 +21,12 @@ interface ResultsScreenProps {
   onGroups: () => void;
   onLeaderboard: () => void;
   onRequireAuth: (reason?: AuthReason) => void;
+  onArchive?: () => void;
   onBackToArchive?: () => void;
   onPlayAgain?: () => void;
 }
 
-export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, onBackToArchive, onPlayAgain }: ResultsScreenProps) {
+export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, onArchive, onBackToArchive, onPlayAgain }: ResultsScreenProps) {
   const { isAuthenticated } = useAuth();
   const appMode = isAppMode();
   const puzzle = getTodaysPuzzle();
@@ -173,6 +175,7 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
           maxScore={maxScore}
           dateLabel={dateLabel}
           elapsedMs={displayState.elapsedMs}
+          section="summary"
         />
 
         {!practice && (
@@ -181,7 +184,7 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
             className={styles.shareButton}
             style={{ animationDelay: '620ms' }}
           >
-            Share Score
+            Challenge a Friend
           </button>
         )}
 
@@ -225,27 +228,41 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
             </p>
           </>
         ) : (
+          <button
+            className={styles.secondaryButton}
+            onClick={() => onArchive?.()}
+            type="button"
+            style={{ animationDelay: '660ms' }}
+          >
+            Play Past Days
+          </button>
+        )}
+
+        {!practice && !isAuthenticated && !appMode && (
           <>
-            <button
-              className={styles.secondaryButton}
-              onClick={() => onRequireAuth()}
-              type="button"
-              style={{ animationDelay: '660ms' }}
-            >
-              Create an Account
-            </button>
-            <p className={styles.descriptionLine} style={{ animationDelay: '700ms' }}>
-              …to see where you rank worldwide, invite group chat and more
-            </p>
-            <p className={styles.contextLine} style={{ animationDelay: '740ms' }}>
-              Already member?{' '}
-              <button className={styles.inlineLink} onClick={() => onRequireAuth()} type="button">
-                Sign in
+            <p className={styles.unlockLine} style={{ animationDelay: '700ms' }}>
+              See your{' '}
+              <button type="button" className={styles.unlockTerm} onClick={onGroups}>
+                Group score
+              </button>{' '}
+              and{' '}
+              <button type="button" className={styles.unlockTerm} onClick={onLeaderboard}>
+                Global Rank
               </button>
             </p>
+            <div className={styles.joinRewindBlock} style={{ animationDelay: '740ms' }}>
+              <JoinRewindCard onSignIn={() => onRequireAuth()} />
+            </div>
           </>
         )}
 
+        <ShareCard
+          results={displayState.results}
+          totalScore={displayState.totalScore}
+          maxScore={maxScore}
+          section="breakdown"
+          rowDelayBase={780}
+        />
       </div>
       {!practice && !appMode && (
         <ResultsCountdownReminder

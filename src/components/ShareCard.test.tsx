@@ -25,7 +25,7 @@ test('renders the redesigned header and round list', () => {
   expect(screen.getByText('888')).not.toBeNull();
   expect(screen.getByText('/ 1,000')).not.toBeNull();
   expect(screen.getByText('02:36')).not.toBeNull();
-  expect(screen.getAllByTestId('tier-dot')).toHaveLength(5);
+  expect(screen.getAllByTestId('round-dot')).toHaveLength(5);
 
   const roundList = screen.getByTestId('round-list');
   expect(within(roundList).getByText('Round 1')).not.toBeNull();
