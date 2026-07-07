@@ -137,6 +137,18 @@
   overflow: visible;
 }
 
+/* Matches the global leaderboard disclaimer; sits below the board, above Leave. */
+.disclaimer {
+  width: 100%;
+  margin: 0;
+  padding: 12px 16px 0;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-muted);
+  text-align: center;
+}
+
 .listTitle {
   font-family: var(--font-display);
   font-size: 34px;

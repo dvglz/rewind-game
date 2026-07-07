@@ -364,6 +364,10 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
             />
           </div>
 
+          <p className={styles.disclaimer}>
+            Updates every 2 min. Ties: fastest run, then earliest submission.
+          </p>
+
           <button
             className={`${styles.leaveButton} ${confirmLeave ? styles.leaveButtonConfirm : ''}`}
             onClick={handleLeave}
