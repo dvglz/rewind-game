@@ -31,7 +31,7 @@ export function JoinRewindCard({ onSignIn }: JoinRewindCardProps) {
         ))}
       </ul>
       <button type="button" className={styles.signInButton} onClick={onSignIn}>
-        Sign In
+        Sign In for Free
       </button>
     </div>
   );

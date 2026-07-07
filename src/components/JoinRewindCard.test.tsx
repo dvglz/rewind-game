@@ -12,6 +12,6 @@ test('renders the unlock benefits and fires onSignIn from the Sign In button', (
   expect(screen.getByText('Access the full archive')).not.toBeNull();
   expect(screen.getByText('Get daily reminders. No spam.')).not.toBeNull();
 
-  fireEvent.click(screen.getByRole('button', { name: 'Sign In' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Sign In for Free' }));
   expect(onSignIn).toHaveBeenCalledTimes(1);
 });
