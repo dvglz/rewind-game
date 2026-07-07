@@ -249,7 +249,7 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
             <p className={styles.unlockLine} style={{ animationDelay: '700ms' }}>
               See your{' '}
               <button type="button" className={styles.unlockTerm} onClick={onGroups}>
-                Group Scores
+                Group score
               </button>{' '}
               and{' '}
               <button type="button" className={styles.unlockTerm} onClick={onLeaderboard}>

@@ -125,8 +125,8 @@ test('logged-out users get play-past-days CTA and the join-Rewind sign-in card',
   fireEvent.click(screen.getByRole('button', { name: 'Sign In for Free' }));
   expect(onRequireAuth).toHaveBeenCalledTimes(1);
 
-  // Teaser terms link out: Group Scores -> groups, Global Rank -> leaderboard.
-  fireEvent.click(screen.getByRole('button', { name: 'Group Scores' }));
+  // Teaser terms link out: Group score -> groups, Global Rank -> leaderboard.
+  fireEvent.click(screen.getByRole('button', { name: 'Group score' }));
   expect(onGroups).toHaveBeenCalledTimes(1);
 
   fireEvent.click(screen.getByRole('button', { name: 'Global Rank' }));
