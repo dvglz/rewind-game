@@ -53,9 +53,10 @@ beforeEach(() => {
   window.history.replaceState(null, '', '/');
 });
 
-test('logged-in users get friends CTA plus inline leaderboard link', () => {
+test('logged-in users get play-past-days CTA and the group/rank teaser, no sign-in card', () => {
   const onGroups = vi.fn();
   const onLeaderboard = vi.fn();
+  const onArchive = vi.fn();
 
   mockAuthed = true;
   render(
@@ -64,16 +65,24 @@ test('logged-in users get friends CTA plus inline leaderboard link', () => {
       onGroups={onGroups}
       onLeaderboard={onLeaderboard}
       onRequireAuth={() => {}}
+      onArchive={onArchive}
     />
   );
 
-  expect(screen.getByRole('button', { name: /See Friends' Scores/i })).not.toBeNull();
-  expect(screen.getByRole('button', { name: /^Leaderboard$/i })).not.toBeNull();
-  expect(screen.queryByRole('button', { name: /Play Past Days/i })).toBeNull();
+  // Same secondary section as logged-out, minus the sign-in upsell card.
+  expect(screen.getByRole('button', { name: /Play Past Days/i })).not.toBeNull();
+  expect(screen.queryByRole('button', { name: /See Friends' Scores/i })).toBeNull();
+  expect(screen.queryByText(/rank worldwide/i)).toBeNull();
   expect(screen.queryByText(/Sign in to unlock/i)).toBeNull();
   expect(screen.getByText('02:36')).not.toBeNull();
 
-  fireEvent.click(screen.getByRole('button', { name: /^Leaderboard$/i }));
+  fireEvent.click(screen.getByRole('button', { name: /Play Past Days/i }));
+  expect(onArchive).toHaveBeenCalledTimes(1);
+
+  // Teaser terms link out: Group score -> groups, Global Rank -> leaderboard.
+  fireEvent.click(screen.getByRole('button', { name: 'Group score' }));
+  expect(onGroups).toHaveBeenCalledTimes(1);
+  fireEvent.click(screen.getByRole('button', { name: 'Global Rank' }));
   expect(onLeaderboard).toHaveBeenCalledTimes(1);
 });
 
@@ -346,7 +355,8 @@ test('hides the sign-in prompt when in app mode', () => {
   );
 
   expect(screen.queryByRole('button', { name: /^Sign in$/i })).toBeNull();
-  expect(screen.queryByRole('button', { name: /Play Past Days/i })).toBeNull();
+  // App mode gets the same Play Past Days + teaser as web, but never the sign-in card.
+  expect(screen.getByRole('button', { name: /Play Past Days/i })).not.toBeNull();
   expect(screen.queryByText(/Sign in to unlock/i)).toBeNull();
   expect(screen.queryByLabelText('Next Rewind puzzle')).toBeNull();
   expect(screen.queryByRole('button', { name: 'Notify Me' })).toBeNull();

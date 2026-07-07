@@ -68,8 +68,7 @@
 .shareButton,
 .descriptionLine,
 .unlockLine,
-.joinRewindBlock,
-.contextLine {
+.joinRewindBlock {
   opacity: 0;
   animation: fadeInUp 0.35s ease forwards;
 }
@@ -182,17 +181,6 @@
   color: var(--color-muted);
 }
 
-/* Context line + inline links — Special Gothic 20px, half-opacity text per Figma */
-.contextLine {
-  width: var(--results-action-width);
-  margin: 0;
-  text-align: center;
-  font-family: var(--font-display);
-  font-size: 20px;
-  line-height: 1.1;
-  color: color-mix(in srgb, var(--color-text) 50%, transparent);
-}
-
 .joinRewindBlock {
   width: 100%;
   margin-top: 24px;
@@ -219,21 +207,4 @@
   text-decoration-skip-ink: none;
   text-underline-offset: 2px;
   cursor: pointer;
-}
-
-.inlineLink {
-  background: none;
-  border: 0;
-  padding: 0;
-  font-family: var(--font-display);
-  font-size: 20px;
-  color: var(--color-text);
-  text-decoration: underline;
-  text-decoration-skip-ink: none;
-  text-underline-offset: 2px;
-  cursor: pointer;
-}
-
-.inlineLink:hover {
-  opacity: 0.7;
 }

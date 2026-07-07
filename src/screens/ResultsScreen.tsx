@@ -216,23 +216,6 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
               </div>
             )}
           </>
-        ) : (isAuthenticated || appMode) ? (
-          <>
-            <button
-              className={styles.secondaryButton}
-              onClick={onGroups}
-              type="button"
-              style={{ animationDelay: '660ms' }}
-            >
-              See Friends&apos; Scores
-            </button>
-            <p className={styles.contextLine} style={{ animationDelay: '700ms' }}>
-              Check today&apos;s rank worldwide in{' '}
-              <button className={styles.inlineLink} onClick={onLeaderboard} type="button">
-                Leaderboard
-              </button>
-            </p>
-          </>
         ) : (
           <button
             className={styles.secondaryButton}
@@ -244,7 +227,7 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
           </button>
         )}
 
-        {!practice && !isAuthenticated && !appMode && (
+        {!practice && (
           <>
             <p className={styles.unlockLine} style={{ animationDelay: '700ms' }}>
               See your{' '}
@@ -256,9 +239,11 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
                 Global Rank
               </button>
             </p>
-            <div className={styles.joinRewindBlock} style={{ animationDelay: '740ms' }}>
-              <JoinRewindCard onSignIn={() => onRequireAuth()} />
-            </div>
+            {!isAuthenticated && !appMode && (
+              <div className={styles.joinRewindBlock} style={{ animationDelay: '740ms' }}>
+                <JoinRewindCard onSignIn={() => onRequireAuth()} />
+              </div>
+            )}
           </>
         )}
 
