@@ -24,6 +24,11 @@ import { archiveGateAction } from './lib/archiveGate';
 import { computeNavSearch } from './lib/navigation';
 import { markHomeIntroSeen } from './lib/homeIntro';
 import { LoadingOverlay } from './components/LoadingOverlay';
+import '@fontsource/special-gothic-condensed-one/latin-400.css';
+import '@fontsource/lora/latin-400.css';
+import '@fontsource/lora/latin-400-italic.css';
+import '@fontsource/lora/latin-700.css';
+import '@fontsource/lora/latin-700-italic.css';
 import './styles/global.css';
 
 type Screen = 'home' | 'game' | 'ordering' | 'results' | 'groups' | 'auth' | 'leaderboard' | 'howto' | 'archive';
