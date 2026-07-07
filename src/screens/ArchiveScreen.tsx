@@ -8,8 +8,6 @@ interface ArchiveScreenProps {
   onPlayPast: (date: string) => void;
 }
 
-const MAX_DAYS = 10;
-
 function shiftDate(isoDate: string, deltaDays: number): string {
   const d = new Date(`${isoDate}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() + deltaDays);
@@ -20,8 +18,11 @@ export function ArchiveScreen({ onBack, onPlayPast }: ArchiveScreenProps) {
   const sport = getSport();
   const today = getTodayString();
 
+  // Every past day back to launch (#001). Today's number bounds the loop; the
+  // `number < 1` break is a safety net for dates before DAY_ZERO_DATE.
+  const todayNumber = getPuzzleForDate(today, sport).number;
   const days: { date: string; number: number }[] = [];
-  for (let offset = 1; offset <= MAX_DAYS; offset++) {
+  for (let offset = 1; offset < todayNumber; offset++) {
     const date = shiftDate(today, -offset);
     const number = getPuzzleForDate(date, sport).number;
     if (number < 1) break; // before launch

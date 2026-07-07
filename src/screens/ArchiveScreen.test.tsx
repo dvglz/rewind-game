@@ -2,9 +2,11 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { ArchiveScreen } from './ArchiveScreen';
 
-vi.mock('../lib/date', () => ({ getTodayString: () => '2026-06-22' }));
+const today = vi.hoisted(() => ({ value: '2026-06-22' }));
+vi.mock('../lib/date', () => ({ getTodayString: () => today.value }));
 
 beforeEach(() => {
+  today.value = '2026-06-22';
   window.history.replaceState({}, '', '/');
 });
 
@@ -15,6 +17,15 @@ test('lists past days newest-first, capped at days since launch', () => {
   expect(rows).toHaveLength(4);
   expect(rows[0].textContent).toContain('#004'); // 06-21 = Day 4, newest first
   expect(rows[3].textContent).toContain('#001'); // 06-18 = Day 1 (launch)
+});
+
+test('shows every day back to launch, not just the last 10', () => {
+  today.value = '2026-07-03'; // Day 16 → 15 past days, more than the old 10-day cap
+  render(<ArchiveScreen onBack={() => {}} onPlayPast={() => {}} />);
+  const rows = screen.getAllByRole('button', { name: /Play #/ });
+  expect(rows).toHaveLength(15);
+  expect(rows[0].textContent).toContain('#015'); // newest past day
+  expect(rows[14].textContent).toContain('#001'); // launch day
 });
 
 test('tapping a row plays that date', () => {
