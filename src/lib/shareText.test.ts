@@ -5,27 +5,29 @@ vi.stubEnv('VITE_PUBLIC_APP_URL', 'https://clutchpoints-rewind-test.4taps.me');
 
 test('formats the share text as an NBA challenge with the emoji row', () => {
   const text = generateShareText(
-    6,
+    20,
     [
       { event: { text: 'Q1', year: 2010 }, guessedYear: 2010, actualYear: 2010, diff: 0, score: 100 },
-      { event: { text: 'Q2', year: 2010 }, guessedYear: 2011, actualYear: 2010, diff: 1, score: 82 },
-      { event: { text: 'Q3', year: 2010 }, guessedYear: 2012, actualYear: 2010, diff: 2, score: 72 },
-      { event: { text: 'Q4', year: 2010 }, guessedYear: 2016, actualYear: 2010, diff: 6, score: 42 },
-      { event: { text: 'Q5', year: 2010 }, guessedYear: 2014, actualYear: 2010, diff: 4, score: 64 },
+      { event: { text: 'Q2', year: 2010 }, guessedYear: 2010, actualYear: 2010, diff: 0, score: 100 },
+      { event: { text: 'Q3', year: 2010 }, guessedYear: 2010, actualYear: 2010, diff: 0, score: 200 },
+      { event: { text: 'Q4', year: 2010 }, guessedYear: 2010, actualYear: 2010, diff: 0, score: 300 },
+      { event: { text: 'Q5', year: 2010 }, guessedYear: 2010, actualYear: 2010, diff: 0, score: 300 },
     ],
-    790,
+    1000,
     1000,
     0,
     'american',
     '2026-06-06',
+    false,
+    30000,
   );
 
   expect(text).toBe(
     [
-      '⏪ Rewind #006 – Guess 5 NBA moments by year',
-      '🟢🟢🟢🟠🟡',
-      '',
-      'Top this. https://clutchpoints-rewind-test.4taps.me',
+      '⏪ Rewind #020',
+      'Guess 5 NBA moments by year',
+      '🟢🟢🟢🟢🟢 in 00:30',
+      'Can you beat it? https://clutchpoints-rewind-test.4taps.me',
     ].join('\n'),
   );
 });
@@ -39,9 +41,11 @@ test('adds the soccer marker only for soccer shares', () => {
     0,
     'soccer',
     '2026-06-06',
+    false,
+    47000,
   );
 
-  expect(text.startsWith('⏪ Rewind ⚽ #006 – Guess 5 NBA moments by year')).toBe(true);
+  expect(text.startsWith('⏪ Rewind ⚽ #006\nGuess 5 NBA moments by year\n🟢 in 00:47')).toBe(true);
 });
 
 test('normalizes a bare public app url to https for share and invite links', async () => {
@@ -57,6 +61,8 @@ test('normalizes a bare public app url to https for share and invite links', asy
     0,
     'american',
     '2026-06-16',
+    false,
+    0,
   );
 
   expect(getPublicAppUrl()).toBe('https://rewindgame.com');
@@ -82,7 +88,7 @@ test('native share sends only text to avoid duplicating the Rewind title', async
 });
 
 test('uses the Archive title when the archive flag is set', () => {
-  const text = generateShareText(2, [], 800, 1000, 0, 'american', '2026-06-19', true);
+  const text = generateShareText(2, [], 800, 1000, 0, 'american', '2026-06-19', true, 0);
   expect(text.startsWith('⏪ Rewind Archive #002')).toBe(true);
   expect(text).not.toContain('Rewind #');
 });

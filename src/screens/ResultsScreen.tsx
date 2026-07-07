@@ -146,6 +146,7 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
       sport,
       getDateOverride(),
       practice,
+      displayState.elapsedMs,
     );
     const outcome = await shareResults(text);
     track('share_score', {

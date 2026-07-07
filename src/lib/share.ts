@@ -1,5 +1,6 @@
 import type { RoundResult } from '../types';
 import { getResultColor, getResultEmoji } from '../engine/scoring';
+import { formatTime } from './formatTime';
 
 export type ShareOutcome = 'shared' | 'copied' | 'failed';
 
@@ -25,6 +26,7 @@ export function generateShareText(
   sport: 'american' | 'soccer' = 'american',
   _date?: string,
   archive = false,
+  elapsedMs = 0,
 ): string {
   const base = sport === 'soccer' ? 'Rewind ⚽' : 'Rewind';
   const title = archive ? (sport === 'soccer' ? 'Rewind Archive ⚽' : 'Rewind Archive') : base;
@@ -34,9 +36,10 @@ export function generateShareText(
     .map((r) => getResultEmoji(getResultColor(r.diff)))
     .join('');
 
-  let text = `⏪ ${title} #${puzzleLabel} – Guess 5 NBA moments by year\n`;
-  text += `${emojiRow}\n\n`;
-  text += `Top this. ${getPublicAppUrl()}`;
+  let text = `⏪ ${title} #${puzzleLabel}\n`;
+  text += `Guess 5 NBA moments by year\n`;
+  text += `${emojiRow} in ${formatTime(elapsedMs)}\n`;
+  text += `Can you beat it? ${getPublicAppUrl()}`;
   return text;
 }
 

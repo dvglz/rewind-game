@@ -194,7 +194,11 @@ test('shares selected group invite links with the configured public app url', as
   fireEvent.click(await screen.findByRole('button', { name: /invite friends/i }));
 
   expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-    expect.stringContaining('https://clutchpoints-rewind-test.4taps.me/?invite=YPWFZC'),
+    [
+      '⏪ Join "the boys" on Rewind',
+      'Guess 5 NBA moments by year',
+      'Go https://clutchpoints-rewind-test.4taps.me/?invite=YPWFZC or use code YPWFZC',
+    ].join('\n'),
   );
 });
 

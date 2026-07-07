@@ -241,7 +241,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
 
     const code = extractInviteCode(group.invite_link);
     const inviteUrl = `${getPublicAppUrl()}/?invite=${code}`;
-    const shareText = `⏪ Join "${group.name}" on Rewind\nGuess 5 NBA moments a day\nGo ${inviteUrl} or use code ${code}`;
+    const shareText = `⏪ Join "${group.name}" on Rewind\nGuess 5 NBA moments by year\nGo ${inviteUrl} or use code ${code}`;
 
     if (window.isSecureContext && navigator.share) {
       try {
