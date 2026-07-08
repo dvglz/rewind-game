@@ -1735,7 +1735,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   },
   {
     id: 'evt_blake_roty_after_injury',
-    title: 'Blake Griffin misses his first NBA season, then wins ROTY',
+    title: 'Blake Griffin wins Rookie of the Year after missing first season due to injury',
     date: '2011',
     reveal: 'In 2011, Griffin won Rookie of the Year after a knee injury wiped out what should have been his first NBA season.',
     sport: 'nba',
@@ -1819,9 +1819,9 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   },
   {
     id: 'evt_melo_syracuse_title',
-    title: 'Carmelo carries Syracuse to a national title before the NBA',
+    title: 'Carmelo carries Syracuse to a national title before getting drafted to the NBA',
     date: '2003',
-    reveal: 'In 2003, Melo won it all as a freshman before becoming a top NBA prospect.',
+    reveal: 'In 2003, Melo won it all for the Orange as a freshman before becoming a top NBA prospect.',
     sport: 'nba_adjacent',
     theme: ['nba_adjacent'],
     teams: ['Syracuse'],
@@ -1833,7 +1833,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   },
   {
     id: 'evt_hakeem_before_jordan_draft',
-    title: 'Hakeem goes first before Jordan goes third',
+    title: 'Hakeem goes first before Jordan goes third in the draft',
     date: '1984',
     reveal: 'In 1984, Houston took Hakeem No. 1 before Jordan went No. 3 to Chicago.',
     sport: 'nba',
@@ -2365,7 +2365,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   },
   {
     id: 'evt_draymond_second_round_pick',
-    title: 'Golden State takes Draymond in the second round',
+    title: 'Golden State takes Draymond in the second round of the draft',
     date: '2012',
     reveal: 'In 2012, the Warriors picked Draymond in the second round before he became central to their dynasty.',
     sport: 'nba',

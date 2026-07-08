@@ -41,7 +41,19 @@ test('newly curated days use final editorial copy', () => {
     'LeBron lands on the SI cover as a high school junior',
   );
   expect(questionById.get('evt_blake_roty_after_injury')?.title).toBe(
-    'Blake Griffin misses his first NBA season, then wins ROTY',
+    'Blake Griffin wins Rookie of the Year after missing first season due to injury',
+  );
+  expect(questionById.get('evt_melo_syracuse_title')?.title).toBe(
+    'Carmelo carries Syracuse to a national title before getting drafted to the NBA',
+  );
+  expect(questionById.get('evt_melo_syracuse_title')?.reveal).toBe(
+    'In 2003, Melo won it all for the Orange as a freshman before becoming a top NBA prospect.',
+  );
+  expect(questionById.get('evt_hakeem_before_jordan_draft')?.title).toBe(
+    'Hakeem goes first before Jordan goes third in the draft',
+  );
+  expect(questionById.get('evt_draymond_second_round_pick')?.title).toBe(
+    'Golden State takes Draymond in the second round of the draft',
   );
   expect(questionById.get('evt_kg_high_school_draft')?.title).toBe(
     'Kevin Garnett jumps straight from high school to the NBA',

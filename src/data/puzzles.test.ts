@@ -54,7 +54,7 @@ test('rewindLab selects newly added puzzle numbers beyond day 20', () => {
     'Ron Artest officially becomes Metta World Peace',
     'Muggsy Bogues enters the NBA at 5-foot-3',
     'The NBA brings in the three-point line',
-    'Blake Griffin misses his first NBA season, then wins ROTY',
+    'Blake Griffin wins Rookie of the Year after missing first season due to injury',
   ]);
 });
 
