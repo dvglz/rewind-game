@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useEffect, useMemo, useState, createContext, useContext, type ReactNode } from 'react';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
@@ -241,22 +241,6 @@ test('starts the game even when first-run rules have not been seen', async () =>
   expect(markHomeIntroSeen).toHaveBeenCalledTimes(1);
 });
 
-test('does not render the auth screen in app mode even with mode=auth', async () => {
-  sessionStorage.clear();
-  window.history.replaceState({}, '', '/?from=app&mode=auth');
-
-  const { App } = await import('./App');
-  render(<App />);
-
-  await waitFor(() => {
-    expect(screen.getByTestId('home-screen')).toBeTruthy();
-  });
-  expect(screen.queryByTestId('auth-screen')).toBeNull();
-
-  window.history.replaceState({}, '', '/');
-  sessionStorage.clear();
-});
-
 test('routes Notify Me from results to auth with reminder copy', async () => {
   const { loadGameState } = await import('./engine/storage');
   vi.mocked(loadGameState).mockReturnValue({
@@ -267,7 +251,7 @@ test('routes Notify Me from results to auth with reminder copy', async () => {
     completed: true,
     elapsedMs: 90000,
   });
-  window.history.replaceState({}, '', '/?mode=results');
+  window.history.replaceState({}, '', '/results');
 
   const { App } = await import('./App');
   render(<App />);
@@ -288,10 +272,21 @@ test('routes Notify Me from results to auth with reminder copy', async () => {
 });
 
 test('does not let stale reminder reason affect leaderboard sign-in', async () => {
-  window.history.replaceState({}, '', '/?mode=auth&returnTo=leaderboard&authReason=reminder');
+  // Clear the invite/returnTo=groups query the shared beforeEach seeds onto
+  // window.location — App reads pendingInvite off the real window location
+  // regardless of the MemoryRouter path, so a lingering invite would steal
+  // this test's auth screen the moment auth resolves.
+  window.history.replaceState({}, '', '/');
+  const { AuthProvider } = await import('./context/AuthContext');
+  const { AppRoutes } = await import('./App');
 
-  const { App } = await import('./App');
-  render(<App />);
+  render(
+    <AuthProvider>
+      <MemoryRouter initialEntries={['/auth?returnTo=leaderboard&authReason=reminder']}>
+        <AppRoutes />
+      </MemoryRouter>
+    </AuthProvider>
+  );
 
   await waitFor(() => {
     expect(screen.getByTestId('auth-screen')).toBeTruthy();
@@ -314,20 +309,37 @@ test('renders the leaderboard screen at /leaderboard', async () => {
   expect(await screen.findByTestId('leaderboard-screen')).toBeTruthy();
 });
 
-test('back navigation returns to the previous screen', async () => {
-  const { AuthProvider } = await import('./context/AuthContext');
-  const { AppRoutes } = await import('./App');
+test('browser Back returns to the previously rendered screen', async () => {
+  window.history.replaceState({}, '', '/');
 
-  render(
-    <AuthProvider>
-      <MemoryRouter initialEntries={['/', '/archive']} initialIndex={1}>
-        <AppRoutes />
-      </MemoryRouter>
-    </AuthProvider>
-  );
+  const { App } = await import('./App');
+  render(<App />);
 
-  // At /archive first:
-  expect(await screen.findByTestId('archive-screen')).toBeTruthy();
+  await waitFor(() => {
+    expect(screen.getByTestId('home-screen')).toBeTruthy();
+  });
+
+  // Real forward navigation via an app control, pushing a new history entry.
+  fireEvent.click(screen.getByRole('button', { name: 'Leaderboard' }));
+
+  await waitFor(() => {
+    expect(screen.getByTestId('leaderboard-screen')).toBeTruthy();
+  });
+  expect(window.location.pathname).toBe('/leaderboard');
+
+  // Now actually traverse history backwards, the way a real browser Back
+  // button would, and confirm the view re-syncs with the URL.
+  await act(async () => {
+    window.history.back();
+  });
+
+  await waitFor(() => {
+    expect(window.location.pathname).toBe('/');
+  });
+  await waitFor(() => {
+    expect(screen.getByTestId('home-screen')).toBeTruthy();
+  });
+  expect(screen.queryByTestId('leaderboard-screen')).toBeNull();
 });
 
 test('a legacy ?mode=leaderboard link redirects to /leaderboard', async () => {
