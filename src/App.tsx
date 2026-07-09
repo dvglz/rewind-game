@@ -20,7 +20,7 @@ import { hidesCompletedGameLock, shouldEnableHapticsDebug } from './lib/testMode
 import { isAppMode, ensureAppModeParam } from './lib/appMode';
 import { useThemePreference } from './hooks/useThemePreference';
 import { fetchMyScore, flushPendingScore } from './lib/api';
-import { initAnalytics, track } from './lib/analytics';
+import { initAnalytics, track, trackPageView } from './lib/analytics';
 import { archiveGateAction } from './lib/archiveGate';
 import { buildTo, legacyRedirect, screenFromPathname, type Screen } from './lib/navigation';
 import { markHomeIntroSeen } from './lib/homeIntro';
@@ -41,6 +41,10 @@ export function AppRoutes() {
   const navigate = useNavigate();
   const location = useLocation();
   const screen: Screen = screenFromPathname(location.pathname);
+
+  useEffect(() => {
+    trackPageView(screen);
+  }, [screen]);
 
   // Central navigation: push a path, carrying context query via buildTo.
   // `state` is forwarded to the router so a guard can trust an in-app

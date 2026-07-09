@@ -180,7 +180,7 @@ test('updates the URL before tracking SPA navigation pageviews', async () => {
   window.history.replaceState({}, '', '/');
   trackPageViewMock.mockImplementation((screen: string) => {
     if (screen === 'leaderboard') {
-      expect(window.location.search).toBe('?mode=leaderboard');
+      expect(window.location.pathname).toBe('/leaderboard');
     }
   });
 
@@ -197,6 +197,8 @@ test('updates the URL before tracking SPA navigation pageviews', async () => {
   await waitFor(() => {
     expect(trackPageViewMock).toHaveBeenCalledWith('leaderboard');
   });
+
+  trackPageViewMock.mockReset();
 });
 
 test('marks the home intro as seen when Start enters the game', async () => {
@@ -405,4 +407,22 @@ test('/game with a completed save does not render even if freshStart state is st
 
   expect(await screen.findByTestId('home-screen')).toBeTruthy();
   expect(screen.queryByTestId('game-screen')).toBeNull();
+});
+
+test('fires exactly one page_view per navigation with the screen page_path', async () => {
+  const analytics = await import('./lib/analytics');
+  const spy = vi.spyOn(analytics, 'trackPageView');
+  const { AuthProvider } = await import('./context/AuthContext');
+  const { AppRoutes } = await import('./App');
+
+  render(
+    <AuthProvider>
+      <MemoryRouter initialEntries={['/leaderboard']}>
+        <AppRoutes />
+      </MemoryRouter>
+    </AuthProvider>
+  );
+  await waitFor(() => expect(spy).toHaveBeenCalledWith('leaderboard'));
+  expect(spy).toHaveBeenCalledTimes(1);
+  spy.mockRestore();
 });
