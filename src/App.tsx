@@ -320,6 +320,11 @@ export function AppRoutes() {
         const puzzle = getTodaysPuzzle(sport);
         const saved = loadGameState(puzzle.id);
         const freshStart = (location.state as { freshStart?: boolean } | null)?.freshStart === true;
+        // isPracticeMode() intentionally keeps a practice session on-screen across a
+        // refresh (before round 1 writes a save) — a deliberate, benign widening vs the
+        // old ?mode=game deep-link derivation, which bounced home. Practice has no scoring.
+        // `freshStart && !saved` trusts the just-started flag only until a save exists, so a
+        // stale freshStart history entry can't re-open /game after the game is completed.
         const inProgress = isPracticeMode() || (!!saved && !saved.completed) || (freshStart && !saved);
         return inProgress
           ? <GameScreen onFinish={() => go('results')} onHome={() => go('home')} />
