@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { BrowserRouter, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { HomeScreen } from './screens/HomeScreen';
 import { GameScreen } from './screens/GameScreen';
@@ -19,9 +20,9 @@ import { hidesCompletedGameLock, shouldEnableHapticsDebug } from './lib/testMode
 import { isAppMode, ensureAppModeParam } from './lib/appMode';
 import { useThemePreference } from './hooks/useThemePreference';
 import { fetchMyScore, flushPendingScore } from './lib/api';
-import { initAnalytics, trackPageView, track } from './lib/analytics';
+import { initAnalytics, track } from './lib/analytics';
 import { archiveGateAction } from './lib/archiveGate';
-import { computeNavSearch } from './lib/navigation';
+import { buildTo, screenFromPathname, type Screen } from './lib/navigation';
 import { markHomeIntroSeen } from './lib/homeIntro';
 import { LoadingOverlay } from './components/LoadingOverlay';
 import '@fontsource/special-gothic-condensed-one/latin-400.css';
@@ -31,14 +32,22 @@ import '@fontsource/lora/latin-700.css';
 import '@fontsource/lora/latin-700-italic.css';
 import './styles/global.css';
 
-type Screen = 'home' | 'game' | 'ordering' | 'results' | 'groups' | 'auth' | 'leaderboard' | 'howto' | 'archive';
-
 // In mock mode (local dev) the auth gate is bypassed so screens that normally
 // require a token — e.g. the global leaderboard — can be tested without one.
 const USE_MOCK = import.meta.env.VITE_MOCK_API === 'true';
 const REMINDER_AUTH_MESSAGE = "Drop your email and we'll ping you when tomorrow's puzzle drops. No password, no spam.";
 
-function AppInner() {
+export function AppRoutes() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const screen: Screen = screenFromPathname(location.pathname);
+
+  // Central navigation: push a path, carrying context query via buildTo.
+  const go = (s: Screen) => {
+    const { pathname, search } = buildTo(s, location.search);
+    navigate(`${pathname}${search}`);
+  };
+
   const allowReplay = hidesCompletedGameLock(window.location.search);
   const appMode = isAppMode();
   const hasVibrateSupport = typeof navigator !== 'undefined' && 'vibrate' in navigator;
@@ -99,91 +108,43 @@ function AppInner() {
     return params.get('invite');
   });
 
-  const [screen, setScreen] = useState<Screen>(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('invite')) {
-      if (!isAuthenticated) {
-        params.set('returnTo', 'groups');
-        const next = params.toString();
-        window.history.replaceState({}, '', `/?${next}`);
-      }
-      return isAuthenticated ? 'groups' : 'auth';
-    }
-    const mode = params.get('mode');
-    if (mode === 'auth') return isAppMode() ? 'home' : 'auth';
-    if (mode === 'howto') return 'howto';
-    if (mode === 'ordering') return 'ordering';
-    if (mode === 'game') {
-      const sport = getSport();
-      const puzzle = getTodaysPuzzle(sport);
-      const saved = loadGameState(puzzle.id);
-      if (saved && !saved.completed) return 'game';
-      return 'home';
-    }
-    if (mode === 'results') {
-      const sport = getSport();
-      const puzzle = getTodaysPuzzle(sport);
-      const saved = loadGameState(puzzle.id);
-      if (saved && saved.completed && !allowReplay) return 'results';
-      return 'home';
-    }
-    return 'home';
-  });
-
   const [howToEntry, setHowToEntry] = useState<HowToEntryPoint>('menu');
 
   useEffect(() => {
     initAnalytics();
-    trackPageView(screen);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const navigate = (s: Screen) => {
-    setScreen(s);
-    const nextSearch = computeNavSearch(window.location.search, s);
-    window.history.pushState({}, '', nextSearch ? `/?${nextSearch}` : '/');
-    trackPageView(s);
-  };
 
   const navigateToAuth = (returnTo: Screen) => {
     if (appMode) return; // app owns identity — no in-app login
-    const params = new URLSearchParams(window.location.search);
-    params.set('mode', 'auth');
+    const params = new URLSearchParams(location.search);
     params.set('returnTo', returnTo);
     params.delete('authReason');
-    const nextSearch = params.toString();
-    window.history.pushState({}, '', `/?${nextSearch}`);
-    setScreen('auth');
-    trackPageView('auth');
+    navigate(`/auth?${params.toString()}`);
   };
 
   const navigateToReminderAuth = () => {
     if (appMode) return;
-    const params = new URLSearchParams(window.location.search);
-    params.set('mode', 'auth');
+    const params = new URLSearchParams(location.search);
     params.set('returnTo', 'results');
     params.set('authReason', 'reminder');
-    const nextSearch = params.toString();
-    window.history.pushState({}, '', `/?${nextSearch}`);
-    setScreen('auth');
-    trackPageView('auth');
+    navigate(`/auth?${params.toString()}`);
   };
 
   useEffect(() => {
     if (!pendingInvite) return;
     if (isAuthLoading) return;
     if (isAuthenticated && screen === 'auth') {
-      navigate('groups');
+      go('groups');
     }
   }, [isAuthenticated, isAuthLoading, pendingInvite, screen]);
 
   const getReturnTo = (): string | null => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(location.search);
     return params.get('returnTo');
   };
 
   const getAuthReason = (): string | null => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(location.search);
     return params.get('authReason');
   };
 
@@ -198,31 +159,31 @@ function AppInner() {
     await flushPendingScore().catch(() => {});
 
     if (pendingInvite) {
-      navigate('groups');
+      go('groups');
       showAuthToast();
       return;
     }
     const returnTo = getReturnTo();
     const reason = getAuthReason();
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(location.search);
     params.delete('authReason');
     const nextWithoutReason = params.toString();
     window.history.replaceState({}, '', nextWithoutReason ? `/?${nextWithoutReason}` : '/');
 
     if (returnTo === 'archive') {
-      const archiveDate = new URLSearchParams(window.location.search).get('archiveDate');
+      const archiveDate = new URLSearchParams(location.search).get('archiveDate');
       if (archiveDate) {
         startPracticeGame(archiveDate);
       } else {
-        navigate('archive');
+        go('archive');
       }
       showAuthToast();
       return;
     }
     if (returnTo && ['home', 'game', 'ordering', 'results', 'groups', 'leaderboard'].includes(returnTo)) {
-      navigate(returnTo as Screen);
+      go(returnTo as Screen);
     } else {
-      navigate('home');
+      go('home');
     }
     showAuthToast(reason === 'reminder' ? "All set! See you tomorrow" : undefined);
   };
@@ -233,32 +194,29 @@ function AppInner() {
     const saved = loadGameState(puzzle.id);
     markHomeIntroSeen();
     if (saved && !saved.completed) {
-      navigate('game');
+      go('game');
       return;
     }
     beginPuzzleSession();
     clearGameState(puzzle.id);
-    navigate('game');
+    go('game');
   };
 
   const openHowTo = (entry: HowToEntryPoint) => {
     setHowToEntry(entry);
-    navigate('howto');
+    go('howto');
   };
 
   const startPracticeGame = (date: string) => {
     const sport = getSport();
     track('practice_start', { date, sport });
     clearGameState(`practice-${date}-${sport}`);
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(location.search);
     params.set('date', date);
     params.set('practice', '1');
-    params.set('mode', 'game');
     params.delete('returnTo');
     params.delete('archiveDate');
-    window.history.pushState({}, '', `/?${params.toString()}`);
-    setScreen('game');
-    trackPageView('game');
+    navigate(`/game?${params.toString()}`);
   };
 
   // Soft gate: logged-out users get one free archived game, then a sign-in prompt.
@@ -269,14 +227,11 @@ function AppInner() {
       freeUsed: hasUsedArchiveFreePlay(),
     });
     if (action === 'gate') {
-      const params = new URLSearchParams(window.location.search);
-      params.set('mode', 'auth');
+      const params = new URLSearchParams(location.search);
       params.set('returnTo', 'archive');
       params.set('archiveDate', date);
       params.delete('practice');
-      window.history.pushState({}, '', `/?${params.toString()}`);
-      setScreen('auth');
-      trackPageView('auth');
+      navigate(`/auth?${params.toString()}`);
       return;
     }
     if (action === 'play-free') {
@@ -286,13 +241,10 @@ function AppInner() {
   };
 
   const exitToArchive = () => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(location.search);
     params.delete('date');
     params.delete('practice');
-    params.set('mode', 'archive');
-    window.history.pushState({}, '', `/?${params.toString()}`);
-    setScreen('archive');
-    trackPageView('archive');
+    navigate(`/archive${params.toString() ? `?${params.toString()}` : ''}`);
   };
 
   if (isAuthLoading) {
@@ -322,25 +274,25 @@ function AppInner() {
             const puzzle = getTodaysPuzzle(sport);
             const saved = loadGameState(puzzle.id);
             if ((saved && saved.completed) || remoteCompleted) {
-              navigate('results');
+              go('results');
             }
           }}
-          onLeaderboard={() => (isAuthenticated || USE_MOCK) ? navigate('leaderboard') : navigateToAuth('leaderboard')}
+          onLeaderboard={() => (isAuthenticated || USE_MOCK) ? go('leaderboard') : navigateToAuth('leaderboard')}
           showDebugTools={allowReplay}
-          onGroups={() => navigate('groups')}
-          onArchive={() => navigate('archive')}
+          onGroups={() => go('groups')}
+          onArchive={() => go('archive')}
           onNavigateAuth={(returnTo) => navigateToAuth(returnTo as Screen)}
-          onSignOut={() => navigate('home')}
+          onSignOut={() => go('home')}
           onHowTo={(source) => openHowTo(source)}
         />
       )}
-      {screen === 'game' && <GameScreen onFinish={() => navigate('results')} onHome={() => navigate('home')} />}
-      {screen === 'ordering' && <OrderingScreen onFinish={() => navigate('results')} />}
+      {screen === 'game' && <GameScreen onFinish={() => go('results')} onHome={() => go('home')} />}
+      {screen === 'ordering' && <OrderingScreen onFinish={() => go('results')} />}
       {screen === 'results' && (
         <ResultsScreen
-          onHome={() => navigate('home')}
-          onGroups={() => navigate('groups')}
-          onLeaderboard={() => navigate('leaderboard')}
+          onHome={() => go('home')}
+          onGroups={() => go('groups')}
+          onLeaderboard={() => go('leaderboard')}
           onRequireAuth={(reason) => {
             if (reason === 'reminder') {
               navigateToReminderAuth();
@@ -348,20 +300,20 @@ function AppInner() {
             }
             navigateToAuth('results');
           }}
-          onArchive={() => navigate('archive')}
+          onArchive={() => go('archive')}
           onBackToArchive={exitToArchive}
           onPlayAgain={() => startPracticeGame(getDateOverride())}
         />
       )}
       {screen === 'groups' && (
         <GroupsScreen
-          onBack={() => navigate('home')}
+          onBack={() => go('home')}
           onRequireAuth={() => navigateToAuth('groups')}
           isAuthenticated={isAuthenticated}
           pendingInvite={pendingInvite ?? undefined}
           onInviteHandled={() => {
             setPendingInvite(null);
-            const params = new URLSearchParams(window.location.search);
+            const params = new URLSearchParams(location.search);
             params.delete('invite');
             const next = params.toString();
             window.history.replaceState({}, '', next ? `/?${next}` : '/');
@@ -369,11 +321,11 @@ function AppInner() {
         />
       )}
       {screen === 'leaderboard' && (
-        <LeaderboardScreen onBack={() => navigate('home')} />
+        <LeaderboardScreen onBack={() => go('home')} />
       )}
       {screen === 'archive' && (
         <ArchiveScreen
-          onBack={() => navigate('home')}
+          onBack={() => go('home')}
           onPlayPast={playArchivedDate}
         />
       )}
@@ -388,13 +340,13 @@ function AppInner() {
           })()}
           entryPoint={howToEntry}
           onPlay={startGame}
-          onHome={() => navigate('home')}
+          onHome={() => go('home')}
         />
       )}
       {screen === 'auth' && !appMode && (
         <>
           <AuthScreen
-            onBack={() => navigate('home')}
+            onBack={() => go('home')}
             onSuccess={() => {
               void handleAuthSuccess();
             }}
@@ -420,7 +372,9 @@ function AppInner() {
 export function App() {
   return (
     <AuthProvider>
-      <AppInner />
+      <BrowserRouter basename={import.meta.env.VITE_BASE_PATH || '/'}>
+        <AppRoutes />
+      </BrowserRouter>
     </AuthProvider>
   );
 }

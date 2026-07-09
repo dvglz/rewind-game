@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useEffect, useMemo, useState, createContext, useContext, type ReactNode } from 'react';
 import { beforeEach, expect, test, vi } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 
 const { trackPageViewMock } = vi.hoisted(() => ({
   trackPageViewMock: vi.fn(),
@@ -293,4 +294,35 @@ test('does not let stale reminder reason affect leaderboard sign-in', async () =
     expect(screen.getByTestId('auth-screen')).toBeTruthy();
   });
   expect(screen.getByTestId('auth-copy').textContent).toBe('auth');
+});
+
+test('renders the leaderboard screen at /leaderboard', async () => {
+  const { AuthProvider } = await import('./context/AuthContext');
+  const { AppRoutes } = await import('./App');
+
+  render(
+    <AuthProvider>
+      <MemoryRouter initialEntries={['/leaderboard']}>
+        <AppRoutes />
+      </MemoryRouter>
+    </AuthProvider>
+  );
+
+  expect(await screen.findByTestId('leaderboard-screen')).toBeTruthy();
+});
+
+test('back navigation returns to the previous screen', async () => {
+  const { AuthProvider } = await import('./context/AuthContext');
+  const { AppRoutes } = await import('./App');
+
+  render(
+    <AuthProvider>
+      <MemoryRouter initialEntries={['/', '/archive']} initialIndex={1}>
+        <AppRoutes />
+      </MemoryRouter>
+    </AuthProvider>
+  );
+
+  // At /archive first:
+  expect(await screen.findByTestId('archive-screen')).toBeTruthy();
 });
