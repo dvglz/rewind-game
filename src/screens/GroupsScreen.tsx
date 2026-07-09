@@ -7,7 +7,7 @@ import { GroupLeaderboard } from '../components/GroupLeaderboard';
 import { DateSelector } from '../components/DateSelector';
 import { CreateGroupModal } from '../components/CreateGroupModal';
 import { JoinGroupModal } from '../components/JoinGroupModal';
-import { ArrowLeft, Plus } from '../components/icons';
+import { ArrowLeft, Plus, RewindGlyph } from '../components/icons';
 import { Toast } from '../components/Toast';
 import { LoadingOverlay } from '../components/LoadingOverlay';
 import { useAuth } from '../context/AuthContext';
@@ -18,6 +18,8 @@ import styles from './GroupsScreen.module.css';
 
 interface GroupBoardState {
   groupId: number;
+  /** Day the board was fetched for (activeDateOffset + dayOffset). */
+  dayOffset: number;
   board: GlobalLeaderboard | null;
 }
 
@@ -76,7 +78,20 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
   const [groupBoardState, setGroupBoardState] = useState<GroupBoardState | null>(null);
   const detailGroupIds = useRef(new Set<number>());
   const group = selectedGroupId == null ? null : groups.find((g) => g.id === selectedGroupId) ?? null;
-  const groupBoard = group && groupBoardState?.groupId === group.id ? groupBoardState.board : null;
+  const requestedDayOffset = activeDateOffset + dayOffset;
+  // The stored board only counts when it matches BOTH the open group and the
+  // selected day — so switching group or day makes it "not loaded yet" and we
+  // show the loader instead of stale scores or a DNP flash.
+  const activeBoardState =
+    group &&
+    groupBoardState?.groupId === group.id &&
+    groupBoardState.dayOffset === requestedDayOffset
+      ? groupBoardState
+      : null;
+  const groupBoard = activeBoardState?.board ?? null;
+  // Scores for the selected group + day haven't arrived yet: show a loader
+  // rather than rendering every member as DNP while the request is in flight.
+  const boardLoading = !!group && activeBoardState == null;
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -159,12 +174,13 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
 
     let cancelled = false;
     const groupId = group.id;
-    fetchLeaderboard(activeDateOffset + dayOffset, group.id)
+    const requested = activeDateOffset + dayOffset;
+    fetchLeaderboard(requested, group.id)
       .then((board) => {
-        if (!cancelled) setGroupBoardState({ groupId, board });
+        if (!cancelled) setGroupBoardState({ groupId, dayOffset: requested, board });
       })
       .catch(() => {
-        if (!cancelled) setGroupBoardState({ groupId, board: null });
+        if (!cancelled) setGroupBoardState({ groupId, dayOffset: requested, board: null });
       });
 
     return () => {
@@ -243,7 +259,17 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
     const inviteUrl = `${getPublicAppUrl()}/?invite=${code}`;
     const shareText = `⏪ Join "${group.name}" on Rewind\nGuess 5 NBA moments by year\nGo ${inviteUrl} or use code ${code}`;
 
-    if (window.isSecureContext && navigator.share) {
+    // Native share is a great experience on phones/tablets, but on desktop
+    // (notably Windows Chrome/Edge) the OS share flyout frequently resolves as
+    // success when dismissed, so the code below would `return` without ever
+    // copying — the invite silently does nothing. Only offer native share when
+    // the primary pointer is coarse (touch); everything else copies + toasts.
+    const preferNativeShare =
+      window.isSecureContext &&
+      typeof navigator.share === 'function' &&
+      !!window.matchMedia?.('(pointer: coarse)').matches;
+
+    if (preferNativeShare) {
       try {
         await navigator.share({
           text: shareText,
@@ -358,10 +384,16 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
           </div>
 
           <div className={styles.leaderboardArea}>
-            <GroupLeaderboard
-              entries={leaderboardEntries}
-              emptySeed={`day-${dayOffset}`}
-            />
+            {boardLoading ? (
+              <div className={styles.loadingState} role="status" aria-label="Loading scores">
+                <RewindGlyph className={styles.loadingGlyph} aria-hidden="true" />
+              </div>
+            ) : (
+              <GroupLeaderboard
+                entries={leaderboardEntries}
+                emptySeed={`day-${dayOffset}`}
+              />
+            )}
           </div>
 
           <p className={styles.disclaimer}>

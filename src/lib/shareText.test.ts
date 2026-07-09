@@ -79,12 +79,45 @@ test('native share sends only text to avoid duplicating the Rewind title', async
     configurable: true,
     value: share,
   });
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    value: vi.fn().mockReturnValue({ matches: true }), // coarse pointer => touch device
+  });
 
   const text = 'Rewind #001 / Jun 6, 2026';
 
   await shareResults(text);
 
   expect(share).toHaveBeenCalledWith({ text });
+});
+
+test('copies to clipboard on desktop instead of invoking native share', async () => {
+  const share = vi.fn().mockResolvedValue(undefined);
+  const writeText = vi.fn().mockResolvedValue(undefined);
+  Object.defineProperty(window, 'isSecureContext', {
+    configurable: true,
+    value: true,
+  });
+  Object.defineProperty(navigator, 'share', {
+    configurable: true,
+    value: share,
+  });
+  Object.defineProperty(navigator, 'clipboard', {
+    configurable: true,
+    value: { writeText },
+  });
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    value: vi.fn().mockReturnValue({ matches: false }), // fine pointer => desktop
+  });
+
+  const text = 'Rewind #001 / Jun 6, 2026';
+
+  const outcome = await shareResults(text);
+
+  expect(share).not.toHaveBeenCalled();
+  expect(writeText).toHaveBeenCalledWith(text);
+  expect(outcome).toBe('copied');
 });
 
 test('uses the Archive title when the archive flag is set', () => {

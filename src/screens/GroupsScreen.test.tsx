@@ -340,3 +340,80 @@ test('shows the loading overlay until the groups resolve', async () => {
   await screen.findByText('My Groups');
   expect(screen.queryByRole('status', { name: 'Loading' })).toBeNull();
 });
+
+test('shows the glyph loader instead of flashing DNP while group scores are loading', async () => {
+  fetchGroups.mockResolvedValueOnce([smallGroup]);
+  let resolveBoard: (board: unknown) => void = () => {};
+  fetchLeaderboard.mockImplementationOnce(
+    () => new Promise((resolve) => { resolveBoard = resolve; }),
+  );
+
+  render(<GroupsScreen onBack={() => {}} onRequireAuth={() => {}} isAuthenticated />);
+
+  fireEvent.click(await screen.findByRole('button', { name: /the boys/i }));
+
+  // While the scores request is still in flight, members must NOT be shown as
+  // DNP — that is the flicker the loader replaces.
+  expect(await screen.findByRole('status', { name: /loading scores/i })).toBeTruthy();
+  expect(screen.queryByText('DNP')).toBeNull();
+
+  // Once scores resolve, DNP legitimately appears for members who did not play.
+  resolveBoard({
+    date: '2026-06-12',
+    currentUser: { rank: 1, userId: 7, displayName: 'You', score: 820, timeMs: 156000, isCurrentUser: true },
+    entries: [
+      { rank: 1, userId: 9, displayName: 'Mike', score: 940, timeMs: 72000, isCurrentUser: false },
+    ],
+  });
+
+  expect(await screen.findByText('DNP')).not.toBeNull();
+  expect(screen.queryByRole('status', { name: /loading scores/i })).toBeNull();
+});
+
+test('copies the invite on desktop instead of opening the native share sheet', async () => {
+  Object.defineProperty(window, 'isSecureContext', { configurable: true, value: true });
+  const share = vi.fn().mockResolvedValue(undefined);
+  Object.defineProperty(navigator, 'share', { configurable: true, value: share });
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    value: vi.fn().mockReturnValue({ matches: false }), // fine pointer => desktop
+  });
+
+  fetchGroups.mockResolvedValueOnce([smallGroup]);
+  fetchLeaderboard.mockResolvedValueOnce({ date: '2026-06-12', currentUser: null, entries: [] });
+
+  render(<GroupsScreen onBack={() => {}} onRequireAuth={() => {}} isAuthenticated />);
+
+  fireEvent.click(await screen.findByRole('button', { name: /the boys/i }));
+  fireEvent.click(await screen.findByRole('button', { name: /invite friends/i }));
+
+  expect(share).not.toHaveBeenCalled();
+  expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+    [
+      '⏪ Join "the boys" on Rewind',
+      'Guess 5 NBA moments by year',
+      'Go https://clutchpoints-rewind-test.4taps.me/?invite=YPWFZC or use code YPWFZC',
+    ].join('\n'),
+  );
+  expect(await screen.findByText(/copied/i)).toBeTruthy();
+});
+
+test('uses the native share sheet on touch devices', async () => {
+  Object.defineProperty(window, 'isSecureContext', { configurable: true, value: true });
+  const share = vi.fn().mockResolvedValue(undefined);
+  Object.defineProperty(navigator, 'share', { configurable: true, value: share });
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    value: vi.fn().mockReturnValue({ matches: true }), // coarse pointer => touch
+  });
+
+  fetchGroups.mockResolvedValueOnce([smallGroup]);
+  fetchLeaderboard.mockResolvedValueOnce({ date: '2026-06-12', currentUser: null, entries: [] });
+
+  render(<GroupsScreen onBack={() => {}} onRequireAuth={() => {}} isAuthenticated />);
+
+  fireEvent.click(await screen.findByRole('button', { name: /the boys/i }));
+  fireEvent.click(await screen.findByRole('button', { name: /invite friends/i }));
+
+  expect(share).toHaveBeenCalledWith({ text: expect.stringContaining('YPWFZC') });
+});

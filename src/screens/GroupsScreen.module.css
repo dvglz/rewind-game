@@ -137,6 +137,37 @@
   overflow: visible;
 }
 
+/* Glyph loader shown while the group's daily scores are still loading, so
+   members never briefly flash as DNP. Mirrors the global leaderboard. */
+.loadingState {
+  flex: 1;
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loadingGlyph {
+  width: 56px;
+  height: 56px;
+  color: var(--color-text);
+  transform-origin: center;
+  animation: loadingBreathe 1.25s ease-in-out infinite;
+}
+
+@keyframes loadingBreathe {
+  0%, 100% { transform: scale(0.82); opacity: 0.5; }
+  50% { transform: scale(1); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loadingGlyph {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
 /* Matches the global leaderboard disclaimer; sits below the board, above Leave. */
 .disclaimer {
   width: 100%;

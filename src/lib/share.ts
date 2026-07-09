@@ -69,7 +69,16 @@ export async function shareResults(text: string): Promise<ShareOutcome> {
     text,
   };
 
-  if (window.isSecureContext && navigator.share) {
+  // Native share shines on phones/tablets, but on desktop (notably Windows
+  // Chrome/Edge) the OS share flyout often resolves as success when dismissed,
+  // leaving nothing on the clipboard. Only offer it when the primary pointer is
+  // coarse (touch); everything else copies to the clipboard instead.
+  const preferNativeShare =
+    window.isSecureContext &&
+    typeof navigator.share === 'function' &&
+    !!window.matchMedia?.('(pointer: coarse)').matches;
+
+  if (preferNativeShare) {
     try {
       await navigator.share(shareData);
       return 'shared';
