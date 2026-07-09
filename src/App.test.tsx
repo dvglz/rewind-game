@@ -156,6 +156,7 @@ beforeEach(async () => {
   window.history.replaceState({}, '', '/?invite=EMNRLJ2G&returnTo=groups');
   const storage = await import('./engine/storage');
   vi.mocked(storage.hasSeenRules).mockReturnValue(true);
+  vi.mocked(storage.loadGameState).mockReturnValue(null);
   const homeIntro = await import('./lib/homeIntro');
   vi.mocked(homeIntro.markHomeIntroSeen).mockClear();
 });
@@ -325,4 +326,57 @@ test('back navigation returns to the previous screen', async () => {
 
   // At /archive first:
   expect(await screen.findByTestId('archive-screen')).toBeTruthy();
+});
+
+test('a legacy ?mode=leaderboard link redirects to /leaderboard', async () => {
+  const { AuthProvider } = await import('./context/AuthContext');
+  const { AppRoutes } = await import('./App');
+
+  render(
+    <AuthProvider>
+      <MemoryRouter initialEntries={['/?mode=leaderboard']}>
+        <AppRoutes />
+      </MemoryRouter>
+    </AuthProvider>
+  );
+
+  expect(await screen.findByTestId('leaderboard-screen')).toBeTruthy();
+});
+
+test('/results without a completed game redirects home', async () => {
+  // With no game state seeded, /results should bounce to home.
+  const { AuthProvider } = await import('./context/AuthContext');
+  const { AppRoutes } = await import('./App');
+
+  render(
+    <AuthProvider>
+      <MemoryRouter initialEntries={['/results']}>
+        <AppRoutes />
+      </MemoryRouter>
+    </AuthProvider>
+  );
+
+  expect(await screen.findByTestId('home-screen')).toBeTruthy();
+  expect(screen.queryByTestId('results-screen')).toBeNull();
+});
+
+test('/auth redirects home in app mode', async () => {
+  sessionStorage.clear();
+  window.history.replaceState({}, '', '/?from=app');
+  const { AuthProvider } = await import('./context/AuthContext');
+  const { AppRoutes } = await import('./App');
+
+  render(
+    <AuthProvider>
+      <MemoryRouter initialEntries={['/auth?from=app']}>
+        <AppRoutes />
+      </MemoryRouter>
+    </AuthProvider>
+  );
+
+  expect(await screen.findByTestId('home-screen')).toBeTruthy();
+  expect(screen.queryByTestId('auth-screen')).toBeNull();
+
+  window.history.replaceState({}, '', '/');
+  sessionStorage.clear();
 });

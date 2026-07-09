@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { HomeScreen } from './screens/HomeScreen';
 import { GameScreen } from './screens/GameScreen';
@@ -22,7 +22,7 @@ import { useThemePreference } from './hooks/useThemePreference';
 import { fetchMyScore, flushPendingScore } from './lib/api';
 import { initAnalytics, track } from './lib/analytics';
 import { archiveGateAction } from './lib/archiveGate';
-import { buildTo, screenFromPathname, type Screen } from './lib/navigation';
+import { buildTo, legacyRedirect, screenFromPathname, type Screen } from './lib/navigation';
 import { markHomeIntroSeen } from './lib/homeIntro';
 import { LoadingOverlay } from './components/LoadingOverlay';
 import '@fontsource/special-gothic-condensed-one/latin-400.css';
@@ -43,10 +43,22 @@ export function AppRoutes() {
   const screen: Screen = screenFromPathname(location.pathname);
 
   // Central navigation: push a path, carrying context query via buildTo.
-  const go = (s: Screen) => {
+  // `state` is forwarded to the router so a guard can trust an in-app
+  // transition (e.g. a freshly started game with no save yet) without
+  // re-deriving intent from persisted state alone.
+  const go = (s: Screen, state?: Record<string, unknown>) => {
     const { pathname, search } = buildTo(s, location.search);
-    navigate(`${pathname}${search}`);
+    navigate(`${pathname}${search}`, state ? { state } : undefined);
   };
+
+  // One-time: translate legacy /?mode=<screen> links to their path equivalent.
+  useEffect(() => {
+    const target = legacyRedirect(location.search);
+    if (target && location.pathname === '/') {
+      navigate(`${target.pathname}${target.search}`, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const allowReplay = hidesCompletedGameLock(window.location.search);
   const appMode = isAppMode();
@@ -133,8 +145,18 @@ export function AppRoutes() {
   useEffect(() => {
     if (!pendingInvite) return;
     if (isAuthLoading) return;
-    if (isAuthenticated && screen === 'auth') {
-      go('groups');
+    if (isAuthenticated) {
+      if (screen === 'auth' || screen === 'home') {
+        go('groups');
+      }
+      return;
+    }
+    if (screen === 'home') {
+      navigate(`/auth?${(() => {
+        const p = new URLSearchParams(location.search);
+        p.set('returnTo', 'groups');
+        return p.toString();
+      })()}`, { replace: true });
     }
   }, [isAuthenticated, isAuthLoading, pendingInvite, screen]);
 
@@ -199,7 +221,10 @@ export function AppRoutes() {
     }
     beginPuzzleSession();
     clearGameState(puzzle.id);
-    go('game');
+    // No save exists yet for a brand-new game (the first save happens after
+    // round 1 completes) — mark this transition so the /game guard doesn't
+    // mistake "just started" for "nothing to resume".
+    go('game', { freshStart: true });
   };
 
   const openHowTo = (entry: HowToEntryPoint) => {
@@ -286,25 +311,40 @@ export function AppRoutes() {
           onHowTo={(source) => openHowTo(source)}
         />
       )}
-      {screen === 'game' && <GameScreen onFinish={() => go('results')} onHome={() => go('home')} />}
+      {screen === 'game' && (() => {
+        const sport = getSport();
+        const puzzle = getTodaysPuzzle(sport);
+        const saved = loadGameState(puzzle.id);
+        const freshStart = (location.state as { freshStart?: boolean } | null)?.freshStart === true;
+        const inProgress = isPracticeMode() || (!!saved && !saved.completed) || freshStart;
+        return inProgress
+          ? <GameScreen onFinish={() => go('results')} onHome={() => go('home')} />
+          : <Navigate to="/" replace />;
+      })()}
       {screen === 'ordering' && <OrderingScreen onFinish={() => go('results')} />}
-      {screen === 'results' && (
-        <ResultsScreen
-          onHome={() => go('home')}
-          onGroups={() => go('groups')}
-          onLeaderboard={() => go('leaderboard')}
-          onRequireAuth={(reason) => {
-            if (reason === 'reminder') {
-              navigateToReminderAuth();
-              return;
-            }
-            navigateToAuth('results');
-          }}
-          onArchive={() => go('archive')}
-          onBackToArchive={exitToArchive}
-          onPlayAgain={() => startPracticeGame(getDateOverride())}
-        />
-      )}
+      {screen === 'results' && (() => {
+        const sport = getSport();
+        const puzzle = getTodaysPuzzle(sport);
+        const saved = loadGameState(puzzle.id);
+        const hasScore = (!!saved && saved.completed && !allowReplay) || remoteCompleted;
+        return hasScore ? (
+          <ResultsScreen
+            onHome={() => go('home')}
+            onGroups={() => go('groups')}
+            onLeaderboard={() => go('leaderboard')}
+            onRequireAuth={(reason) => {
+              if (reason === 'reminder') {
+                navigateToReminderAuth();
+                return;
+              }
+              navigateToAuth('results');
+            }}
+            onArchive={() => go('archive')}
+            onBackToArchive={exitToArchive}
+            onPlayAgain={() => startPracticeGame(getDateOverride())}
+          />
+        ) : <Navigate to="/" replace />;
+      })()}
       {screen === 'groups' && (
         <GroupsScreen
           onBack={() => go('home')}
@@ -343,27 +383,25 @@ export function AppRoutes() {
           onHome={() => go('home')}
         />
       )}
-      {screen === 'auth' && !appMode && (
-        <>
-          <AuthScreen
-            onBack={() => go('home')}
-            onSuccess={() => {
-              void handleAuthSuccess();
-            }}
-            returnTo={getReturnTo()}
-            contextMessage={
-              pendingInvite
-                ? "You'll join a group right after signing in"
-                : getReturnTo() === 'archive'
-                  ? 'Sign in to keep playing past puzzles'
-                  : isReminderAuth()
-                    ? REMINDER_AUTH_MESSAGE
-                    : undefined
-            }
-            reminderMode={isReminderAuth()}
-          />
-        </>
-      )}
+      {screen === 'auth' && (appMode ? <Navigate to="/" replace /> : (
+        <AuthScreen
+          onBack={() => go('home')}
+          onSuccess={() => {
+            void handleAuthSuccess();
+          }}
+          returnTo={getReturnTo()}
+          contextMessage={
+            pendingInvite
+              ? "You'll join a group right after signing in"
+              : getReturnTo() === 'archive'
+                ? 'Sign in to keep playing past puzzles'
+                : isReminderAuth()
+                  ? REMINDER_AUTH_MESSAGE
+                  : undefined
+          }
+          reminderMode={isReminderAuth()}
+        />
+      ))}
       {authToast && <Toast message={authToast} />}
     </>
   );
