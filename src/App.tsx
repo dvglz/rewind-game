@@ -316,7 +316,7 @@ export function AppRoutes() {
         const puzzle = getTodaysPuzzle(sport);
         const saved = loadGameState(puzzle.id);
         const freshStart = (location.state as { freshStart?: boolean } | null)?.freshStart === true;
-        const inProgress = isPracticeMode() || (!!saved && !saved.completed) || freshStart;
+        const inProgress = isPracticeMode() || (!!saved && !saved.completed) || (freshStart && !saved);
         return inProgress
           ? <GameScreen onFinish={() => go('results')} onHome={() => go('home')} />
           : <Navigate to="/" replace />;

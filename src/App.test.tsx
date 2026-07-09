@@ -380,3 +380,29 @@ test('/auth redirects home in app mode', async () => {
   window.history.replaceState({}, '', '/');
   sessionStorage.clear();
 });
+
+test('/game with a completed save does not render even if freshStart state is stale (Back/reload after finishing)', async () => {
+  const { loadGameState } = await import('./engine/storage');
+  vi.mocked(loadGameState).mockReturnValue({
+    puzzleId: '2026-06-15-american',
+    currentRound: 5,
+    results: [],
+    totalScore: 500,
+    completed: true,
+    elapsedMs: 90000,
+  });
+
+  const { AuthProvider } = await import('./context/AuthContext');
+  const { AppRoutes } = await import('./App');
+
+  render(
+    <AuthProvider>
+      <MemoryRouter initialEntries={[{ pathname: '/game', state: { freshStart: true } }]}>
+        <AppRoutes />
+      </MemoryRouter>
+    </AuthProvider>
+  );
+
+  expect(await screen.findByTestId('home-screen')).toBeTruthy();
+  expect(screen.queryByTestId('game-screen')).toBeNull();
+});
