@@ -1680,7 +1680,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_lebron_si_cover',
     title: 'LeBron lands on the SI cover as a high school junior',
-    date: '2002',
+    date: '2002-02-18',
     reveal: 'In 2002, LeBron was already being framed as basketball\'s next chosen one before he reached the NBA.',
     sport: 'nba_adjacent',
     theme: ['nba_adjacent'],
@@ -1694,7 +1694,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_artest_metta_world_peace',
     title: 'Ron Artest officially becomes Metta World Peace',
-    date: '2011',
+    date: '2011-09-16',
     reveal: 'In 2011, Artest legally changed his name and added another surreal chapter to his NBA story.',
     sport: 'nba_adjacent',
     theme: ['nba_adjacent'],
@@ -1708,7 +1708,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_muggsy_bogues_debut',
     title: 'Muggsy Bogues enters the NBA at 5-foot-3',
-    date: '1987',
+    date: '1987-11-06',
     reveal: 'In 1987, Muggsy entered the league and became the shortest player in NBA history.',
     sport: 'nba',
     theme: ['draft', 'record'],
@@ -1722,7 +1722,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_nba_three_point_line',
     title: 'The NBA brings in the three-point line',
-    date: '1979',
+    date: '1979-10-12',
     reveal: 'In 1979, the NBA adopted the three-point shot for the 1979-80 season.',
     sport: 'nba',
     theme: ['nba_adjacent'],
@@ -1736,7 +1736,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_blake_roty_after_injury',
     title: 'Blake Griffin wins Rookie of the Year after missing first season due to injury',
-    date: '2011',
+    date: '2011-05-04',
     reveal: 'In 2011, Griffin won Rookie of the Year after a knee injury wiped out what should have been his first NBA season.',
     sport: 'nba',
     theme: ['award'],
@@ -1750,7 +1750,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_air_jordan_1',
     title: 'The first Air Jordans start the sneaker era',
-    date: '1985',
+    date: '1985-04-01',
     reveal: 'In 1985, the first Air Jordans helped turn basketball shoes into culture.',
     sport: 'nba_adjacent',
     theme: ['nba_adjacent'],
@@ -1764,7 +1764,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_nick_young_no_look_miss',
     title: 'Nick Young makes that no-look missed three a meme',
-    date: '2014',
+    date: '2014-03-25',
     reveal: 'In 2014, Swaggy P celebrated before his three missed, giving NBA fans one of the funniest GIFs ever.',
     sport: 'nba_adjacent',
     theme: ['nba_adjacent'],
@@ -1778,7 +1778,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_tmac_raptors_high_school',
     title: 'Tracy McGrady goes straight from high school to Toronto',
-    date: '1997',
+    date: '1997-06-25',
     reveal: 'In 1997, McGrady entered the NBA as a teenage wing with huge upside.',
     sport: 'nba',
     theme: ['draft'],
@@ -1792,7 +1792,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_spud_webb_dunk_contest',
     title: 'Spud Webb wins the Dunk Contest at 5-foot-7',
-    date: '1986',
+    date: '1986-02-08',
     reveal: 'In 1986, Spud shocked the league by winning the dunk contest against much bigger flyers.',
     sport: 'nba',
     theme: ['signature_game'],
@@ -1806,7 +1806,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_nba_dress_code',
     title: 'The NBA brings in its controversial business-casual dress code',
-    date: '2005',
+    date: '2005-10-17',
     reveal: 'In 2005, the league\'s business-casual dress code changed how players showed up for official NBA business.',
     sport: 'nba',
     theme: ['nba_adjacent'],
@@ -1820,7 +1820,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_melo_syracuse_title',
     title: 'Carmelo carries Syracuse to a national title before getting drafted to the NBA',
-    date: '2003',
+    date: '2003-04-07',
     reveal: 'In 2003, Melo won it all for the Orange as a freshman before becoming a top NBA prospect.',
     sport: 'nba_adjacent',
     theme: ['nba_adjacent'],
@@ -1834,7 +1834,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_hakeem_before_jordan_draft',
     title: 'Hakeem goes first before Jordan goes third in the draft',
-    date: '1984',
+    date: '1984-06-19',
     reveal: 'In 1984, Houston took Hakeem No. 1 before Jordan went No. 3 to Chicago.',
     sport: 'nba',
     theme: ['draft'],
@@ -1848,7 +1848,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_manute_bol_debut',
     title: 'Manute Bol arrives in the NBA at 7-foot-7',
-    date: '1985',
+    date: '1985-10-25',
     reveal: 'In 1985, Bol entered the league as one of the tallest players basketball had ever seen.',
     sport: 'nba',
     theme: ['record', 'draft'],
@@ -1862,7 +1862,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_sixers_fo_fo_fo_title',
     title: 'The Sixers finish Moses Malone\'s "fo, fo, fo" playoff run',
-    date: '1983',
+    date: '1983-05-31',
     reveal: 'In 1983, Philadelphia went 12-1 in the playoffs after Moses Malone\'s famous "fo, fo, fo" prediction.',
     sport: 'nba',
     theme: ['finals', 'team_era'],
@@ -1876,7 +1876,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_shai_to_okc_pg_trade',
     title: 'Shai is sent to OKC in the Paul George blockbuster',
-    date: '2019',
+    date: '2019-07-10',
     reveal: 'In 2019, the Clippers sent Shai Gilgeous-Alexander, Danilo Gallinari and a huge pick haul to Oklahoma City for Paul George.',
     sport: 'nba',
     theme: ['trade'],
@@ -1890,7 +1890,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_curry_davidson_elite_eight',
     title: 'Curry carries Davidson to the Elite Eight',
-    date: '2008',
+    date: '2008-03-28',
     reveal: 'In 2008, Curry carried Davidson deep into the tournament and became a national name.',
     sport: 'nba_adjacent',
     theme: ['nba_adjacent'],
@@ -1904,7 +1904,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_iverson_reebok_question',
     title: 'Iverson\'s Reebok Questions arrive with his rookie season',
-    date: '1996',
+    date: '1996-11-01',
     reveal: 'In 1996, Iverson\'s first signature shoe matched the arrival of a new kind of NBA star.',
     sport: 'nba_adjacent',
     theme: ['nba_adjacent'],
@@ -1918,7 +1918,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_robinson_spurs_navy',
     title: 'David Robinson finally joins the Spurs after his Navy commitment',
-    date: '1989',
+    date: '1989-11-04',
     reveal: 'In 1989, Robinson joined San Antonio after completing his Navy service.',
     sport: 'nba',
     theme: ['draft'],
@@ -1932,7 +1932,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_nba_zone_defense_rules',
     title: 'The NBA opens the door for zone defense',
-    date: '2001',
+    date: '2001-04-12',
     reveal: 'In 2001, the league changed its defensive rules and moved away from the old illegal-defense era.',
     sport: 'nba',
     theme: ['nba_adjacent'],
@@ -1946,7 +1946,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_bird_celtics_1986_title',
     title: 'Bird\'s Celtics beat the Rockets for another 80s title',
-    date: '1986',
+    date: '1986-06-08',
     reveal: 'In 1986, Boston beat Houston to finish one of the great Celtics seasons.',
     sport: 'nba',
     theme: ['finals', 'team_era'],
@@ -1960,7 +1960,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_kg_high_school_draft',
     title: 'Kevin Garnett jumps straight from high school to the NBA',
-    date: '1995',
+    date: '1995-06-28',
     reveal: 'In 1995, Garnett helped reopen the path from high school straight to the league.',
     sport: 'nba',
     theme: ['draft'],
@@ -1974,7 +1974,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_kemba_uconn_title',
     title: 'Kemba Walker carries UConn through March Madness',
-    date: '2011',
+    date: '2011-04-04',
     reveal: 'In 2011, Kemba Walker led UConn through a legendary tournament run and won the national title.',
     sport: 'nba_adjacent',
     theme: ['nba_adjacent'],
@@ -1988,7 +1988,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_nba_2k_debut_iverson',
     title: 'NBA 2K launches with Iverson on the cover',
-    date: '1999',
+    date: '1999-11-10',
     reveal: 'In 1999, the first NBA 2K debuted with Allen Iverson as its cover star.',
     sport: 'nba_adjacent',
     theme: ['nba_adjacent'],
@@ -2002,7 +2002,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_magic_bird_enter_nba',
     title: 'Magic and Bird enter the NBA together',
-    date: '1979',
+    date: '1979-10-12',
     reveal: 'In 1979, Magic and Bird arrived and helped pull the league into a new era.',
     sport: 'nba',
     theme: ['draft', 'rivalry'],
@@ -2016,7 +2016,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_nba_steals_blocks_official',
     title: 'The NBA starts officially tracking steals and blocks',
-    date: '1973',
+    date: '1973-10-09',
     reveal: 'In 1973, steals and blocks became official NBA stats for the first time.',
     sport: 'nba',
     theme: ['record', 'nba_adjacent'],
@@ -2030,7 +2030,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_yao_no_1_pick',
     title: 'Yao Ming goes No. 1 from China',
-    date: '2002',
+    date: '2002-06-26',
     reveal: 'In 2002, Houston drafted Yao first overall and turned the Rockets into a global story.',
     sport: 'nba',
     theme: ['draft'],
@@ -2044,7 +2044,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_amare_roty_high_school',
     title: 'Amar\'e wins Rookie of the Year straight out of high school',
-    date: '2003',
+    date: '2003-04-24',
     reveal: 'In 2003, Amar\'e became Rookie of the Year after jumping straight from high school to the NBA.',
     sport: 'nba',
     theme: ['award', 'draft'],
@@ -2058,7 +2058,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_pau_gasol_roty_memphis',
     title: 'Pau Gasol becomes Rookie of the Year in Memphis',
-    date: '2002',
+    date: '2002-04-24',
     reveal: 'In 2002, Gasol became the first international player to win NBA Rookie of the Year.',
     sport: 'nba',
     theme: ['award'],
@@ -2072,7 +2072,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_lakers_beat_celtics_1985',
     title: 'The Lakers finally beat the Celtics in the Finals',
-    date: '1985',
+    date: '1985-06-09',
     reveal: 'In 1985, the Lakers beat Boston in the Finals for the first time after years of Celtics heartbreak.',
     sport: 'nba',
     theme: ['finals', 'rivalry'],
@@ -2086,7 +2086,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_nba_bans_ninja_headbands',
     title: 'The NBA bans ninja-style headbands',
-    date: '2019',
+    date: '2019-09-09',
     reveal: 'In 2019, the league banned the loose-tie headbands before the new season over safety and uniform concerns.',
     sport: 'nba',
     theme: ['nba_adjacent'],
@@ -2100,7 +2100,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_shaq_breaks_backboard_rookie',
     title: 'Shaq brings down a backboard as a rookie',
-    date: '1993',
+    date: '1993-04-23',
     reveal: 'In 1993, Shaq\'s power became a literal problem for NBA rims.',
     sport: 'nba',
     theme: ['signature_game'],
@@ -2114,7 +2114,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_dirk_passes_wilt_scoring',
     title: 'Dirk passes Wilt on the all-time scoring list',
-    date: '2019',
+    date: '2019-03-18',
     reveal: 'In 2019, Dirk moved past Wilt Chamberlain in the final stretch of his legendary career.',
     sport: 'nba',
     theme: ['record'],
@@ -2128,7 +2128,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_first_draft_lottery_ewing',
     title: 'The first Draft Lottery sends Patrick Ewing to NY',
-    date: '1985',
+    date: '1985-05-12',
     reveal: 'In 1985, the first NBA Draft Lottery landed Ewing with the Knicks.',
     sport: 'nba',
     theme: ['draft'],
@@ -2142,7 +2142,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_nbdl_begins_play',
     title: 'The future G League begins play as the NBDL',
-    date: '2001',
+    date: '2001-11-16',
     reveal: 'In 2001, the NBA\'s development league began as the NBDL. It later became the D-League, then the G League in 2017.',
     sport: 'nba',
     theme: ['nba_adjacent'],
@@ -2156,7 +2156,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_bad_boy_pistons_first_title',
     title: 'The Bad Boy Pistons win their first title',
-    date: '1989',
+    date: '1989-06-13',
     reveal: 'In 1989, Detroit beat the Lakers and finally turned the Bad Boys era into a championship.',
     sport: 'nba',
     theme: ['finals', 'team_era'],
@@ -2170,7 +2170,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_kobe_si_cover_pre_draft',
     title: 'Kobe hits the Sports Illustrated cover before draft night',
-    date: '1996',
+    date: '1996-06-17',
     reveal: 'In 1996, Kobe was already a national basketball name before entering the NBA.',
     sport: 'nba_adjacent',
     theme: ['nba_adjacent'],
@@ -2184,7 +2184,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_cp3_roty_new_orleans',
     title: 'Chris Paul becomes Rookie of the Year in New Orleans',
-    date: '2006',
+    date: '2006-05-10',
     reveal: 'In 2006, CP3 won Rookie of the Year and gave New Orleans its new franchise guard.',
     sport: 'nba',
     theme: ['award'],
@@ -2198,7 +2198,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_mikal_bridges_ironman_streak',
     title: 'Mikal Bridges plays 23 sec to keep his ironman streak alive',
-    date: '2026',
+    date: '2026-04-12',
     reveal: 'In 2026, Bridges played 23 seconds in the Knicks\' finale to extend the NBA\'s longest active streak to 638 straight games.',
     sport: 'nba',
     theme: ['record'],
@@ -2212,7 +2212,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_kareem_name_change',
     title: 'Lew Alcindor becomes Kareem Abdul-Jabbar',
-    date: '1971',
+    date: '1971-05-01',
     reveal: 'In 1971, Alcindor publicly adopted the name Kareem Abdul-Jabbar.',
     sport: 'nba',
     theme: ['nba_adjacent'],
@@ -2226,7 +2226,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_sleeved_jerseys_games',
     title: 'Sleeved jerseys show up in real NBA games',
-    date: '2013',
+    date: '2013-02-22',
     reveal: 'In 2013, short-sleeve jerseys became one of the league\'s strangest uniform experiments.',
     sport: 'nba',
     theme: ['nba_adjacent'],
@@ -2240,7 +2240,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_jordan_im_back_fax',
     title: 'Jordan sends the "I\'m back" fax',
-    date: '1995',
+    date: '1995-03-18',
     reveal: 'In 1995, Jordan returned from baseball with two words that shook the league.',
     sport: 'nba',
     theme: ['team_era', 'nba_adjacent'],
@@ -2254,7 +2254,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_bill_russell_number_retired',
     title: 'The NBA retires Bill Russell\'s No. 6 league-wide',
-    date: '2022',
+    date: '2022-08-11',
     reveal: 'In 2022, the NBA retired Russell\'s No. 6 across the league, the first league-wide number retirement in NBA history.',
     sport: 'nba',
     theme: ['record', 'nba_adjacent'],
@@ -2268,7 +2268,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_fred_vanvleet_undrafted',
     title: 'VanVleet goes undrafted before earning an NBA spot',
-    date: '2016',
+    date: '2016-06-23',
     reveal: 'In 2016, VanVleet went undrafted before starting one of the league\'s best underdog careers.',
     sport: 'nba',
     theme: ['draft'],
@@ -2282,7 +2282,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_oscar_triple_double_season',
     title: 'Oscar Robertson averages a triple-double for a season',
-    date: '1962',
+    date: '1962-03-14',
     reveal: 'In 1962, Robertson averaged 30.8 points, 12.5 rebounds and 11.4 assists, becoming the first player to average a triple-double for a season.',
     sport: 'nba',
     theme: ['record', 'season_record'],
@@ -2296,7 +2296,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_nba_hand_checking_limits',
     title: 'The NBA limits hand-checking and opens the game for guards',
-    date: '2004',
+    date: '2004-11-02',
     reveal: 'In 2004, the NBA emphasized perimeter contact rules, making it harder for defenders to steer ball-handlers with their hands.',
     sport: 'nba',
     theme: ['nba_adjacent'],
@@ -2310,7 +2310,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_nash_first_mvp_phoenix',
     title: 'Nash wins his first MVP after returning to Phoenix',
-    date: '2005',
+    date: '2005-05-08',
     reveal: 'In 2005, Nash won MVP after coming back to Phoenix and reshaping the Suns offense.',
     sport: 'nba',
     theme: ['award'],
@@ -2324,7 +2324,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_jontay_porter_lifetime_ban',
     title: 'Jontay Porter gets banned for life over NBA betting rules',
-    date: '2024',
+    date: '2024-04-17',
     reveal: 'In 2024, Porter was banned after the NBA said he shared confidential information with bettors and bet on NBA games.',
     sport: 'nba',
     theme: ['scandal'],
@@ -2338,7 +2338,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_rasheed_technical_foul_record',
     title: 'Rasheed Wallace sets the single-season record for techs',
-    date: '2001',
+    date: '2001-04-18',
     reveal: 'In 2001, Rasheed Wallace picked up 41 techs, still the NBA\'s single-season record.',
     sport: 'nba',
     theme: ['record', 'season_record'],
@@ -2352,7 +2352,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_aba_nba_merger',
     title: 'The ABA-NBA merger brings four teams into the league',
-    date: '1976',
+    date: '1976-06-17',
     reveal: 'In 1976, the Nuggets, Pacers, Spurs and Nets joined the NBA from the ABA.',
     sport: 'nba',
     theme: ['team_era'],
@@ -2366,7 +2366,7 @@ export const REWIND_QUESTION_BANK: RewindQuestion[] = [
   {
     id: 'evt_draymond_second_round_pick',
     title: 'Golden State takes Draymond in the second round of the draft',
-    date: '2012',
+    date: '2012-06-28',
     reveal: 'In 2012, the Warriors picked Draymond in the second round before he became central to their dynasty.',
     sport: 'nba',
     theme: ['draft', 'team_era'],

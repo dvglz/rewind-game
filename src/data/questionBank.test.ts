@@ -89,7 +89,8 @@ test('newly curated days use final editorial copy', () => {
 
 test('date parses and reveal confirms the same year', () => {
   for (const q of REWIND_QUESTION_BANK) {
-    const year = new Date(q.date).getFullYear();
+    expect(q.date, q.id).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    const year = Number(q.date.slice(0, 4));
     expect(Number.isFinite(year)).toBe(true);
     expect(year).toBeGreaterThanOrEqual(1946);
     expect(year).toBeLessThanOrEqual(new Date().getFullYear() + 1);
