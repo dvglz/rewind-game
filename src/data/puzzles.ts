@@ -201,7 +201,9 @@ function rawToGameEvent(raw: RawEvent, sport: Sport): GameEvent {
 
   return {
     text: raw.title,
-    year: new Date(raw.date).getFullYear(),
+    // Parse the year from the string directly: new Date('2003') is UTC
+    // midnight, so getFullYear() returns 2002 for players west of UTC.
+    year: Number(raw.date.slice(0, 4)),
     detail: context ? `${reveal} ${context}.` : `${reveal}.`,
   };
 }

@@ -93,6 +93,18 @@ test('rewindLab accepts a stable puzzle id', () => {
   expect(puzzle.number).toBe(2);
 });
 
+test('event years match the question date regardless of player timezone', () => {
+  const originalTZ = process.env.TZ;
+  process.env.TZ = 'America/Los_Angeles';
+  try {
+    // Day 23: every event uses a bare-year date ('2003', '1984', ...).
+    const puzzle = getPuzzleForDate('2026-07-10');
+    expect(puzzle.events.map((event) => event.year)).toEqual([2003, 1984, 1985, 1983, 2019]);
+  } finally {
+    process.env.TZ = originalTZ;
+  }
+});
+
 test('isPracticeMode reflects the ?practice=1 param', () => {
   window.history.replaceState({}, '', '/');
   expect(isPracticeMode()).toBe(false);
