@@ -1,7 +1,21 @@
+export interface SpecialEventMedia {
+  src: string;
+  caption: string;
+  credit: string;
+}
+
+export interface PuzzleSpecial {
+  slug: string;
+  flag: string;
+  label: string;
+  shareLine: string;
+}
+
 export interface GameEvent {
   text: string;
   year: number;
   detail?: string;
+  media?: SpecialEventMedia;
 }
 
 export interface Puzzle {
@@ -9,6 +23,8 @@ export interface Puzzle {
   number: number;
   sport: 'american' | 'soccer';
   theme?: string;
+  weights?: readonly number[];
+  special?: PuzzleSpecial;
   events: GameEvent[];
 }
 
@@ -31,6 +47,7 @@ export interface GameState {
   completed: boolean;
   startedAt?: number;
   elapsedMs?: number;
+  pausedMs?: number;
 }
 
 export interface PlayerStats {
