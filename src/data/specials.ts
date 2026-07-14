@@ -43,30 +43,55 @@ export const MESSI_SPECIAL: SpecialDay = {
       title: 'Messi makes his La Liga debut for Barcelona',
       date: '2004-10-16',
       reveal: 'In 2004, a 17-year-old Messi came on against Espanyol in the derby, becoming one of the youngest players ever to appear for Barcelona in La Liga',
+      media: {
+        src: '/specials/messi/02-debut.jpg',
+        caption: 'A teenage Messi playing for Barcelona in the 2005–06 season, in the years right after his debut',
+        credit: 'Photo: Josep Tomàs, CC BY-SA 4.0, via Wikimedia Commons',
+      },
     },
     {
       id: 'evt_messi_first_goal',
       title: 'Messi scores his first senior goal, chipped in from a Ronaldinho assist',
       date: '2005-05-01',
       reveal: 'In 2005, Ronaldinho lobbed the pass and the teenager finished it against Albacete — the first of more than 800 career goals',
+      media: {
+        src: '/specials/messi/03-first-goal.jpg',
+        caption: 'Messi with Ronaldinho and his Barcelona teammates celebrating at Camp Nou, December 2005',
+        credit: 'Photo: Hector Garcia, CC BY-SA 2.0, via Wikimedia Commons',
+      },
     },
     {
       id: 'evt_messi_first_ballon',
       title: 'Messi wins his first Ballon d’Or',
       date: '2009-12-01',
       reveal: 'In 2009, after Barcelona won six trophies in a single year, Messi claimed his first Ballon d’Or by what was then the widest margin in the award’s history',
+      media: {
+        src: '/specials/messi/04-ballon-dor.jpg',
+        caption: 'Messi taking a corner for Barcelona at Camp Nou, April 2009 — the season he won his first Ballon d’Or',
+        credit: 'Photo: Tsutomu Takasu, CC BY 2.0, via Wikimedia Commons',
+      },
     },
     {
       id: 'evt_messi_91_goals',
       title: 'Messi sets the record for most goals in a calendar year: 91',
       date: '2012-12-22',
       reveal: 'In 2012, Messi passed Gerd Müller’s 85-goal mark and finished on 91 goals for club and country — a record nobody has come close to since',
+      media: {
+        src: '/specials/messi/05-record-goals.jpg',
+        caption: 'Messi playing for Barcelona in the Champions League against Bayer Leverkusen, March 2012 — the record-breaking year',
+        credit: 'Photo: Shai Pal, CC BY-SA 3.0, via Wikimedia Commons',
+      },
     },
     {
       id: 'evt_messi_wc_final_loss',
       title: 'Messi loses the World Cup final to Germany at the Maracanã',
       date: '2014-07-13',
       reveal: 'In 2014, Götze’s extra-time volley broke Argentina’s hearts, and Messi’s long walk past the trophy became one of football’s most haunting images',
+      media: {
+        src: '/specials/messi/06-maracana.jpg',
+        caption: 'A dejected Messi after Argentina’s loss to Germany in the 2014 World Cup final at the Maracanã',
+        credit: 'Photo: Agência Brasil, CC BY 3.0 BR, via Wikimedia Commons',
+      },
     },
     {
       id: 'evt_messi_retirement',
@@ -85,12 +110,22 @@ export const MESSI_SPECIAL: SpecialDay = {
       title: 'Messi lifts the World Cup in Qatar',
       date: '2022-12-18',
       reveal: 'In 2022, Messi won maybe the greatest final ever played, beating France on penalties after a 3–3 epic to complete football’s last unfinished résumé',
+      media: {
+        src: '/specials/messi/09-worldcup.jpg',
+        caption: 'Messi scores a penalty for Argentina against France in the 2022 World Cup final in Qatar',
+        credit: 'Photo: Sebas, CC BY 3.0, via Wikimedia Commons',
+      },
     },
     {
       id: 'evt_messi_miami',
       title: 'Messi debuts for Inter Miami and wins it with a last-minute free kick',
       date: '2023-07-21',
       reveal: 'In 2023, Messi’s first game in American soccer ended with a 94th-minute free-kick winner — and MLS was never the same',
+      media: {
+        src: '/specials/messi/10-miami.jpg',
+        caption: 'Messi in Inter Miami’s pink kit during the 2023 U.S. Open Cup semifinal against FC Cincinnati, his first American season',
+        credit: 'Photo: Hayden Schiff, CC BY 4.0, via Wikimedia Commons',
+      },
     },
   ],
 };

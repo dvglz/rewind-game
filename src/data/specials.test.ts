@@ -38,6 +38,15 @@ describe('specials registry', () => {
       expect(e.reveal.startsWith('In ')).toBe(true);
     }
   });
+
+  test('all media entries are complete and point at bundled assets', () => {
+    for (const e of MESSI_SPECIAL.events) {
+      if (!e.media) continue;
+      expect(e.media.src).toMatch(/^\/specials\/messi\/\d{2}-[a-z-]+\.jpg$/);
+      expect(e.media.caption.length).toBeGreaterThan(10);
+      expect(e.media.credit).toMatch(/^Photo: .+, via Wikimedia Commons$/);
+    }
+  });
 });
 
 describe('computeSpecialRedirect', () => {
