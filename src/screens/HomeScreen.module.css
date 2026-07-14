@@ -269,6 +269,10 @@
 /* Special-event pill above the footer CTA (regular home: play the special;
    special mode: switch back). Pops in, then nudges periodically for eyeballs. */
 .specialSlot {
+  position: absolute;
+  bottom: 76px;
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: center;
 }

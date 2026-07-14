@@ -53,7 +53,6 @@ export function HomeScreen({
   const [randomEnabled, setRandomEnabled] = useState(() => isRandomModeEnabled());
   const [signOutToast, setSignOutToast] = useState(false);
   const hideAuthControls = isAppMode();
-  const showIntroDemo = !hideAuthControls && !isAuthenticated && !hasSeenHomeIntro();
 
   useEffect(() => {
     if (hideAuthControls) {
@@ -89,6 +88,10 @@ export function HomeScreen({
   // a banner promoting the special once its day has arrived.
   const specialDay = special ? getActiveSpecial() : null;
   const bannerSpecial = special ? null : getBannerSpecial(getDateOverride());
+  // The landing demo animates the NBA daily — suppress it while a special is
+  // being promoted or played so the copy and demo don't contradict each other.
+  const showIntroDemo =
+    !hideAuthControls && !isAuthenticated && !hasSeenHomeIntro() && !specialDay && !bannerSpecial;
 
   return (
     <div className={`${styles.container} ${showIntroDemo ? '' : styles.containerCompact}`}>
