@@ -25,12 +25,13 @@ export function clearAllGameStates(): void {
   localStorage.removeItem(GAME_STATE_KEY);
 }
 
-export function pruneOldGameStates(currentPuzzleId: string): void {
+export function pruneOldGameStates(currentPuzzleIds: string | string[]): void {
+  const keep = new Set(Array.isArray(currentPuzzleIds) ? currentPuzzleIds : [currentPuzzleIds]);
   const all = JSON.parse(localStorage.getItem(GAME_STATE_KEY) || '{}');
   const keys = Object.keys(all);
   let changed = false;
   for (const key of keys) {
-    if (key !== currentPuzzleId) {
+    if (!keep.has(key)) {
       delete all[key];
       changed = true;
     }

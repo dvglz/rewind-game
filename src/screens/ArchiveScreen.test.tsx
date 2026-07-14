@@ -36,10 +36,11 @@ test('tapping a row plays that date', () => {
   expect(onPlayPast).toHaveBeenCalledWith('2026-06-21');
 });
 
-test('flags the Messi special day row with its flag', () => {
-  today.value = '2026-07-16'; // one day after the 2026-07-15 special, so it's in the archive
+test('archive shows the regular #028 row without a special flag (special is a parallel mode)', () => {
+  today.value = '2026-07-16'; // one day after the 2026-07-15 special
   render(<ArchiveScreen onBack={() => {}} onPlayPast={() => {}} />);
   const rows = screen.getAllByRole('button', { name: /Play #/ });
-  const messiRow = rows.find((row) => row.textContent?.includes('#028'));
-  expect(messiRow?.textContent).toContain(`#028 ${MESSI_SPECIAL.flag}`);
+  const jul15Row = rows.find((row) => row.textContent?.includes('#028'));
+  expect(jul15Row?.textContent).toContain('#028');
+  expect(jul15Row?.textContent).not.toContain(MESSI_SPECIAL.flag);
 });

@@ -9,7 +9,8 @@ import { useGame } from '../hooks/useGame';
 import { useTimeline } from '../hooks/useTimeline';
 import { useElapsedTimer } from '../hooks/useElapsedTimer';
 import { formatTime } from '../lib/formatTime';
-import { getTodaysPuzzle, isRewindLabMode, isPracticeMode } from '../data/puzzles';
+import { getTodaysPuzzle, getDateOverride, isRewindLabMode, isPracticeMode } from '../data/puzzles';
+import { getActiveSpecial, isSpecialScoringLive } from '../data/specials';
 import { getResultColor, getResultColorVar, getResultLabel, getMaxPossibleScore, ROUND_WEIGHTS } from '../engine/scoring';
 import { vibrateConfirm, vibrateError, vibrateMedium } from '../lib/haptics';
 import { loadStats } from '../engine/storage';
@@ -32,7 +33,13 @@ interface GameScreenProps {
 
 export function GameScreen({ onFinish, onHome }: GameScreenProps) {
   const puzzle = getTodaysPuzzle();
-  const game = useGame(puzzle, { scoringEnabled: !isRewindLabMode() && !isPracticeMode() });
+  const activeSpecial = getActiveSpecial();
+  // Specials only submit real scores on their event day; afterwards /slug
+  // replays are practice so the one-day board stays clean.
+  const specialScoringLive = !activeSpecial || isSpecialScoringLive(activeSpecial, getDateOverride());
+  const game = useGame(puzzle, {
+    scoringEnabled: !isRewindLabMode() && !isPracticeMode() && specialScoringLive,
+  });
   const timeline = useTimeline(puzzle.events);
   const weights = puzzle.weights ?? ROUND_WEIGHTS;
   // Capture the game's start once so the timer base is stable across renders.

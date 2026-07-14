@@ -102,8 +102,9 @@ function mockBoard(dayOffset: number): GlobalLeaderboard {
 // endpoint, offset N comes from previous_leaderboard_id of offset N-1.
 const leaderboardIdCache = new Map<string, number>();
 
-function cacheKey(dayOffset: number, groupId?: number): string {
-  return groupId != null ? `group:${groupId}:${dayOffset}` : `global:${dayOffset}`;
+function cacheKey(dayOffset: number, groupId?: number, gameMode?: string): string {
+  const base = groupId != null ? `group:${groupId}:${dayOffset}` : `global:${dayOffset}`;
+  return gameMode ? `${gameMode}:${base}` : base;
 }
 
 // ── Response mapping ──────────────────────────────────────
@@ -157,17 +158,17 @@ function mapResponse(raw: LeaderboardApiResponse): GlobalLeaderboard {
 }
 
 /** Cache the leaderboard ID at `offset` and its previous pointer at `offset+1`. */
-function cacheFromResponse(raw: LeaderboardApiResponse, offset: number, groupId?: number): void {
+function cacheFromResponse(raw: LeaderboardApiResponse, offset: number, groupId?: number, gameMode?: string): void {
   if (!raw.leaderboard) return;
-  leaderboardIdCache.set(cacheKey(offset, groupId), raw.leaderboard.id);
+  leaderboardIdCache.set(cacheKey(offset, groupId, gameMode), raw.leaderboard.id);
   if (raw.leaderboard.previous_leaderboard_id != null) {
-    leaderboardIdCache.set(cacheKey(offset + 1, groupId), raw.leaderboard.previous_leaderboard_id);
+    leaderboardIdCache.set(cacheKey(offset + 1, groupId, gameMode), raw.leaderboard.previous_leaderboard_id);
   }
 }
 
 // ── Public API ─────────────────────────────────────────────
 
-export async function fetchLeaderboard(dayOffset: number, groupId?: number): Promise<GlobalLeaderboard> {
+export async function fetchLeaderboard(dayOffset: number, groupId?: number, gameMode?: string): Promise<GlobalLeaderboard> {
   if (usesMockApi()) {
     await new Promise((r) => setTimeout(r, 300));
     return mockBoard(dayOffset);
@@ -175,40 +176,40 @@ export async function fetchLeaderboard(dayOffset: number, groupId?: number): Pro
 
   // dayOffset 0 → current daily leaderboard
   if (dayOffset === 0) {
-    const raw = await fetchLeaderboardApi(groupId);
-    cacheFromResponse(raw, 0, groupId);
+    const raw = await fetchLeaderboardApi(groupId, gameMode);
+    cacheFromResponse(raw, 0, groupId, gameMode);
     return mapResponse(raw);
   }
 
   // dayOffset > 0 → walk the chain via previous_leaderboard_id
-  if (!leaderboardIdCache.has(cacheKey(dayOffset, groupId))) {
+  if (!leaderboardIdCache.has(cacheKey(dayOffset, groupId, gameMode))) {
     // Fill the chain from the closest cached offset
     let closest = dayOffset - 1;
-    while (closest >= 0 && !leaderboardIdCache.has(cacheKey(closest, groupId))) {
+    while (closest >= 0 && !leaderboardIdCache.has(cacheKey(closest, groupId, gameMode))) {
       closest--;
     }
     // If nothing is cached, fetch today first
     if (closest < 0) {
-      const todayRaw = await fetchLeaderboardApi(groupId);
-      cacheFromResponse(todayRaw, 0, groupId);
+      const todayRaw = await fetchLeaderboardApi(groupId, gameMode);
+      cacheFromResponse(todayRaw, 0, groupId, gameMode);
       closest = 0;
     }
     // Walk forward from closest cached to fill up to dayOffset
     for (let i = closest + 1; i <= dayOffset; i++) {
-      const prevId = leaderboardIdCache.get(cacheKey(i, groupId));
+      const prevId = leaderboardIdCache.get(cacheKey(i, groupId, gameMode));
       if (!prevId) break; // no further history
-      const prevRaw = await fetchLeaderboardById(prevId, groupId);
-      cacheFromResponse(prevRaw, i, groupId);
+      const prevRaw = await fetchLeaderboardById(prevId, groupId, gameMode);
+      cacheFromResponse(prevRaw, i, groupId, gameMode);
     }
   }
 
-  const targetId = leaderboardIdCache.get(cacheKey(dayOffset, groupId));
+  const targetId = leaderboardIdCache.get(cacheKey(dayOffset, groupId, gameMode));
   if (!targetId) {
     // No leaderboard exists that far back
     return { date: dateForOffset(dayOffset), hasPrevious: false, entries: [], currentUser: null };
   }
 
-  const raw = await fetchLeaderboardById(targetId, groupId);
-  cacheFromResponse(raw, dayOffset, groupId);
+  const raw = await fetchLeaderboardById(targetId, groupId, gameMode);
+  cacheFromResponse(raw, dayOffset, groupId, gameMode);
   return mapResponse(raw);
 }

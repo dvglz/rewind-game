@@ -82,7 +82,7 @@ test('disables previous-day navigation when the current board has no earlier his
 
   fireEvent.click(previousButton);
 
-  await waitFor(() => expect(fetchLeaderboardMock).toHaveBeenLastCalledWith(1));
+  await waitFor(() => expect(fetchLeaderboardMock).toHaveBeenLastCalledWith(1, undefined, undefined));
   await waitFor(() => expect((previousButton as HTMLButtonElement).disabled).toBe(true));
 });
 
@@ -96,7 +96,7 @@ test('anchors the first leaderboard view to the active puzzle date', async () =>
     </AuthProvider>,
   );
 
-  await waitFor(() => expect(fetchLeaderboardMock).toHaveBeenCalledWith(1));
+  await waitFor(() => expect(fetchLeaderboardMock).toHaveBeenCalledWith(1, undefined, undefined));
   expect(await screen.findByText('Today')).not.toBeNull();
   expect(screen.getByText('Jun 15, 2026')).not.toBeNull();
 });
@@ -126,17 +126,6 @@ test('shows the leaderboard freshness and tiebreak disclaimer', async () => {
   expect(await screen.findByText('Updates every 2 min. Ties: fastest run, then earliest submission.')).not.toBeNull();
 });
 
-test('shows the special label under the title when viewing the Messi special day', async () => {
-  getDateOverrideMock.mockReturnValue('2026-07-15');
-
-  render(
-    <AuthProvider>
-      <LeaderboardScreen onBack={() => {}} />
-    </AuthProvider>,
-  );
-
-  expect(await screen.findByText(`${MESSI_SPECIAL.label} ${MESSI_SPECIAL.flag}`)).not.toBeNull();
-});
 
 test('omits the special label on non-special days', async () => {
   render(
@@ -147,4 +136,30 @@ test('omits the special label on non-special days', async () => {
 
   await screen.findByRole('heading', { name: 'Leaderboard' });
   expect(screen.queryByText(`${MESSI_SPECIAL.label} ${MESSI_SPECIAL.flag}`)).toBeNull();
+});
+
+test('inserts a Messi Special slot after its date and fetches its own game mode', async () => {
+  getDateOverrideMock.mockReturnValue('2026-07-15');
+
+  render(
+    <AuthProvider>
+      <LeaderboardScreen onBack={() => {}} />
+    </AuthProvider>,
+  );
+
+  await screen.findByRole('heading', { name: 'Leaderboard' });
+  await waitFor(() => expect(fetchLeaderboardMock).toHaveBeenCalledWith(0, undefined, undefined));
+
+  // One step back from the regular Jul 15 board sits the special board.
+  fireEvent.click(screen.getByRole('button', { name: 'Previous day' }));
+
+  expect(await screen.findByText(`${MESSI_SPECIAL.label} ${MESSI_SPECIAL.flag}`)).not.toBeNull();
+  expect(screen.getByText('Jul 15, 2026')).not.toBeNull();
+  await waitFor(() =>
+    expect(fetchLeaderboardMock).toHaveBeenLastCalledWith(0, undefined, MESSI_SPECIAL.gameMode),
+  );
+
+  // Stepping forward returns to the regular board.
+  fireEvent.click(screen.getByRole('button', { name: 'Next day' }));
+  await waitFor(() => expect(fetchLeaderboardMock).toHaveBeenLastCalledWith(0, undefined, undefined));
 });

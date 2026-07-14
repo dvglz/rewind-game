@@ -58,6 +58,7 @@ vi.mock('../hooks/useElapsedTimer', () => ({
 
 vi.mock('../data/puzzles', () => ({
   getTodaysPuzzle: vi.fn(),
+  getDateOverride: vi.fn(() => '2026-07-15'),
   isRewindLabMode: vi.fn(() => false),
   isPracticeMode: vi.fn(() => false),
 }));
@@ -455,7 +456,7 @@ test('special day: flag renders in the header', () => {
     number: 500,
     sport: 'soccer',
     theme: 'Messi Special',
-    special: { slug: 'messi', flag: '🇦🇷', label: 'Messi Special', shareLine: 'The GOAT.' },
+    special: { slug: 'messi', flag: '🇦🇷', label: 'Messi Special', shareLine: 'The GOAT.', gameMode: 'rewind_messi' },
     events: [{ text: 'Messi makes his La Liga debut', year: 2004 }],
   });
 
@@ -470,7 +471,7 @@ test('special day: media card appears after reveal and its button advances the r
     number: 500,
     sport: 'soccer' as const,
     theme: 'Messi Special',
-    special: { slug: 'messi', flag: '🇦🇷', label: 'Messi Special', shareLine: 'The GOAT.' },
+    special: { slug: 'messi', flag: '🇦🇷', label: 'Messi Special', shareLine: 'The GOAT.', gameMode: 'rewind_messi' },
     events: Array.from({ length: 10 }, (_, i) => ({
       text: i === 0 ? 'Messi makes his La Liga debut' : `Messi milestone ${i}`,
       year: 2004 + i,

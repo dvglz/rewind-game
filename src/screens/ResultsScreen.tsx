@@ -81,7 +81,7 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
     setRemoteState(null);
     setRemoteChecked(false);
 
-    fetchMyScore(getDateOverride())
+    fetchMyScore(getDateOverride(), puzzle.special?.gameMode)
       .then((resp) => {
         if (cancelled) return;
         if (resp) {
@@ -108,7 +108,7 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
     return () => {
       cancelled = true;
     };
-  }, [practice, isAuthenticated, state?.completed, superseded]);
+  }, [practice, isAuthenticated, state?.completed, superseded, puzzle.special?.gameMode]);
 
   useEffect(() => {
     // Show the score-grade toast once per puzzle/day, after the card settles.

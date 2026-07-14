@@ -11,6 +11,8 @@ export interface PuzzleSpecial {
   flag: string;
   label: string;
   shareLine: string;
+  /** PlayHub game_mode this special's scores submit to (own leaderboard chain). */
+  gameMode: string;
 }
 
 export interface GameEvent {

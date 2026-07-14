@@ -88,11 +88,11 @@ export async function submitScore(payload: ScorePayload): Promise<SubmitResult> 
   throw new Error(detail || 'Failed to submit score');
 }
 
-export async function fetchMyScore(date: string): Promise<MyScoreResponse | null> {
+export async function fetchMyScore(date: string, gameMode: string = GAME_MODE): Promise<MyScoreResponse | null> {
   if (!getAccessToken()) return null;
 
   const res = await fetch(
-    `${BASE_URL}/playhub/scores/?game_type=${GAME_TYPE}&game_mode=${GAME_MODE}&date=${date}`,
+    `${BASE_URL}/playhub/scores/?game_type=${GAME_TYPE}&game_mode=${gameMode}&date=${date}`,
     { headers: getHeaders() },
   );
 
@@ -116,10 +116,10 @@ export interface LeaderboardApiResponse {
   me: Record<string, unknown> | null;
 }
 
-export async function fetchLeaderboardApi(groupId?: number): Promise<LeaderboardApiResponse> {
+export async function fetchLeaderboardApi(groupId?: number, gameMode: string = GAME_MODE): Promise<LeaderboardApiResponse> {
   const params = new URLSearchParams({
     game_type: GAME_TYPE,
-    game_mode: GAME_MODE,
+    game_mode: gameMode,
   });
   if (groupId != null) {
     params.set('group_id', String(groupId));
@@ -137,12 +137,12 @@ export async function fetchLeaderboardApi(groupId?: number): Promise<Leaderboard
   return res.json();
 }
 
-export async function fetchLeaderboardById(id: number, groupId?: number): Promise<LeaderboardApiResponse> {
+export async function fetchLeaderboardById(id: number, groupId?: number, gameMode: string = GAME_MODE): Promise<LeaderboardApiResponse> {
   // Historical boards use path segments id/period/metric, with game_type/game_mode
   // as query params — same period ("daily") and metric ("scores") as the live board.
   const params = new URLSearchParams({
     game_type: GAME_TYPE,
-    game_mode: GAME_MODE,
+    game_mode: gameMode,
   });
   if (groupId != null) {
     params.set('group_id', String(groupId));

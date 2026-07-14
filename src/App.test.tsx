@@ -81,6 +81,8 @@ vi.mock('./data/puzzles', () => ({
   getDateOverride: vi.fn().mockReturnValue('2026-06-15'),
   getSport: vi.fn().mockReturnValue('american'),
   getTodaysPuzzle: vi.fn().mockReturnValue({ id: '2026-06-15-american', number: 1 }),
+  getPuzzleForDate: vi.fn().mockReturnValue({ id: '2026-06-15-american', number: 1 }),
+  buildSpecialPuzzle: vi.fn().mockReturnValue({ id: '2026-07-15-american-special-messi', number: 28 }),
   isRewindLabMode: vi.fn().mockReturnValue(false),
   isPracticeMode: vi.fn().mockReturnValue(false),
 }));

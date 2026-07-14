@@ -149,6 +149,7 @@ test('special share text uses flag, label, shareLine, and /slug URL', () => {
       slug: 'messi',
       flag: '🇦🇷',
       label: 'Messi Special',
+      gameMode: 'rewind_messi',
       shareLine: 'I walked Messi’s journey — 10 moments by year',
     },
   );

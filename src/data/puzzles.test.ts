@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from 'vitest';
-import { getPuzzleForDate, getTodaysPuzzle, isRewindLabMode, isPracticeMode } from './puzzles';
+import { buildSpecialPuzzle, getPuzzleForDate, getTodaysPuzzle, isRewindLabMode, isPracticeMode } from './puzzles';
 import { MESSI_SPECIAL, SPECIAL_DAYS } from './specials';
 
 beforeEach(() => {
@@ -121,10 +121,19 @@ test('practice mode gives the dated puzzle an isolated practice- id', () => {
   expect(puzzle.events).toHaveLength(5);
 });
 
-describe('special day resolution', () => {
-  test('2026-07-15 american resolves to the Messi special', () => {
+describe('special resolution (parallel mode)', () => {
+  test('the regular daily is untouched on the special date', () => {
     const puzzle = getPuzzleForDate('2026-07-15', 'american');
+    expect(puzzle.special).toBeUndefined();
+    expect(puzzle.id).toBe('2026-07-15-american');
+    expect(puzzle.number).toBe(28);
+    expect(puzzle.events).toHaveLength(5);
+  });
+
+  test('buildSpecialPuzzle produces the Messi puzzle', () => {
+    const puzzle = buildSpecialPuzzle(MESSI_SPECIAL);
     expect(puzzle.special?.slug).toBe('messi');
+    expect(puzzle.special?.gameMode).toBe('rewind_messi');
     expect(puzzle.id).toBe('2026-07-15-american-special-messi');
     expect(puzzle.number).toBe(28);
     expect(puzzle.events).toHaveLength(10);
@@ -133,33 +142,34 @@ describe('special day resolution', () => {
     expect(puzzle.events[0].detail).toMatch(/^In 2000, /);
   });
 
-  test('special overrides random mode on its date', () => {
-    localStorage.setItem('rewind_random_mode', 'true');
-    sessionStorage.setItem('rewind_random_seed', 'abc-123');
+  test('getTodaysPuzzle serves the special when ?special=messi is set', () => {
+    window.history.replaceState({}, '', '/?special=messi');
     try {
-      expect(getPuzzleForDate('2026-07-15', 'american').special?.slug).toBe('messi');
+      const puzzle = getTodaysPuzzle('american');
+      expect(puzzle.special?.slug).toBe('messi');
+      expect(puzzle.id).toBe('2026-07-15-american-special-messi');
     } finally {
-      localStorage.removeItem('rewind_random_mode');
-      sessionStorage.removeItem('rewind_random_seed');
+      window.history.replaceState({}, '', '/');
     }
   });
 
-  test('soccer sport and neighboring dates are untouched', () => {
-    expect(getPuzzleForDate('2026-07-15', 'soccer').special).toBeUndefined();
-    expect(getPuzzleForDate('2026-07-14', 'american').special).toBeUndefined();
-    expect(getPuzzleForDate('2026-07-14', 'american').events).toHaveLength(5);
-  });
-
-  test('kill switch restores the regular day', () => {
+  test('getTodaysPuzzle ignores unknown or disabled special params', () => {
+    window.history.replaceState({}, '', '/?special=nope');
+    try {
+      expect(getTodaysPuzzle('american').special).toBeUndefined();
+    } finally {
+      window.history.replaceState({}, '', '/');
+    }
     const disabled = { ...MESSI_SPECIAL, enabled: false };
     const days = SPECIAL_DAYS.splice(0, SPECIAL_DAYS.length, disabled);
+    window.history.replaceState({}, '', '/?special=messi');
     try {
-      const puzzle = getPuzzleForDate('2026-07-15', 'american');
+      const puzzle = getTodaysPuzzle('american');
       expect(puzzle.special).toBeUndefined();
-      expect(puzzle.id).toBe('2026-07-15-american');
       expect(puzzle.events).toHaveLength(5);
     } finally {
       SPECIAL_DAYS.splice(0, SPECIAL_DAYS.length, ...days);
+      window.history.replaceState({}, '', '/');
     }
   });
 });

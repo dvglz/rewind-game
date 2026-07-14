@@ -8,11 +8,15 @@ interface DateSelectorProps {
   /** Base ISO date that should be treated as "today" for this selector. */
   baseDate?: string;
   hasPrevious?: boolean;
+  /** Overrides the weekday line (e.g. "Messi Special 🇦🇷" for a special-event board). */
+  specialLabel?: string;
+  /** Force the next arrow's state (used when a special slot sits between days). */
+  canNext?: boolean;
   onPrev: () => void;
   onNext: () => void;
 }
 
-export function DateSelector({ dayOffset, baseDate, hasPrevious = true, onPrev, onNext }: DateSelectorProps) {
+export function DateSelector({ dayOffset, baseDate, hasPrevious = true, specialLabel, canNext, onPrev, onNext }: DateSelectorProps) {
   const date = baseDate ? new Date(`${baseDate}T00:00:00Z`) : new Date();
   if (baseDate) {
     date.setUTCDate(date.getUTCDate() - dayOffset);
@@ -20,9 +24,9 @@ export function DateSelector({ dayOffset, baseDate, hasPrevious = true, onPrev, 
     date.setDate(date.getDate() - dayOffset);
   }
 
-  const dayLabel = dayOffset === 0
+  const dayLabel = specialLabel ?? (dayOffset === 0
     ? 'Today'
-    : date.toLocaleDateString('en-US', { weekday: 'long', ...(baseDate ? { timeZone: 'UTC' } : {}) });
+    : date.toLocaleDateString('en-US', { weekday: 'long', ...(baseDate ? { timeZone: 'UTC' } : {}) }));
 
   const dateStr = date.toLocaleDateString('en-US', {
     month: 'short',
@@ -31,7 +35,7 @@ export function DateSelector({ dayOffset, baseDate, hasPrevious = true, onPrev, 
     ...(baseDate ? { timeZone: 'UTC' } : {}),
   });
 
-  const isToday = dayOffset === 0;
+  const nextDisabled = canNext != null ? !canNext : dayOffset === 0;
 
   return (
     <div className={styles.selector}>
@@ -49,9 +53,9 @@ export function DateSelector({ dayOffset, baseDate, hasPrevious = true, onPrev, 
         <span className={styles.dateLabel}>{dateStr}</span>
       </div>
       <button
-        className={`${styles.arrow} ${isToday ? styles.arrowDisabled : ''}`}
+        className={`${styles.arrow} ${nextDisabled ? styles.arrowDisabled : ''}`}
         onClick={onNext}
-        disabled={isToday}
+        disabled={nextDisabled}
         type="button"
         aria-label="Next day"
       >

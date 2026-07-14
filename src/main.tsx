@@ -1,11 +1,12 @@
 import { createRoot } from 'react-dom/client';
 import { App } from './App.tsx';
 import { computeSpecialRedirect } from './data/specials';
-import { getTodayString } from './lib/date';
+import { getDateOverride } from './data/puzzles';
 
 const specialParam = new URLSearchParams(window.location.search).get('special');
 const path = specialParam ? `/${specialParam}` : window.location.pathname;
-const specialRedirect = computeSpecialRedirect(path, getTodayString());
+// getDateOverride honors ?date= (preview/testing); in production it is today.
+const specialRedirect = computeSpecialRedirect(path, getDateOverride());
 if (specialRedirect !== null) {
   const params = new URLSearchParams(window.location.search);
   params.delete('special');

@@ -2,7 +2,7 @@ import type { Puzzle, GameEvent } from '../types';
 import { getTodayString } from '../lib/date';
 import { REWIND_QUESTION_BANK } from './questionBank';
 import { DAY_DEFINITIONS } from './dayDefinitions';
-import { getSpecialForDate } from './specials';
+import { getActiveSpecial, type SpecialDay } from './specials';
 
 interface RawEvent {
   id: string;
@@ -304,28 +304,32 @@ function shouldUseRandomMode(): boolean {
   return isRandomModeEnabled() && !isRewindLabMode() && !isPracticeMode();
 }
 
-export function getPuzzleForDate(dateStr: string, sport: Sport = 'american'): Puzzle {
-  // Special days replace the regular daily (and override random mode — it's an event).
-  const special = sport === 'american' ? getSpecialForDate(dateStr) : null;
-  if (special) {
-    return {
-      id: `${dateStr}-${sport}-special-${special.slug}`,
-      number: dayIndex(dateStr) + 1,
-      sport,
-      weights: special.weights,
-      special: {
-        slug: special.slug,
-        flag: special.flag,
-        label: special.label,
-        shareLine: special.shareLine,
-      },
-      events: special.events.map((raw) => ({
-        ...rawToGameEvent(raw, sport),
-        ...(raw.media ? { media: raw.media } : {}),
-      })),
-    };
-  }
+/**
+ * Build a special's puzzle. Specials run as a parallel mode (`?special=<slug>`)
+ * beside the regular daily — they never replace it. The distinct id keeps the
+ * special's saved state separate from the daily's.
+ */
+export function buildSpecialPuzzle(special: SpecialDay, sport: Sport = 'american'): Puzzle {
+  return {
+    id: `${special.date}-${sport}-special-${special.slug}`,
+    number: dayIndex(special.date) + 1,
+    sport,
+    weights: special.weights,
+    special: {
+      slug: special.slug,
+      flag: special.flag,
+      label: special.label,
+      shareLine: special.shareLine,
+      gameMode: special.gameMode,
+    },
+    events: special.events.map((raw) => ({
+      ...rawToGameEvent(raw, sport),
+      ...(raw.media ? { media: raw.media } : {}),
+    })),
+  };
+}
 
+export function getPuzzleForDate(dateStr: string, sport: Sport = 'american'): Puzzle {
   const seedSource = getPuzzleSeedSource(dateStr, sport);
   const dIdx = dayIndex(dateStr);
 
@@ -372,7 +376,12 @@ export function getDateOverride(): string {
 export function getTodaysPuzzle(sport?: Sport): Puzzle {
   const selectedSport = sport ?? getSport();
   const date = getDateOverride();
-  const puzzle = getPuzzleForDate(date, selectedSport);
+  // Active special mode (?special=<slug>) takes over the whole app surface —
+  // the regular daily stays reachable at the plain URL.
+  const activeSpecial = getActiveSpecial();
+  const puzzle = activeSpecial
+    ? buildSpecialPuzzle(activeSpecial, selectedSport)
+    : getPuzzleForDate(date, selectedSport);
   if (isPracticeMode()) {
     return { ...puzzle, id: `practice-${date}-${selectedSport}` };
   }

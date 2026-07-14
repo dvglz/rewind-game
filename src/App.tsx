@@ -12,7 +12,8 @@ import { HowToScreen, type HowToEntryPoint } from './screens/HowToScreen';
 import { Toast } from './components/Toast';
 import { ToastRegion } from './components/ToastRegion';
 import { clearGameState, loadGameState, pruneOldGameStates, hasUsedArchiveFreePlay, markArchiveFreePlayUsed } from './engine/storage';
-import { beginPuzzleSession, getDateOverride, getSport, getTodaysPuzzle, isRewindLabMode, isPracticeMode } from './data/puzzles';
+import { beginPuzzleSession, buildSpecialPuzzle, getDateOverride, getPuzzleForDate, getSport, getTodaysPuzzle, isRewindLabMode, isPracticeMode } from './data/puzzles';
+import { SPECIAL_DAYS } from './data/specials';
 import { useWebHaptics } from 'web-haptics/react';
 import { initHaptics } from './lib/haptics';
 import { hidesCompletedGameLock, shouldEnableHapticsDebug } from './lib/testMode';
@@ -59,8 +60,13 @@ function AppInner() {
   }, []);
 
   useEffect(() => {
-    const puzzle = getTodaysPuzzle(getSport());
-    pruneOldGameStates(puzzle.id);
+    // Keep both parallel games alive: today's daily AND any enabled special —
+    // finishing one must not wipe the other's saved run.
+    const daily = getPuzzleForDate(getDateOverride(), getSport());
+    const specialIds = SPECIAL_DAYS.filter((s) => s.enabled).map(
+      (s) => buildSpecialPuzzle(s).id,
+    );
+    pruneOldGameStates([daily.id, ...specialIds]);
   }, []);
 
   useEffect(() => {
@@ -81,7 +87,7 @@ function AppInner() {
     }
 
     let cancelled = false;
-    fetchMyScore(getDateOverride())
+    fetchMyScore(getDateOverride(), puzzle.special?.gameMode)
       .then((score) => {
         if (!cancelled) setRemoteCompleted(Boolean(score));
       })

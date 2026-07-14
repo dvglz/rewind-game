@@ -1,24 +1,59 @@
-import { describe, test, expect } from 'vitest';
-import { MESSI_SPECIAL, SPECIAL_DAYS, getSpecialForDate, computeSpecialRedirect } from './specials';
+import { describe, test, expect, afterEach } from 'vitest';
+import {
+  MESSI_SPECIAL,
+  SPECIAL_DAYS,
+  getSpecialBySlug,
+  getActiveSpecial,
+  getBannerSpecial,
+  isSpecialScoringLive,
+  computeSpecialRedirect,
+} from './specials';
+
+afterEach(() => {
+  window.history.replaceState({}, '', '/');
+});
 
 describe('specials registry', () => {
-  test('getSpecialForDate returns the Messi special on its date', () => {
-    expect(getSpecialForDate('2026-07-15')?.slug).toBe('messi');
+  test('getSpecialBySlug returns the enabled Messi special', () => {
+    expect(getSpecialBySlug('messi')?.date).toBe('2026-07-15');
+    expect(getSpecialBySlug('unknown')).toBeNull();
   });
 
-  test('getSpecialForDate returns null on other dates', () => {
-    expect(getSpecialForDate('2026-07-14')).toBeNull();
-    expect(getSpecialForDate('2026-07-16')).toBeNull();
+  test('getActiveSpecial reads the ?special= param', () => {
+    expect(getActiveSpecial()).toBeNull();
+    window.history.replaceState({}, '', '/?special=messi');
+    expect(getActiveSpecial()?.slug).toBe('messi');
+    window.history.replaceState({}, '', '/?special=nope');
+    expect(getActiveSpecial()).toBeNull();
   });
 
-  test('kill switch: disabled specials are not returned', () => {
+  test('kill switch: disabled specials are invisible to slug/param/banner lookups', () => {
     const disabled = { ...MESSI_SPECIAL, enabled: false };
     const days = SPECIAL_DAYS.splice(0, SPECIAL_DAYS.length, disabled);
     try {
-      expect(getSpecialForDate('2026-07-15')).toBeNull();
+      window.history.replaceState({}, '', '/?special=messi');
+      expect(getSpecialBySlug('messi')).toBeNull();
+      expect(getActiveSpecial()).toBeNull();
+      expect(getBannerSpecial('2026-07-15')).toBeNull();
     } finally {
       SPECIAL_DAYS.splice(0, SPECIAL_DAYS.length, ...days);
     }
+  });
+
+  test('banner shows from the event day on, never before', () => {
+    expect(getBannerSpecial('2026-07-14')).toBeNull();
+    expect(getBannerSpecial('2026-07-15')?.slug).toBe('messi');
+    expect(getBannerSpecial('2026-07-16')?.slug).toBe('messi');
+  });
+
+  test('special scoring is live only on the event day', () => {
+    expect(isSpecialScoringLive(MESSI_SPECIAL, '2026-07-15')).toBe(true);
+    expect(isSpecialScoringLive(MESSI_SPECIAL, '2026-07-14')).toBe(false);
+    expect(isSpecialScoringLive(MESSI_SPECIAL, '2026-07-16')).toBe(false);
+  });
+
+  test('Messi special declares its own PlayHub game mode', () => {
+    expect(MESSI_SPECIAL.gameMode).toBe('rewind_messi');
   });
 
   test('Messi special has exactly 10 events with unique ascending years and weights summing to 1000', () => {
@@ -56,13 +91,13 @@ describe('computeSpecialRedirect', () => {
     expect(computeSpecialRedirect('/groups', '2026-07-15')).toBeNull();
   });
 
-  test('before and on the day → home', () => {
+  test('before the day → plain home (no leak)', () => {
     expect(computeSpecialRedirect('/messi', '2026-07-14')).toBe('/');
-    expect(computeSpecialRedirect('/messi', '2026-07-15')).toBe('/');
   });
 
-  test('after the day → archive', () => {
-    expect(computeSpecialRedirect('/messi', '2026-07-16')).toBe('/?mode=archive');
+  test('on and after the day → activates special mode', () => {
+    expect(computeSpecialRedirect('/messi', '2026-07-15')).toBe('/?special=messi');
+    expect(computeSpecialRedirect('/messi', '2026-07-16')).toBe('/?special=messi');
   });
 
   test('disabled special → home regardless of date', () => {

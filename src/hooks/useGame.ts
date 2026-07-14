@@ -73,7 +73,8 @@ export function useGame(puzzle: Puzzle, { scoringEnabled = true }: UseGameOption
         if (!isScoreSubmitted(puzzle.id)) {
           const payload = {
             game_type: GAME_TYPE,
-            game_mode: GAME_MODE,
+            // Specials submit to their own PlayHub mode (separate leaderboard chain).
+            game_mode: puzzle.special?.gameMode ?? GAME_MODE,
             scores: newState.totalScore,
             metadata: {
               total_time: Math.round((newState.elapsedMs ?? 0) / 1000),
@@ -112,7 +113,7 @@ export function useGame(puzzle: Puzzle, { scoringEnabled = true }: UseGameOption
 
       return result;
     },
-    [state, currentEvent, puzzle.id, puzzle.number, puzzle.sport, puzzle.weights, totalRounds, scoringEnabled]
+    [state, currentEvent, puzzle.id, puzzle.number, puzzle.sport, puzzle.weights, puzzle.special, totalRounds, scoringEnabled]
   );
 
   const recordPause = useCallback((ms: number) => {

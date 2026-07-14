@@ -10,10 +10,12 @@ export interface SpecialRawEvent {
 
 export interface SpecialDay {
   slug: string;
-  date: string;            // ISO day this special replaces
-  enabled: boolean;        // KILL SWITCH — set false + deploy to restore the regular daily
+  date: string;            // ISO event day: banner + live scoring start here; picker slot pins here
+  enabled: boolean;        // KILL SWITCH — set false + deploy to hide the special everywhere
   flag: string;
   label: string;
+  /** PlayHub game_mode for this special's own leaderboard chain. */
+  gameMode: string;
   homeHeadline: string;
   homeSub: string;
   shareLine: string;
@@ -27,6 +29,7 @@ export const MESSI_SPECIAL: SpecialDay = {
   enabled: true,
   flag: '🇦🇷',
   label: 'Messi Special',
+  gameMode: 'rewind_messi',
   homeHeadline: 'One more Messi night?',
   homeSub: 'Rewind the career that changed football — 10 moments, one GOAT.',
   shareLine: 'I rewound Messi’s GOAT career — 10 moments by year',
@@ -157,20 +160,50 @@ export const MESSI_SPECIAL: SpecialDay = {
 
 export const SPECIAL_DAYS: SpecialDay[] = [MESSI_SPECIAL];
 
-export function getSpecialForDate(date: string): SpecialDay | null {
-  return SPECIAL_DAYS.find((s) => s.enabled && s.date === date) ?? null;
+const SPECIAL_PARAM = 'special';
+
+/** Enabled special matching a slug, or null. */
+export function getSpecialBySlug(slug: string): SpecialDay | null {
+  return SPECIAL_DAYS.find((s) => s.enabled && s.slug === slug) ?? null;
+}
+
+/**
+ * The special activated via `?special=<slug>` — the special runs as a parallel
+ * mode beside the regular daily, never replacing it.
+ */
+export function getActiveSpecial(): SpecialDay | null {
+  const slug = new URLSearchParams(window.location.search).get(SPECIAL_PARAM)?.trim();
+  if (!slug) return null;
+  return getSpecialBySlug(slug);
+}
+
+/**
+ * The special to promote on the regular home screen (banner), if any:
+ * enabled and its event day has arrived. ISO strings compare lexicographically.
+ */
+export function getBannerSpecial(today: string): SpecialDay | null {
+  return SPECIAL_DAYS.find((s) => s.enabled && today >= s.date) ?? null;
+}
+
+/**
+ * Whether a special submits real scores: only on its event day. Afterwards
+ * /<slug> stays playable as practice so its one-day leaderboard stays clean.
+ */
+export function isSpecialScoringLive(special: SpecialDay, today: string): boolean {
+  return today === special.date;
 }
 
 /**
  * Vanity-path handling (e.g. /messi). Returns the search-preserving redirect
- * target, or null when the path isn't a special. ISO date strings compare
- * lexicographically, so <= is a correct date comparison.
+ * target, or null when the path isn't a special. Before the event day the
+ * special stays hidden (plain home); from the day on, the path activates
+ * special mode. ISO date strings compare lexicographically.
  */
 export function computeSpecialRedirect(pathname: string, today: string): string | null {
   const slug = pathname.replace(/^\/+|\/+$/g, '');
   if (!slug) return null;
   const special = SPECIAL_DAYS.find((s) => s.slug === slug);
   if (!special) return null;
-  if (!special.enabled || today <= special.date) return '/';
-  return '/?mode=archive';
+  if (!special.enabled || today < special.date) return '/';
+  return `/?${SPECIAL_PARAM}=${special.slug}`;
 }

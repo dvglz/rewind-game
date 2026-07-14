@@ -296,8 +296,8 @@ test('hides the landing demo after the intro has been seen', async () => {
   expect(screen.queryByText('Shaq is drafted by Orlando')).toBeNull();
 });
 
-test('shows the Messi special headline, sub, and flag on its date', () => {
-  window.history.replaceState({}, '', '/?date=2026-07-15');
+test('shows the Messi special headline, sub, and flag in special mode', () => {
+  window.history.replaceState({}, '', '/?special=messi');
 
   render(
     <AuthProvider>
@@ -336,4 +336,55 @@ test('compacts home spacing on short mobile screens', () => {
   expect(css).toMatch(/\.footerLink\s*\{[\s\S]*?text-decoration:\s*underline;/);
   expect(css).toMatch(/\.containerCompact\s*\{/);
   expect(css).toMatch(/\.containerCompact\s+\.actions\s*\{/);
+});
+
+test('regular home shows the special banner from the event day, not the special copy', () => {
+  window.history.replaceState({}, '', '/?date=2026-07-15');
+
+  render(
+    <AuthProvider>
+      <HomeScreen
+        onPlay={() => {}}
+        hasInProgressGame={false}
+        hasCompletedGame={false}
+        onViewResults={() => {}}
+        onLeaderboard={() => {}}
+        showDebugTools={false}
+        onGroups={() => {}}
+        onArchive={() => {}}
+        onNavigateAuth={() => {}}
+        onSignOut={() => {}}
+        onHowTo={() => {}}
+      />
+    </AuthProvider>
+  );
+
+  expect(screen.getByRole('button', { name: `${MESSI_SPECIAL.flag} Play the ${MESSI_SPECIAL.label} →` })).not.toBeNull();
+  expect(screen.queryByText(MESSI_SPECIAL.homeHeadline)).toBeNull();
+  window.history.replaceState({}, '', '/');
+});
+
+test('no special banner before the event day', () => {
+  window.history.replaceState({}, '', '/?date=2026-07-14');
+
+  render(
+    <AuthProvider>
+      <HomeScreen
+        onPlay={() => {}}
+        hasInProgressGame={false}
+        hasCompletedGame={false}
+        onViewResults={() => {}}
+        onLeaderboard={() => {}}
+        showDebugTools={false}
+        onGroups={() => {}}
+        onArchive={() => {}}
+        onNavigateAuth={() => {}}
+        onSignOut={() => {}}
+        onHowTo={() => {}}
+      />
+    </AuthProvider>
+  );
+
+  expect(screen.queryByRole('button', { name: /Play the Messi Special/ })).toBeNull();
+  window.history.replaceState({}, '', '/');
 });

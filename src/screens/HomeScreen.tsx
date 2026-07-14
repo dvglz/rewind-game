@@ -8,7 +8,7 @@ import {
   SPORT_LABELS,
   type Sport,
 } from '../data/puzzles';
-import { getSpecialForDate } from '../data/specials';
+import { getActiveSpecial, getBannerSpecial } from '../data/specials';
 import { BurgerMenu } from '../components/BurgerMenu';
 import { LandingDemo } from '../components/LandingDemo';
 import { Toast } from '../components/Toast';
@@ -85,7 +85,10 @@ export function HomeScreen({
   const todaysPuzzle = getTodaysPuzzle(currentSport);
   const puzzleNumber = String(todaysPuzzle.number).padStart(3, '0');
   const special = todaysPuzzle.special ?? null;
-  const specialDay = special ? getSpecialForDate(getDateOverride()) : null;
+  // Copy override applies in special mode; on the regular home we instead show
+  // a banner promoting the special once its day has arrived.
+  const specialDay = special ? getActiveSpecial() : null;
+  const bannerSpecial = special ? null : getBannerSpecial(getDateOverride());
 
   return (
     <div className={`${styles.container} ${showIntroDemo ? '' : styles.containerCompact}`}>
@@ -119,6 +122,19 @@ export function HomeScreen({
         }}
         onNavigateHowTo={() => onHowTo('menu')}
       />
+      {bannerSpecial && (
+        <button
+          type="button"
+          className={styles.specialBanner}
+          onClick={() => {
+            const params = new URLSearchParams(window.location.search);
+            params.set('special', bannerSpecial.slug);
+            window.location.assign(`/?${params.toString()}`);
+          }}
+        >
+          {bannerSpecial.flag} Play the {bannerSpecial.label} →
+        </button>
+      )}
       <div className={styles.intro}>
         <span className={styles.wordmark}>Rewind</span>
         <h1 className={styles.headline}>

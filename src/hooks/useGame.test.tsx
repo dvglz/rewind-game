@@ -329,3 +329,35 @@ describe('useGame with a 10-round weighted puzzle', () => {
     expect(result.current.state.elapsedMs).toBe(before);
   });
 });
+
+test('special puzzles submit with their own game mode', () => {
+  vi.mocked(getAccessToken).mockReturnValue(null);
+
+  const specialPuzzle: Puzzle = {
+    id: '2026-07-15-american-special-messi',
+    number: 28,
+    sport: 'american',
+    weights: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
+    special: { slug: 'messi', flag: '🇦🇷', label: 'Messi Special', shareLine: 'x', gameMode: 'rewind_messi' },
+    events: Array.from({ length: 10 }, (_, i) => ({ text: `E${i}`, year: 2000 + i })),
+  };
+
+  const { result } = renderHook(() => useGame(specialPuzzle));
+  for (let i = 0; i < 10; i++) {
+    act(() => { result.current.submitGuess(2000 + i); });
+  }
+
+  expect(savePendingScore).toHaveBeenCalledTimes(1);
+  expect(vi.mocked(savePendingScore).mock.calls[0][0]).toMatchObject({ game_mode: 'rewind_messi' });
+});
+
+test('regular puzzles keep submitting with the default game mode', () => {
+  vi.mocked(getAccessToken).mockReturnValue(null);
+
+  const { result } = renderHook(() => useGame(puzzle));
+  for (const year of [2001, 2002, 2003, 2004, 2005]) {
+    act(() => { result.current.submitGuess(year); });
+  }
+
+  expect(vi.mocked(savePendingScore).mock.calls[0][0]).toMatchObject({ game_mode: 'rewind_nba' });
+});

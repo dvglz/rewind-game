@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getDateOverride } from '../data/puzzles';
-import { getSpecialForDate } from '../data/specials';
+import { SPECIAL_DAYS, type SpecialDay } from '../data/specials';
 import { fetchLeaderboard } from '../lib/leaderboard';
 import { getDayOffsetFromToday } from '../lib/leaderboard';
 import { formatTime } from '../lib/formatTime';
@@ -23,28 +23,63 @@ function shiftDateByDays(isoDate: string, deltaDays: number): string {
   return d.toISOString().slice(0, 10);
 }
 
+function daysBetween(fromIso: string, toIso: string): number {
+  return Math.round(
+    (new Date(`${fromIso}T00:00:00Z`).getTime() - new Date(`${toIso}T00:00:00Z`).getTime()) / 86_400_000,
+  );
+}
+
+/**
+ * The day picker walks an ordered list of board slots: one per regular day,
+ * plus one extra slot per special event pinned right after its date — so
+ * Jul 15 shows twice: the daily board, then "Jul 15 · Messi Special 🇦🇷".
+ */
+type BoardSlot =
+  | { kind: 'regular'; offset: number }
+  | { kind: 'special'; offset: number; special: SpecialDay };
+
+const MAX_SLOT_DAYS = 60;
+
+function buildSlots(activeDate: string): BoardSlot[] {
+  const specials = SPECIAL_DAYS.filter((s) => s.enabled && s.date <= activeDate);
+  const slots: BoardSlot[] = [];
+  for (let offset = 0; offset < MAX_SLOT_DAYS; offset++) {
+    slots.push({ kind: 'regular', offset });
+    const date = shiftDateByDays(activeDate, -offset);
+    const special = specials.find((s) => s.date === date);
+    if (special) slots.push({ kind: 'special', offset, special });
+  }
+  return slots;
+}
+
 export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
   const { user: authUser } = useAuth();
   const activeDate = getDateOverride();
   const activeDateOffset = getDayOffsetFromToday(activeDate);
-  const [dayOffset, setDayOffset] = useState(0);
+  const slots = useMemo(() => buildSlots(activeDate), [activeDate]);
+  const [slotIndex, setSlotIndex] = useState(0);
   const [board, setBoard] = useState<GlobalLeaderboard | null>(null);
   const [loading, setLoading] = useState(true);
-  const shownSpecial = getSpecialForDate(shiftDateByDays(activeDate, -dayOffset));
+  const slot = slots[slotIndex] ?? slots[0];
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetchLeaderboard(activeDateOffset + dayOffset)
+    const gameMode = slot.kind === 'special' ? slot.special.gameMode : undefined;
+    fetchLeaderboard(activeDateOffset + slot.offset, undefined, gameMode)
       .then((b) => { if (!cancelled) setBoard(b); })
       .catch(() => { if (!cancelled) setBoard(null); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [activeDateOffset, dayOffset]);
+  }, [activeDateOffset, slot]);
 
   useEffect(() => {
-    track('leaderboard_view', { scope: 'global', day_offset: dayOffset });
-  }, [dayOffset]);
+    track('leaderboard_view', {
+      scope: 'global',
+      day_offset: slot.offset,
+      ...(slot.kind === 'special' ? { special: slot.special.slug } : {}),
+    });
+  }, [slot]);
 
   const entries: GroupLeaderboardEntry[] = (board?.entries ?? []).map((e) => ({
     displayName: e.displayName,
@@ -63,6 +98,11 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
         }
       : undefined;
 
+  // Prev must stay available when the next-older slot is a special, even if
+  // the regular chain reports no previous board.
+  const nextOlder = slots[slotIndex + 1];
+  const hasPrevious = nextOlder?.kind === 'special' ? true : (board?.hasPrevious ?? true);
+
   return (
     <div className={styles.screen}>
       <div className={styles.topBar}>
@@ -77,16 +117,15 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
 
       <div className={styles.content}>
         <h1 className={styles.title}>Leaderboard</h1>
-        {shownSpecial && (
-          <p className={styles.specialLabel}>{shownSpecial.label} {shownSpecial.flag}</p>
-        )}
 
         <DateSelector
-          dayOffset={dayOffset}
+          dayOffset={slot.kind === 'special' ? daysBetween(activeDate, slot.special.date) : slot.offset}
           baseDate={activeDate}
-          hasPrevious={board?.hasPrevious ?? true}
-          onPrev={() => setDayOffset((d) => d + 1)}
-          onNext={() => setDayOffset((d) => Math.max(0, d - 1))}
+          hasPrevious={hasPrevious}
+          specialLabel={slot.kind === 'special' ? `${slot.special.label} ${slot.special.flag}` : undefined}
+          canNext={slotIndex > 0}
+          onPrev={() => setSlotIndex((i) => Math.min(i + 1, slots.length - 1))}
+          onNext={() => setSlotIndex((i) => Math.max(0, i - 1))}
         />
 
         <div className={styles.leaderboardArea}>
@@ -98,7 +137,7 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
             <GroupLeaderboard
               entries={entries}
               pinnedEntry={pinnedEntry}
-              emptySeed={`lb-${dayOffset}`}
+              emptySeed={`lb-${slotIndex}`}
             />
           )}
         </div>
