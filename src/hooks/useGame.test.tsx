@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { useGame } from './useGame';
 import type { Puzzle } from '../types';
 
@@ -274,4 +274,58 @@ test('does not claim missions when scoring is disabled', () => {
   act(() => { result.current.submitGuess(2005); });
 
   expect(claimReward).not.toHaveBeenCalled();
+});
+
+const tenRoundPuzzle: Puzzle = {
+  id: 'test-special',
+  number: 28,
+  sport: 'american',
+  weights: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
+  events: Array.from({ length: 10 }, (_, i) => ({
+    text: `Event ${i + 1}`,
+    year: 2000 + i,
+    detail: `In ${2000 + i}, something happened.`,
+  })),
+};
+
+describe('useGame with a 10-round weighted puzzle', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-15T12:00:00Z'));
+  });
+  afterEach(() => vi.useRealTimers());
+
+  test('totalRounds follows the event count and completion needs 10 guesses', () => {
+    const { result } = renderHook(() => useGame(tenRoundPuzzle, { scoringEnabled: false }));
+    expect(result.current.totalRounds).toBe(10);
+    for (let i = 0; i < 10; i++) {
+      expect(result.current.isComplete).toBe(false);
+      act(() => { result.current.submitGuess(2000 + i); }); // all perfect
+    }
+    expect(result.current.isComplete).toBe(true);
+    expect(result.current.totalScore).toBe(1000); // flat weights, 10 perfects
+  });
+
+  test('recordPause accumulates and final elapsedMs excludes paused time', () => {
+    const { result } = renderHook(() => useGame(tenRoundPuzzle, { scoringEnabled: false }));
+    for (let i = 0; i < 9; i++) {
+      act(() => { result.current.submitGuess(2000 + i); });
+      act(() => { result.current.recordPause(2_000); });
+    }
+    act(() => { vi.advanceTimersByTime(60_000); });
+    act(() => { result.current.submitGuess(2009); });
+    // 60s wall clock minus 9 × 2s of pauses = 42s
+    expect(result.current.state.elapsedMs).toBe(42_000);
+    expect(result.current.state.pausedMs).toBe(18_000);
+  });
+
+  test('recordPause after completion is a no-op', () => {
+    const { result } = renderHook(() => useGame(tenRoundPuzzle, { scoringEnabled: false }));
+    for (let i = 0; i < 10; i++) act(() => { result.current.submitGuess(2000 + i); });
+    const before = result.current.state.elapsedMs;
+    act(() => { result.current.recordPause(5_000); });
+    expect(result.current.state.pausedMs ?? 0).toBe(0);
+    expect(result.current.state.elapsedMs).toBe(before);
+  });
 });

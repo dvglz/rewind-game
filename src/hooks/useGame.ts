@@ -7,8 +7,6 @@ import { submitScore, savePendingScore, isScoreSubmitted, markScoreSubmitted, ma
 import { claimReward } from '../lib/playhub';
 import { evaluateMissions } from '../lib/missions';
 
-const TOTAL_ROUNDS = 5;
-
 interface UseGameOptions {
   scoringEnabled?: boolean;
 }
@@ -32,12 +30,14 @@ export function useGame(puzzle: Puzzle, { scoringEnabled = true }: UseGameOption
     [puzzle.events, state.currentRound]
   );
 
+  const totalRounds = puzzle.events.length;
+
   const submitGuess = useCallback(
     (guessedYear: number) => {
       if (state.completed || !currentEvent) return null;
 
       const diff = guessedYear - currentEvent.year;
-      const score = calculateScore(diff, state.currentRound);
+      const score = calculateScore(diff, state.currentRound, puzzle.weights);
 
       const result: RoundResult = {
         event: currentEvent,
@@ -48,9 +48,11 @@ export function useGame(puzzle: Puzzle, { scoringEnabled = true }: UseGameOption
       };
 
       const nextRound = state.currentRound + 1;
-      const completed = nextRound >= TOTAL_ROUNDS;
+      const completed = nextRound >= totalRounds;
       const startedAt = state.startedAt ?? Date.now();
-      const elapsedMs = completed ? Math.max(0, Date.now() - startedAt) : state.elapsedMs;
+      const elapsedMs = completed
+        ? Math.max(0, Date.now() - startedAt - (state.pausedMs ?? 0))
+        : state.elapsedMs;
 
       const newState: GameState = {
         ...state,
@@ -110,17 +112,28 @@ export function useGame(puzzle: Puzzle, { scoringEnabled = true }: UseGameOption
 
       return result;
     },
-    [state, currentEvent, puzzle.id, puzzle.number, puzzle.sport, scoringEnabled]
+    [state, currentEvent, puzzle.id, puzzle.number, puzzle.sport, puzzle.weights, totalRounds, scoringEnabled]
   );
+
+  const recordPause = useCallback((ms: number) => {
+    if (ms <= 0) return;
+    setState((prev) => {
+      if (prev.completed) return prev; // final elapsedMs is already frozen
+      const next = { ...prev, pausedMs: (prev.pausedMs ?? 0) + ms };
+      saveGameState(next);
+      return next;
+    });
+  }, []);
 
   return {
     state,
     currentEvent,
     currentRound: state.currentRound,
-    totalRounds: TOTAL_ROUNDS,
+    totalRounds,
     isComplete: state.completed,
     results: state.results,
     totalScore: state.totalScore,
     submitGuess,
+    recordPause,
   };
 }
