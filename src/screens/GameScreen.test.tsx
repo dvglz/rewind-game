@@ -153,6 +153,7 @@ test('keeps showing the guessed year while the timeline scrolls to the correct a
       diff: 9,
       score: 100,
     })),
+    recordPause: vi.fn(),
   });
 
   vi.mocked(useTimeline).mockReturnValue({
@@ -203,6 +204,7 @@ test('activates spotlight while a non-perfect reveal is scrolling', async () => 
       diff: 9,
       score: 100,
     })),
+    recordPause: vi.fn(),
   });
 
   vi.mocked(useTimeline).mockReturnValue({
@@ -260,6 +262,7 @@ test('keeps the headline year dimmed until reveal state is committed', async () 
       diff: 9,
       score: 100,
     })),
+    recordPause: vi.fn(),
   });
 
   vi.mocked(useTimeline).mockReturnValue({
@@ -316,6 +319,7 @@ test('shows confetti on a perfect reveal', async () => {
       diff: 0,
       score: 100,
     })),
+    recordPause: vi.fn(),
   });
 
   vi.mocked(useTimeline).mockReturnValue({
@@ -362,6 +366,7 @@ test('marks the just-revealed completed dot for animation', async () => {
       diff: 0,
       score: 100,
     })),
+    recordPause: vi.fn(),
   });
 
   vi.mocked(useTimeline).mockReturnValue({
@@ -415,6 +420,7 @@ test('keeps the reveal indicator green even on a wrong answer', async () => {
       diff: 9,
       score: 100,
     })),
+    recordPause: vi.fn(),
   });
 
   vi.mocked(useTimeline).mockReturnValue({
