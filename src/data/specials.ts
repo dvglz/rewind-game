@@ -11,6 +11,12 @@ export interface SpecialRawEvent {
 export interface SpecialDay {
   slug: string;
   date: string;            // ISO event day: banner + live scoring start here; picker slot pins here
+  /**
+   * Optional last live day (inclusive) — extends the promo window: banner shows
+   * and scores submit through this day, each day ranked on its own board (one
+   * attempt per player total). Defaults to `date` (single-day event).
+   */
+  endDate?: string;
   enabled: boolean;        // KILL SWITCH — set false + deploy to hide the special everywhere
   flag: string;
   label: string;
@@ -177,20 +183,25 @@ export function getActiveSpecial(): SpecialDay | null {
   return getSpecialBySlug(slug);
 }
 
-/**
- * The special to promote on the regular home screen (banner): only on its
- * event day — afterwards the promo disappears while /slug stays reachable.
- */
-export function getBannerSpecial(today: string): SpecialDay | null {
-  return SPECIAL_DAYS.find((s) => s.enabled && today === s.date) ?? null;
+/** Last live day of a special's promo window (inclusive). */
+export function specialEndDate(special: SpecialDay): string {
+  return special.endDate ?? special.date;
 }
 
 /**
- * Whether a special submits real scores: only on its event day. Afterwards
- * /<slug> stays playable as practice so its one-day leaderboard stays clean.
+ * The special to promote on the regular home screen (banner): during its live
+ * window only — afterwards the promo disappears while /slug stays reachable.
+ */
+export function getBannerSpecial(today: string): SpecialDay | null {
+  return SPECIAL_DAYS.find((s) => s.enabled && today >= s.date && today <= specialEndDate(s)) ?? null;
+}
+
+/**
+ * Whether a special submits real scores: during its live window. Each live day
+ * ranks on its own daily board; afterwards /<slug> plays as practice.
  */
 export function isSpecialScoringLive(special: SpecialDay, today: string): boolean {
-  return today === special.date;
+  return today >= special.date && today <= specialEndDate(special);
 }
 
 /**

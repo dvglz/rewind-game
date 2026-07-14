@@ -110,3 +110,25 @@ describe('computeSpecialRedirect', () => {
     }
   });
 });
+
+describe('multi-day live window (endDate)', () => {
+  const twoDay = { ...MESSI_SPECIAL, endDate: '2026-07-16' };
+
+  test('endDate defaults to the event day', () => {
+    expect(getBannerSpecial('2026-07-16')).toBeNull();
+    expect(isSpecialScoringLive(MESSI_SPECIAL, '2026-07-16')).toBe(false);
+  });
+
+  test('extended window: banner and scoring live through endDate, not beyond', () => {
+    const days = SPECIAL_DAYS.splice(0, SPECIAL_DAYS.length, twoDay);
+    try {
+      expect(getBannerSpecial('2026-07-15')?.slug).toBe('messi');
+      expect(getBannerSpecial('2026-07-16')?.slug).toBe('messi');
+      expect(getBannerSpecial('2026-07-17')).toBeNull();
+      expect(isSpecialScoringLive(twoDay, '2026-07-16')).toBe(true);
+      expect(isSpecialScoringLive(twoDay, '2026-07-17')).toBe(false);
+    } finally {
+      SPECIAL_DAYS.splice(0, SPECIAL_DAYS.length, ...days);
+    }
+  });
+});

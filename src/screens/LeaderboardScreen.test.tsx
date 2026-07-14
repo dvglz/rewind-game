@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { LeaderboardScreen } from './LeaderboardScreen';
 import { AuthProvider } from '../context/AuthContext';
-import { MESSI_SPECIAL } from '../data/specials';
+import { MESSI_SPECIAL, SPECIAL_DAYS } from '../data/specials';
 
 const { fetchLeaderboardMock, getDateOverrideMock, getDayOffsetFromTodayMock } = vi.hoisted(() => ({
   fetchLeaderboardMock: vi.fn(async (dayOffset: number) => ({
@@ -181,5 +181,38 @@ test('opens directly on the special board when viewing from special mode', async
     );
   } finally {
     window.history.replaceState({}, '', '/');
+  }
+});
+
+test('extended special window pins one board slot per live day', async () => {
+  getDateOverrideMock.mockReturnValue('2026-07-16');
+  const twoDay = { ...MESSI_SPECIAL, endDate: '2026-07-16' };
+  const original = SPECIAL_DAYS.splice(0, SPECIAL_DAYS.length, twoDay);
+
+  try {
+    render(
+      <AuthProvider>
+        <LeaderboardScreen onBack={() => {}} />
+      </AuthProvider>,
+    );
+    await screen.findByRole('heading', { name: 'Leaderboard' });
+
+    // Today (Jul 16 regular) → Messi Jul 16 → Jul 15 regular → Messi Jul 15
+    fireEvent.click(screen.getByRole('button', { name: 'Previous day' }));
+    expect(await screen.findByText(`${MESSI_SPECIAL.label} ${MESSI_SPECIAL.flag}`)).not.toBeNull();
+    expect(screen.getByText('Jul 16, 2026')).not.toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Previous day' }));
+    await waitFor(() => expect(screen.queryByText(`${MESSI_SPECIAL.label} ${MESSI_SPECIAL.flag}`)).toBeNull());
+    expect(screen.getByText('Jul 15, 2026')).not.toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Previous day' }));
+    expect(await screen.findByText(`${MESSI_SPECIAL.label} ${MESSI_SPECIAL.flag}`)).not.toBeNull();
+    expect(screen.getByText('Jul 15, 2026')).not.toBeNull();
+    await waitFor(() =>
+      expect(fetchLeaderboardMock).toHaveBeenLastCalledWith(1, undefined, MESSI_SPECIAL.gameMode),
+    );
+  } finally {
+    SPECIAL_DAYS.splice(0, SPECIAL_DAYS.length, ...original);
   }
 });

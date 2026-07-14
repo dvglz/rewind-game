@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getDateOverride } from '../data/puzzles';
-import { SPECIAL_DAYS, getActiveSpecial, type SpecialDay } from '../data/specials';
+import { SPECIAL_DAYS, getActiveSpecial, specialEndDate, type SpecialDay } from '../data/specials';
 import { fetchLeaderboard } from '../lib/leaderboard';
 import { getDayOffsetFromToday } from '../lib/leaderboard';
 import { formatTime } from '../lib/formatTime';
@@ -23,12 +23,6 @@ function shiftDateByDays(isoDate: string, deltaDays: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-function daysBetween(fromIso: string, toIso: string): number {
-  return Math.round(
-    (new Date(`${fromIso}T00:00:00Z`).getTime() - new Date(`${toIso}T00:00:00Z`).getTime()) / 86_400_000,
-  );
-}
-
 /**
  * The day picker walks an ordered list of board slots: one per regular day,
  * plus one extra slot per special event pinned right after its date — so
@@ -46,7 +40,8 @@ function buildSlots(activeDate: string): BoardSlot[] {
   for (let offset = 0; offset < MAX_SLOT_DAYS; offset++) {
     slots.push({ kind: 'regular', offset });
     const date = shiftDateByDays(activeDate, -offset);
-    const special = specials.find((s) => s.date === date);
+    // Multi-day specials get one board slot per live day.
+    const special = specials.find((s) => date >= s.date && date <= specialEndDate(s));
     if (special) slots.push({ kind: 'special', offset, special });
   }
   return slots;
@@ -125,7 +120,7 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
         <h1 className={styles.title}>Leaderboard</h1>
 
         <DateSelector
-          dayOffset={slot.kind === 'special' ? daysBetween(activeDate, slot.special.date) : slot.offset}
+          dayOffset={slot.offset}
           baseDate={activeDate}
           hasPrevious={hasPrevious}
           specialLabel={slot.kind === 'special' ? `${slot.special.label} ${slot.special.flag}` : undefined}
