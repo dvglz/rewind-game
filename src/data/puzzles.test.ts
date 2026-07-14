@@ -1,5 +1,6 @@
-import { beforeEach, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test } from 'vitest';
 import { getPuzzleForDate, getTodaysPuzzle, isRewindLabMode, isPracticeMode } from './puzzles';
+import { MESSI_SPECIAL, SPECIAL_DAYS } from './specials';
 
 beforeEach(() => {
   window.history.replaceState({}, '', '/');
@@ -118,4 +119,47 @@ test('practice mode gives the dated puzzle an isolated practice- id', () => {
   expect(puzzle.id).toBe('practice-2026-06-19-american');
   expect(puzzle.number).toBe(2); // 2026-06-19 = Day 2 (launch is 06-18)
   expect(puzzle.events).toHaveLength(5);
+});
+
+describe('special day resolution', () => {
+  test('2026-07-15 american resolves to the Messi special', () => {
+    const puzzle = getPuzzleForDate('2026-07-15', 'american');
+    expect(puzzle.special?.slug).toBe('messi');
+    expect(puzzle.id).toBe('2026-07-15-american-special-messi');
+    expect(puzzle.number).toBe(28);
+    expect(puzzle.events).toHaveLength(10);
+    expect(puzzle.weights).toEqual(MESSI_SPECIAL.weights);
+    expect(puzzle.events[0].year).toBe(2000);
+    expect(puzzle.events[0].detail).toMatch(/^In 2000, /);
+  });
+
+  test('special overrides random mode on its date', () => {
+    localStorage.setItem('rewind_random_mode', 'true');
+    sessionStorage.setItem('rewind_random_seed', 'abc-123');
+    try {
+      expect(getPuzzleForDate('2026-07-15', 'american').special?.slug).toBe('messi');
+    } finally {
+      localStorage.removeItem('rewind_random_mode');
+      sessionStorage.removeItem('rewind_random_seed');
+    }
+  });
+
+  test('soccer sport and neighboring dates are untouched', () => {
+    expect(getPuzzleForDate('2026-07-15', 'soccer').special).toBeUndefined();
+    expect(getPuzzleForDate('2026-07-14', 'american').special).toBeUndefined();
+    expect(getPuzzleForDate('2026-07-14', 'american').events).toHaveLength(5);
+  });
+
+  test('kill switch restores the regular day', () => {
+    const disabled = { ...MESSI_SPECIAL, enabled: false };
+    const days = SPECIAL_DAYS.splice(0, SPECIAL_DAYS.length, disabled);
+    try {
+      const puzzle = getPuzzleForDate('2026-07-15', 'american');
+      expect(puzzle.special).toBeUndefined();
+      expect(puzzle.id).toBe('2026-07-15-american');
+      expect(puzzle.events).toHaveLength(5);
+    } finally {
+      SPECIAL_DAYS.splice(0, SPECIAL_DAYS.length, ...days);
+    }
+  });
 });

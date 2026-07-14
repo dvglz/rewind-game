@@ -2,6 +2,7 @@ import type { Puzzle, GameEvent } from '../types';
 import { getTodayString } from '../lib/date';
 import { REWIND_QUESTION_BANK } from './questionBank';
 import { DAY_DEFINITIONS } from './dayDefinitions';
+import { getSpecialForDate } from './specials';
 
 interface RawEvent {
   id: string;
@@ -304,6 +305,27 @@ function shouldUseRandomMode(): boolean {
 }
 
 export function getPuzzleForDate(dateStr: string, sport: Sport = 'american'): Puzzle {
+  // Special days replace the regular daily (and override random mode — it's an event).
+  const special = sport === 'american' ? getSpecialForDate(dateStr) : null;
+  if (special) {
+    return {
+      id: `${dateStr}-${sport}-special-${special.slug}`,
+      number: dayIndex(dateStr) + 1,
+      sport,
+      weights: special.weights,
+      special: {
+        slug: special.slug,
+        flag: special.flag,
+        label: special.label,
+        shareLine: special.shareLine,
+      },
+      events: special.events.map((raw) => ({
+        ...rawToGameEvent(raw, sport),
+        ...(raw.media ? { media: raw.media } : {}),
+      })),
+    };
+  }
+
   const seedSource = getPuzzleSeedSource(dateStr, sport);
   const dIdx = dayIndex(dateStr);
 
