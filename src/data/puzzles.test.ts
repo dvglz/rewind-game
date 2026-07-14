@@ -134,8 +134,8 @@ describe('special resolution (parallel mode)', () => {
     const puzzle = buildSpecialPuzzle(MESSI_SPECIAL);
     expect(puzzle.special?.slug).toBe('messi');
     expect(puzzle.special?.gameMode).toBe('rewind_messi');
-    expect(puzzle.id).toBe('2026-07-15-american-special-messi');
-    expect(puzzle.number).toBe(28);
+    expect(puzzle.id).toBe('2026-07-14-american-special-messi');
+    expect(puzzle.number).toBe(27);
     expect(puzzle.events).toHaveLength(10);
     expect(puzzle.weights).toEqual(MESSI_SPECIAL.weights);
     expect(puzzle.events[0].year).toBe(2000);
@@ -147,7 +147,7 @@ describe('special resolution (parallel mode)', () => {
     try {
       const puzzle = getTodaysPuzzle('american');
       expect(puzzle.special?.slug).toBe('messi');
-      expect(puzzle.id).toBe('2026-07-15-american-special-messi');
+      expect(puzzle.id).toBe('2026-07-14-american-special-messi');
     } finally {
       window.history.replaceState({}, '', '/');
     }

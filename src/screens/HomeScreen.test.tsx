@@ -250,6 +250,8 @@ test('hides intro demo and footer sign-in in app mode', async () => {
 });
 
 test('shows the landing demo for anonymous first-time web users', () => {
+  // Outside any special live window — the demo is suppressed during specials.
+  window.history.replaceState({}, '', '/?date=2026-07-13');
   render(
     <AuthProvider>
       <HomeScreen
@@ -321,7 +323,7 @@ test('shows the Messi special headline, sub, and flag in special mode', () => {
   expect(screen.getByText(MESSI_SPECIAL.homeSub)).not.toBeNull();
 
   const meta = document.querySelector('p[class*="meta"]');
-  expect(meta?.textContent).toContain(`#028 ${MESSI_SPECIAL.flag}`);
+  expect(meta?.textContent).toContain(`#027 ${MESSI_SPECIAL.flag}`);
 });
 
 test('compacts home spacing on short mobile screens', () => {
@@ -365,7 +367,7 @@ test('regular home shows the special banner from the event day, not the special 
 });
 
 test('no special banner before the event day', () => {
-  window.history.replaceState({}, '', '/?date=2026-07-14');
+  window.history.replaceState({}, '', '/?date=2026-07-13');
 
   render(
     <AuthProvider>

@@ -15,7 +15,7 @@ afterEach(() => {
 
 describe('specials registry', () => {
   test('getSpecialBySlug returns the enabled Messi special', () => {
-    expect(getSpecialBySlug('messi')?.date).toBe('2026-07-15');
+    expect(getSpecialBySlug('messi')?.date).toBe('2026-07-14');
     expect(getSpecialBySlug('unknown')).toBeNull();
   });
 
@@ -40,15 +40,17 @@ describe('specials registry', () => {
     }
   });
 
-  test('banner shows only on the event day', () => {
-    expect(getBannerSpecial('2026-07-14')).toBeNull();
+  test('banner shows only during the live window', () => {
+    expect(getBannerSpecial('2026-07-13')).toBeNull();
+    expect(getBannerSpecial('2026-07-14')?.slug).toBe('messi');
     expect(getBannerSpecial('2026-07-15')?.slug).toBe('messi');
     expect(getBannerSpecial('2026-07-16')).toBeNull();
   });
 
-  test('special scoring is live only on the event day', () => {
+  test('special scoring is live only during the window', () => {
+    expect(isSpecialScoringLive(MESSI_SPECIAL, '2026-07-13')).toBe(false);
+    expect(isSpecialScoringLive(MESSI_SPECIAL, '2026-07-14')).toBe(true);
     expect(isSpecialScoringLive(MESSI_SPECIAL, '2026-07-15')).toBe(true);
-    expect(isSpecialScoringLive(MESSI_SPECIAL, '2026-07-14')).toBe(false);
     expect(isSpecialScoringLive(MESSI_SPECIAL, '2026-07-16')).toBe(false);
   });
 
@@ -92,11 +94,11 @@ describe('computeSpecialRedirect', () => {
   });
 
   test('before the day → plain home (no leak)', () => {
-    expect(computeSpecialRedirect('/messi', '2026-07-14')).toBe('/');
+    expect(computeSpecialRedirect('/messi', '2026-07-13')).toBe('/');
   });
 
   test('on and after the day → activates special mode', () => {
-    expect(computeSpecialRedirect('/messi', '2026-07-15')).toBe('/?special=messi');
+    expect(computeSpecialRedirect('/messi', '2026-07-14')).toBe('/?special=messi');
     expect(computeSpecialRedirect('/messi', '2026-07-16')).toBe('/?special=messi');
   });
 
@@ -114,7 +116,7 @@ describe('computeSpecialRedirect', () => {
 describe('multi-day live window (endDate)', () => {
   const twoDay = { ...MESSI_SPECIAL, endDate: '2026-07-16' };
 
-  test('endDate defaults to the event day', () => {
+  test('window closes after endDate', () => {
     expect(getBannerSpecial('2026-07-16')).toBeNull();
     expect(isSpecialScoringLive(MESSI_SPECIAL, '2026-07-16')).toBe(false);
   });
