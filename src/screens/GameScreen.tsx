@@ -40,7 +40,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
     game.state.startedAt ?? timerStart,
     game.isComplete,
     game.state.pausedMs ?? 0,
-    mediaCard !== null,
+    mediaCard !== null && !game.isComplete,
   );
   const [rulesOpen, setRulesOpen] = useState(false);
   // Rounds whose answer has been revealed — dots color at reveal, not on lock.
@@ -210,6 +210,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
     }
     setMediaCard(null);
     if (mediaTimer.current) clearTimeout(mediaTimer.current);
+    mediaTimer.current = null;
 
     setPendingResult(null);
     setRevealResult(null);
