@@ -456,7 +456,9 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
             </p>
           )}
           {isRevealing ? (
-            mediaCard === null && (
+            // Media rounds advance only via the overlay's button — never show
+            // the footer button, even in the beat before the overlay mounts.
+            !revealResult?.event.media && (
               <button
                 onClick={handleNext}
                 className={styles.nextButton}

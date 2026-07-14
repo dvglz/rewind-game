@@ -54,7 +54,7 @@
 .detail {
   font-family: var(--font-body);
   font-weight: 400;
-  font-size: 16px;
+  font-size: 15px;
   line-height: 1.55;
   color: var(--color-text);
   text-align: center;
@@ -93,10 +93,8 @@
   }
 
   .photo {
-    /* Short desktop viewports put the timeline labels near mid-height —
-       keep the print below them, per the no-label-overlap rule. */
-    max-width: 440px;
-    max-height: min(20vh, 280px);
+    max-width: min(58vw, 620px);
+    max-height: clamp(300px, 34vh, 430px);
   }
 
   .footer {
