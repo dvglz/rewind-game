@@ -127,7 +127,12 @@ export function HomeScreen({
           type="button"
           className={styles.specialBanner}
           onClick={() => {
-            const params = new URLSearchParams(window.location.search);
+            // Clean URL: only the date override (testing) rides along, so the
+            // special always opens on its home screen — never mid-game.
+            const current = new URLSearchParams(window.location.search);
+            const params = new URLSearchParams();
+            const date = current.get('date');
+            if (date) params.set('date', date);
             params.set('special', bannerSpecial.slug);
             window.location.assign(`/?${params.toString()}`);
           }}
@@ -140,9 +145,10 @@ export function HomeScreen({
           type="button"
           className={styles.specialBack}
           onClick={() => {
-            const params = new URLSearchParams(window.location.search);
-            params.delete('special');
-            params.delete('mode');
+            const current = new URLSearchParams(window.location.search);
+            const params = new URLSearchParams();
+            const date = current.get('date');
+            if (date) params.set('date', date);
             const qs = params.toString();
             window.location.assign(qs ? `/?${qs}` : '/');
           }}

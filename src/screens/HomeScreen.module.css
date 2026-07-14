@@ -271,7 +271,7 @@
 .specialBanner {
   align-self: center;
   border: none;
-  border-radius: 999px;
+  border-radius: 10px;
   padding: 10px 20px;
   background: #74acdf;
   color: #0f2340;
@@ -287,14 +287,14 @@
 
 .specialBack {
   align-self: center;
-  border: 1px solid color-mix(in srgb, var(--color-text) 35%, transparent);
-  border-radius: 999px;
-  padding: 8px 16px;
-  background: transparent;
-  color: var(--color-text);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  background: var(--color-text);
+  color: var(--color-bg);
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
 }
 

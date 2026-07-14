@@ -30,8 +30,8 @@ export const MESSI_SPECIAL: SpecialDay = {
   flag: '🇦🇷',
   label: 'Messi Special',
   gameMode: 'rewind_messi',
-  homeHeadline: 'One more Messi night?',
-  homeSub: 'Rewind the career that changed football — 10 moments, one GOAT.',
+  homeHeadline: 'One More Messi Chapter?',
+  homeSub: 'Before the next whistle, rewind 10 moments from the career that changed football.',
   shareLine: 'I rewound Messi’s GOAT career — 10 moments by year',
   weights: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
   events: [
@@ -178,11 +178,11 @@ export function getActiveSpecial(): SpecialDay | null {
 }
 
 /**
- * The special to promote on the regular home screen (banner), if any:
- * enabled and its event day has arrived. ISO strings compare lexicographically.
+ * The special to promote on the regular home screen (banner): only on its
+ * event day — afterwards the promo disappears while /slug stays reachable.
  */
 export function getBannerSpecial(today: string): SpecialDay | null {
-  return SPECIAL_DAYS.find((s) => s.enabled && today >= s.date) ?? null;
+  return SPECIAL_DAYS.find((s) => s.enabled && today === s.date) ?? null;
 }
 
 /**

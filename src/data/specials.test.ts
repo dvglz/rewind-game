@@ -40,10 +40,10 @@ describe('specials registry', () => {
     }
   });
 
-  test('banner shows from the event day on, never before', () => {
+  test('banner shows only on the event day', () => {
     expect(getBannerSpecial('2026-07-14')).toBeNull();
     expect(getBannerSpecial('2026-07-15')?.slug).toBe('messi');
-    expect(getBannerSpecial('2026-07-16')?.slug).toBe('messi');
+    expect(getBannerSpecial('2026-07-16')).toBeNull();
   });
 
   test('special scoring is live only on the event day', () => {
