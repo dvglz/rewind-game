@@ -104,7 +104,7 @@ test('opens a selected group and keeps DNP members visible while merging scores 
 
   fireEvent.click(await screen.findByRole('button', { name: /the boys/i }));
 
-  expect(fetchLeaderboard).toHaveBeenCalledWith(expect.any(Number), 42);
+  expect(fetchLeaderboard).toHaveBeenCalledWith(expect.any(Number), 42, undefined);
   expect(await screen.findByText('Mike')).not.toBeNull();
   expect(await screen.findByText('You')).not.toBeNull();
   expect(await screen.findByText('Sarah')).not.toBeNull();
@@ -128,7 +128,7 @@ test('shows group leaderboard scores when the group roster is missing', async ()
 
   fireEvent.click(await screen.findByRole('button', { name: /the boys/i }));
 
-  expect(fetchLeaderboard).toHaveBeenCalledWith(expect.any(Number), 42);
+  expect(fetchLeaderboard).toHaveBeenCalledWith(expect.any(Number), 42, undefined);
   expect(await screen.findByText('Mike')).not.toBeNull();
   expect(await screen.findByText('You')).not.toBeNull();
   expect(await screen.findByText('940')).not.toBeNull();

@@ -266,38 +266,57 @@
   }
 }
 
-/* Special-event pill on the regular home (Argentina-celeste), and its
-   counterpart inside special mode for getting back to the NBA daily. */
-.specialBanner {
-  align-self: center;
+/* Special-event pill centered in the top bar (regular home: play the special;
+   special mode: switch back). Pops in, then nudges periodically for eyeballs. */
+.specialSlot {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.specialBanner,
+.specialBack {
+  pointer-events: auto;
   border: none;
   border-radius: 10px;
   padding: 10px 20px;
-  background: #74acdf;
-  color: #0f2340;
   font-family: var(--font-display);
   font-weight: 400;
   font-size: 16px;
   cursor: pointer;
+  animation:
+    specialPopIn 480ms cubic-bezier(0.22, 1.6, 0.36, 1) 250ms backwards,
+    specialNudge 5s ease-in-out 3s infinite;
 }
 
-.specialBanner:active {
-  transform: scale(0.98);
+.specialBanner {
+  background: #74acdf;
+  color: #0f2340;
 }
 
 .specialBack {
-  align-self: center;
-  border: none;
-  border-radius: 10px;
-  padding: 10px 20px;
   background: var(--color-text);
   color: var(--color-bg);
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 16px;
-  cursor: pointer;
 }
 
+.specialBanner:active,
 .specialBack:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
+}
+
+@keyframes specialPopIn {
+  from { opacity: 0; transform: scale(0.6); }
+  60% { opacity: 1; transform: scale(1.06); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes specialNudge {
+  0%, 88%, 100% { transform: scale(1); }
+  92% { transform: scale(1.06); }
+  96% { transform: scale(0.99); }
 }

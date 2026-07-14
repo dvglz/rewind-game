@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { getDateOverride } from '../data/puzzles';
+import { buildBoardSlots, initialSlotIndex } from '../lib/boardSlots';
 import { fetchGroups, fetchGroup, createGroup, joinGroup, leaveGroup } from '../lib/playhub';
 import { fetchLeaderboard, getDayOffsetFromToday } from '../lib/leaderboard';
 import { formatTime } from '../lib/formatTime';
@@ -18,8 +19,10 @@ import styles from './GroupsScreen.module.css';
 
 interface GroupBoardState {
   groupId: number;
-  /** Day the board was fetched for (activeDateOffset + dayOffset). */
+  /** Day the board was fetched for (activeDateOffset + slot offset). */
   dayOffset: number;
+  /** Special game mode the board was fetched for (undefined = regular daily). */
+  gameMode?: string;
   board: GlobalLeaderboard | null;
 }
 
@@ -74,18 +77,22 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
   const [showJoin, setShowJoin] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [toast, setToast] = useState('');
-  const [dayOffset, setDayOffset] = useState(0);
+  const slots = useMemo(() => buildBoardSlots(activeDate), [activeDate]);
+  const [slotIndex, setSlotIndex] = useState(() => initialSlotIndex(slots));
   const [groupBoardState, setGroupBoardState] = useState<GroupBoardState | null>(null);
   const detailGroupIds = useRef(new Set<number>());
   const group = selectedGroupId == null ? null : groups.find((g) => g.id === selectedGroupId) ?? null;
-  const requestedDayOffset = activeDateOffset + dayOffset;
+  const slot = slots[slotIndex] ?? slots[0];
+  const slotGameMode = slot.kind === 'special' ? slot.special.gameMode : undefined;
+  const requestedDayOffset = activeDateOffset + slot.offset;
   // The stored board only counts when it matches BOTH the open group and the
   // selected day — so switching group or day makes it "not loaded yet" and we
   // show the loader instead of stale scores or a DNP flash.
   const activeBoardState =
     group &&
     groupBoardState?.groupId === group.id &&
-    groupBoardState.dayOffset === requestedDayOffset
+    groupBoardState.dayOffset === requestedDayOffset &&
+    groupBoardState.gameMode === slotGameMode
       ? groupBoardState
       : null;
   const groupBoard = activeBoardState?.board ?? null;
@@ -174,25 +181,30 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
 
     let cancelled = false;
     const groupId = group.id;
-    const requested = activeDateOffset + dayOffset;
-    fetchLeaderboard(requested, group.id)
+    const requested = activeDateOffset + slot.offset;
+    const gameMode = slot.kind === 'special' ? slot.special.gameMode : undefined;
+    fetchLeaderboard(requested, group.id, gameMode)
       .then((board) => {
-        if (!cancelled) setGroupBoardState({ groupId, dayOffset: requested, board });
+        if (!cancelled) setGroupBoardState({ groupId, dayOffset: requested, gameMode, board });
       })
       .catch(() => {
-        if (!cancelled) setGroupBoardState({ groupId, dayOffset: requested, board: null });
+        if (!cancelled) setGroupBoardState({ groupId, dayOffset: requested, gameMode, board: null });
       });
 
     return () => {
       cancelled = true;
     };
-  }, [activeDateOffset, dayOffset, group?.id]);
+  }, [activeDateOffset, slot, group?.id]);
 
   useEffect(() => {
     if (!group) return;
-    track('leaderboard_view', { scope: 'group', day_offset: dayOffset });
+    track('leaderboard_view', {
+      scope: 'group',
+      day_offset: slot.offset,
+      ...(slot.kind === 'special' ? { special: slot.special.slug } : {}),
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [group?.id, dayOffset]);
+  }, [group?.id, slot]);
 
   const handleCreate = async (name: string) => {
     const createdGroup = await createGroup(name);
@@ -376,10 +388,12 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
             </button>
 
             <DateSelector
-              dayOffset={dayOffset}
+              dayOffset={slot.offset}
               baseDate={activeDate}
-              onPrev={() => setDayOffset((d) => d + 1)}
-              onNext={() => setDayOffset((d) => Math.max(0, d - 1))}
+              specialLabel={slot.kind === 'special' ? `${slot.special.label} ${slot.special.flag}` : undefined}
+              canNext={slotIndex > 0}
+              onPrev={() => setSlotIndex((i) => Math.min(i + 1, slots.length - 1))}
+              onNext={() => setSlotIndex((i) => Math.max(0, i - 1))}
             />
           </div>
 
@@ -391,7 +405,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
             ) : (
               <GroupLeaderboard
                 entries={leaderboardEntries}
-                emptySeed={`day-${dayOffset}`}
+                emptySeed={`day-${slotIndex}`}
               />
             )}
           </div>
@@ -421,7 +435,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
                   className={styles.groupRow}
                   onClick={() => {
                     setSelectedGroupId(g.id);
-                    setDayOffset(0);
+                    setSlotIndex(initialSlotIndex(slots));
                     setConfirmLeave(false);
                   }}
                   type="button"

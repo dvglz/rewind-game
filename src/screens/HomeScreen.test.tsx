@@ -359,7 +359,7 @@ test('regular home shows the special banner from the event day, not the special 
     </AuthProvider>
   );
 
-  expect(screen.getByRole('button', { name: `${MESSI_SPECIAL.flag} Play the ${MESSI_SPECIAL.label} →` })).not.toBeNull();
+  expect(screen.getByRole('button', { name: `${MESSI_SPECIAL.flag} Play the ${MESSI_SPECIAL.label}` })).not.toBeNull();
   expect(screen.queryByText(MESSI_SPECIAL.homeHeadline)).toBeNull();
   window.history.replaceState({}, '', '/');
 });
