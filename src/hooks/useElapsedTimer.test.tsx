@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react';
 import { act } from '@testing-library/react';
-import { afterEach, beforeEach, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { useElapsedTimer } from './useElapsedTimer';
 
 beforeEach(() => {
@@ -62,4 +62,31 @@ test('freezes at the final value once complete', () => {
     vi.advanceTimersByTime(5000);
   });
   expect(result.current).toBe(frozen);
+});
+
+describe('useElapsedTimer pause support', () => {
+  test('subtracts pausedMs from elapsed', () => {
+    const start = Date.now() - 30_000;
+    const { result } = renderHook(() => useElapsedTimer(start, false, 10_000, false));
+    expect(result.current).toBe(20_000);
+  });
+
+  test('freezes while paused, resumes correctly after pausedMs grows', () => {
+    const start = Date.now();
+    const { result, rerender } = renderHook(
+      ({ pausedMs, isPaused }) => useElapsedTimer(start, false, pausedMs, isPaused),
+      { initialProps: { pausedMs: 0, isPaused: false } },
+    );
+    act(() => { vi.advanceTimersByTime(10_000); });
+    expect(result.current).toBe(10_000);
+
+    rerender({ pausedMs: 0, isPaused: true });       // card opens
+    act(() => { vi.advanceTimersByTime(7_000); });   // reading the photo
+    expect(result.current).toBe(10_000);             // frozen
+
+    rerender({ pausedMs: 7_000, isPaused: false });  // card dismissed
+    expect(result.current).toBe(10_000);             // resumes where it paused
+    act(() => { vi.advanceTimersByTime(5_000); });
+    expect(result.current).toBe(15_000);
+  });
 });
