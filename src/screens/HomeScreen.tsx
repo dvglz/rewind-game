@@ -135,6 +135,21 @@ export function HomeScreen({
           {bannerSpecial.flag} Play the {bannerSpecial.label} →
         </button>
       )}
+      {specialDay && (
+        <button
+          type="button"
+          className={styles.specialBack}
+          onClick={() => {
+            const params = new URLSearchParams(window.location.search);
+            params.delete('special');
+            params.delete('mode');
+            const qs = params.toString();
+            window.location.assign(qs ? `/?${qs}` : '/');
+          }}
+        >
+          ← Back to the NBA daily
+        </button>
+      )}
       <div className={styles.intro}>
         <span className={styles.wordmark}>Rewind</span>
         <h1 className={styles.headline}>

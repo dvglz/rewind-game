@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getDateOverride } from '../data/puzzles';
-import { SPECIAL_DAYS, type SpecialDay } from '../data/specials';
+import { SPECIAL_DAYS, getActiveSpecial, type SpecialDay } from '../data/specials';
 import { fetchLeaderboard } from '../lib/leaderboard';
 import { getDayOffsetFromToday } from '../lib/leaderboard';
 import { formatTime } from '../lib/formatTime';
@@ -57,7 +57,13 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
   const activeDate = getDateOverride();
   const activeDateOffset = getDayOffsetFromToday(activeDate);
   const slots = useMemo(() => buildSlots(activeDate), [activeDate]);
-  const [slotIndex, setSlotIndex] = useState(0);
+  // Opening the leaderboard from special mode lands on that special's board.
+  const [slotIndex, setSlotIndex] = useState(() => {
+    const active = getActiveSpecial();
+    if (!active) return 0;
+    const index = slots.findIndex((s) => s.kind === 'special' && s.special.slug === active.slug);
+    return index >= 0 ? index : 0;
+  });
   const [board, setBoard] = useState<GlobalLeaderboard | null>(null);
   const [loading, setLoading] = useState(true);
   const slot = slots[slotIndex] ?? slots[0];

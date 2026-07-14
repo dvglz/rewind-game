@@ -163,3 +163,23 @@ test('inserts a Messi Special slot after its date and fetches its own game mode'
   fireEvent.click(screen.getByRole('button', { name: 'Next day' }));
   await waitFor(() => expect(fetchLeaderboardMock).toHaveBeenLastCalledWith(0, undefined, undefined));
 });
+
+test('opens directly on the special board when viewing from special mode', async () => {
+  getDateOverrideMock.mockReturnValue('2026-07-15');
+  window.history.replaceState({}, '', '/?special=messi');
+
+  try {
+    render(
+      <AuthProvider>
+        <LeaderboardScreen onBack={() => {}} />
+      </AuthProvider>,
+    );
+
+    expect(await screen.findByText(`${MESSI_SPECIAL.label} ${MESSI_SPECIAL.flag}`)).not.toBeNull();
+    await waitFor(() =>
+      expect(fetchLeaderboardMock).toHaveBeenCalledWith(0, undefined, MESSI_SPECIAL.gameMode),
+    );
+  } finally {
+    window.history.replaceState({}, '', '/');
+  }
+});
