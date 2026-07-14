@@ -2,6 +2,9 @@
   display: flex;
   align-items: center;
   gap: var(--round-dot-gap, 4px);
+  /* Rows cap at 5 dots — a 10-round special wraps into a 5x2 grid. */
+  flex-wrap: wrap;
+  max-width: calc(5 * var(--round-dot-size, 14px) + 4 * var(--round-dot-gap, 4px));
 }
 
 .dot {
@@ -36,6 +39,7 @@
 @media (min-width: 900px) {
   .dots {
     gap: var(--round-dot-gap, 5px);
+    max-width: calc(5 * var(--round-dot-size, 16px) + 4 * var(--round-dot-gap, 5px));
   }
 
   .dot {

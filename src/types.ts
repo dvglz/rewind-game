@@ -2,6 +2,8 @@ export interface SpecialEventMedia {
   src: string;
   caption: string;
   credit: string;
+  /** Photo's source page (e.g. Wikimedia Commons file page) — target of the "Image credits" link. */
+  sourceUrl: string;
 }
 
 export interface PuzzleSpecial {

@@ -475,7 +475,12 @@ test('special day: media card appears after reveal and its button advances the r
       text: i === 0 ? 'Messi makes his La Liga debut' : `Messi milestone ${i}`,
       year: 2004 + i,
       media: i === 0
-        ? { src: '/messi-debut.jpg', caption: 'Messi debut', credit: 'Getty' }
+        ? {
+            src: '/messi-debut.jpg',
+            caption: 'Messi debut',
+            credit: 'Photo: Example, CC BY 4.0, via Wikimedia Commons',
+            sourceUrl: 'https://commons.wikimedia.org/wiki/File:Messi_debut.jpg',
+          }
         : undefined,
     })),
   };

@@ -45,6 +45,7 @@ describe('specials registry', () => {
       expect(e.media.src).toMatch(/^\/specials\/messi\/\d{2}-[a-z-]+\.jpg$/);
       expect(e.media.caption.length).toBeGreaterThan(10);
       expect(e.media.credit).toMatch(/^Photo: .+, via Wikimedia Commons$/);
+      expect(e.media.sourceUrl).toMatch(/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/);
     }
   });
 });

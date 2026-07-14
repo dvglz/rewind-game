@@ -22,6 +22,9 @@ const sleep = (ms: number) => new Promise<void>((resolve) => {
   window.setTimeout(resolve, ms);
 });
 
+// Print-photo tilt per round — deterministic so a resumed game shows the same angles.
+const MEDIA_TILTS = [-3, 2.5, -2, 3, -2.5, 2, -3.2, 2.8, -2.2, 3.4] as const;
+
 interface GameScreenProps {
   onFinish: () => void;
   onHome?: () => void;
@@ -199,7 +202,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
       mediaTimer.current = setTimeout(() => {
         setMediaCard(result.event.media ?? null);
         mediaOpenedAt.current = Date.now();
-      }, 1250); // ~1s after the reveal text lands
+      }, 600); // overlay pops once the timeline has landed; photo/text stagger via CSS
     }
   }, [game, timeline, displayedScore, puzzle.number]);
 
@@ -440,7 +443,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
 
       <div className={styles.footerSlot}>
         <div className={styles.detailSlot}>
-          {isRevealing ? (
+          {isRevealing && !revealResult?.event.media ? (
             <p className={`${styles.revealDetail} ${showRevealText ? styles.revealDetailVisible : ''}`}>
               {revealResult?.event.detail ?? ''}
             </p>
@@ -474,6 +477,8 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
       {mediaCard && (
         <MediaRevealCard
           media={mediaCard}
+          detail={revealResult?.event.detail ?? ''}
+          tilt={MEDIA_TILTS[(displayRound - 1) % MEDIA_TILTS.length]}
           buttonLabel={game.isComplete ? 'See Results' : 'Next Round'}
           onNext={handleNext}
         />

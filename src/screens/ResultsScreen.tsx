@@ -176,7 +176,7 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
           results={displayState.results}
           totalScore={displayState.totalScore}
           maxScore={maxScore}
-          dateLabel={dateLabel}
+          dateLabel={puzzle.special ? `${puzzle.special.label} ${puzzle.special.flag} · ${dateLabel}` : dateLabel}
           elapsedMs={displayState.elapsedMs}
           section="summary"
         />
