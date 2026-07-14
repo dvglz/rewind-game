@@ -4,6 +4,7 @@ import { Header } from '../components/Header';
 import { RulesSheet } from '../components/RulesSheet';
 import { Timeline } from '../components/Timeline';
 import { ConfirmButton } from '../components/ConfirmButton';
+import { MediaRevealCard } from '../components/MediaRevealCard';
 import { useGame } from '../hooks/useGame';
 import { useTimeline } from '../hooks/useTimeline';
 import { useElapsedTimer } from '../hooks/useElapsedTimer';
@@ -14,7 +15,7 @@ import { vibrateConfirm, vibrateError, vibrateMedium } from '../lib/haptics';
 import { loadStats } from '../engine/storage';
 import { getAccessToken } from '../lib/auth';
 import { track } from '../lib/analytics';
-import type { RoundResult } from '../types';
+import type { RoundResult, SpecialEventMedia } from '../types';
 import styles from './GameScreen.module.css';
 
 const sleep = (ms: number) => new Promise<void>((resolve) => {
@@ -30,10 +31,17 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
   const puzzle = getTodaysPuzzle();
   const game = useGame(puzzle, { scoringEnabled: !isRewindLabMode() && !isPracticeMode() });
   const timeline = useTimeline(puzzle.events);
+  const weights = puzzle.weights ?? ROUND_WEIGHTS;
   // Capture the game's start once so the timer base is stable across renders.
   // startedAt is set at game creation; the fallback only covers legacy saves.
   const [timerStart] = useState(() => game.state.startedAt ?? Date.now());
-  const elapsedMs = useElapsedTimer(game.state.startedAt ?? timerStart, game.isComplete);
+  const [mediaCard, setMediaCard] = useState<SpecialEventMedia | null>(null);
+  const elapsedMs = useElapsedTimer(
+    game.state.startedAt ?? timerStart,
+    game.isComplete,
+    game.state.pausedMs ?? 0,
+    mediaCard !== null,
+  );
   const [rulesOpen, setRulesOpen] = useState(false);
   // Rounds whose answer has been revealed — dots color at reveal, not on lock.
   const [revealedRounds, setRevealedRounds] = useState(() => game.results.length);
@@ -60,6 +68,8 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
   const revealTimer = useRef<ReturnType<typeof setTimeout>>(null);
   const flashTimer = useRef<ReturnType<typeof setTimeout>>(null);
   const flashOffTimer = useRef<ReturnType<typeof setTimeout>>(null);
+  const mediaTimer = useRef<ReturnType<typeof setTimeout>>(null);
+  const mediaOpenedAt = useRef<number | null>(null);
   const rafRef = useRef<number | null>(null);
   const completeFired = useRef(false);
   const activeResult = revealResult ?? pendingResult;
@@ -184,9 +194,23 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
     revealTimer.current = setTimeout(() => {
       setShowRevealText(true);
     }, 250);
+
+    if (result.event.media) {
+      mediaTimer.current = setTimeout(() => {
+        setMediaCard(result.event.media ?? null);
+        mediaOpenedAt.current = Date.now();
+      }, 1250); // ~1s after the reveal text lands
+    }
   }, [game, timeline, displayedScore, puzzle.number]);
 
   const handleNext = useCallback(() => {
+    if (mediaOpenedAt.current !== null) {
+      game.recordPause(Date.now() - mediaOpenedAt.current);
+      mediaOpenedAt.current = null;
+    }
+    setMediaCard(null);
+    if (mediaTimer.current) clearTimeout(mediaTimer.current);
+
     setPendingResult(null);
     setRevealResult(null);
     setIsResolving(false);
@@ -210,7 +234,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
     if (game.isComplete) {
       onFinish();
     }
-  }, [game.isComplete, onFinish]);
+  }, [game, onFinish]);
 
   const isRevealing = revealResult !== null;
   const isLocked = isRevealing || isResolving;
@@ -234,8 +258,17 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
     if (revealTimer.current) clearTimeout(revealTimer.current);
     if (flashTimer.current) clearTimeout(flashTimer.current);
     if (flashOffTimer.current) clearTimeout(flashOffTimer.current);
+    if (mediaTimer.current) clearTimeout(mediaTimer.current);
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
   }, []);
+
+  useEffect(() => {
+    for (const offset of [0, 1]) {
+      const src = puzzle.events[game.currentRound + offset]?.media?.src;
+      if (src) new Image().src = src;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game.currentRound]);
 
   useEffect(() => {
     const entry = game.results.length > 0 && !game.isComplete ? 'resume' : 'new';
@@ -244,6 +277,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
       sport: puzzle.sport,
       is_authenticated: Boolean(getAccessToken()),
       entry_point: entry,
+      ...(puzzle.special ? { special: puzzle.special.slug } : {}),
     });
 
     const stats = loadStats();
@@ -266,9 +300,10 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
         game_number: puzzle.number,
         sport: puzzle.sport,
         total_score: game.totalScore,
-        max_score: getMaxPossibleScore(game.totalRounds),
+        max_score: getMaxPossibleScore(game.totalRounds, puzzle.weights),
         elapsed_ms: game.state.elapsedMs ?? 0,
         streak: stats.currentStreak,
+        ...(puzzle.special ? { special: puzzle.special.slug } : {}),
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -315,6 +350,7 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
       <Header
         onHome={onHome}
         gameNumber={puzzle.number}
+        specialFlag={puzzle.special?.flag}
         rightText={`${displayedScore} PTS`}
         scorePopping={scorePopping}
         onScoreAnimationEnd={() => setScorePopping(false)}
@@ -410,18 +446,20 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
           ) : null}
         </div>
         <div className={styles.buttonRail}>
-          {!isRevealing && !isResolving && (ROUND_WEIGHTS[game.currentRound] ?? 0) > 100 && (
+          {!isRevealing && !isResolving && (weights[game.currentRound] ?? 0) > 100 && (
             <p className={styles.worthLabel}>
-              Worth {(ROUND_WEIGHTS[game.currentRound] ?? 0) / 100}x points
+              Worth {(weights[game.currentRound] ?? 0) / 100}x points
             </p>
           )}
           {isRevealing ? (
-            <button
-              onClick={handleNext}
-              className={styles.nextButton}
-            >
-              {game.isComplete ? 'See Results' : 'Next Round'}
-            </button>
+            mediaCard === null && (
+              <button
+                onClick={handleNext}
+                className={styles.nextButton}
+              >
+                {game.isComplete ? 'See Results' : 'Next Round'}
+              </button>
+            )
           ) : !isResolving ? (
             <ConfirmButton
               onConfirm={handleConfirm}
@@ -432,6 +470,13 @@ export function GameScreen({ onFinish, onHome }: GameScreenProps) {
       </div>
 
       <Confetti active={showConfetti} onComplete={() => setShowConfetti(false)} />
+      {mediaCard && (
+        <MediaRevealCard
+          media={mediaCard}
+          buttonLabel={game.isComplete ? 'See Results' : 'Next Round'}
+          onNext={handleNext}
+        />
+      )}
     </div>
   );
 }

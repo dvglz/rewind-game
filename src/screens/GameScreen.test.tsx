@@ -7,9 +7,14 @@ const headerMock = vi.hoisted(() => ({
 }));
 
 vi.mock('../components/Header', () => ({
-  Header: (props: { roundState?: { animatedDoneIndex?: number } }) => {
+  Header: (props: { roundState?: { animatedDoneIndex?: number }; specialFlag?: string }) => {
     headerMock.latestProps = props;
-    return <div>Header</div>;
+    return (
+      <div>
+        Header
+        {props.specialFlag && <span>{props.specialFlag}</span>}
+      </div>
+    );
   },
 }));
 
@@ -94,6 +99,7 @@ beforeEach(() => {
     results: [],
     totalScore: 0,
     submitGuess: vi.fn(),
+    recordPause: vi.fn(),
   });
 
   vi.mocked(useTimeline).mockReturnValue({
@@ -435,4 +441,143 @@ test('keeps the reveal indicator green even on a wrong answer', async () => {
   expect(screen.getByTestId('timeline-props').textContent).toContain('var(--color-correct)');
   expect(screen.getByTestId('headline-year').getAttribute('style')).toContain('var(--color-wrong)');
   vi.useRealTimers();
+});
+
+test('special day: flag renders in the header', () => {
+  vi.mocked(getTodaysPuzzle).mockReturnValue({
+    id: 'puzzle-messi',
+    number: 500,
+    sport: 'soccer',
+    theme: 'Messi Special',
+    special: { slug: 'messi', flag: '🇦🇷', label: 'Messi Special', shareLine: 'The GOAT.' },
+    events: [{ text: 'Messi makes his La Liga debut', year: 2004 }],
+  });
+
+  render(<GameScreen onFinish={() => {}} />);
+
+  expect(screen.getByText('🇦🇷')).toBeInTheDocument();
+});
+
+test('special day: media card appears after reveal and its button advances the round', async () => {
+  const messiPuzzle = {
+    id: 'puzzle-messi',
+    number: 500,
+    sport: 'soccer' as const,
+    theme: 'Messi Special',
+    special: { slug: 'messi', flag: '🇦🇷', label: 'Messi Special', shareLine: 'The GOAT.' },
+    events: Array.from({ length: 10 }, (_, i) => ({
+      text: i === 0 ? 'Messi makes his La Liga debut' : `Messi milestone ${i}`,
+      year: 2004 + i,
+      media: i === 0
+        ? { src: '/messi-debut.jpg', caption: 'Messi debut', credit: 'Getty' }
+        : undefined,
+    })),
+  };
+  vi.mocked(getTodaysPuzzle).mockReturnValue(messiPuzzle);
+
+  let currentRound = 0;
+
+  vi.mocked(useGame).mockReturnValue({
+    state: { puzzleId: 'puzzle-messi', currentRound: 0, results: [], totalScore: 0, completed: false },
+    get currentEvent() {
+      return messiPuzzle.events[currentRound];
+    },
+    get currentRound() {
+      return currentRound;
+    },
+    totalRounds: 10,
+    isComplete: false,
+    results: [],
+    totalScore: 0,
+    submitGuess: vi.fn(() => {
+      const result = {
+        event: messiPuzzle.events[0],
+        guessedYear: 2004,
+        actualYear: 2004,
+        diff: 0,
+        score: 100,
+      };
+      currentRound = 1;
+      return result;
+    }),
+    recordPause: vi.fn(),
+  });
+
+  vi.mocked(useTimeline).mockReturnValue({
+    containerRef: { current: null },
+    get selectedYear() {
+      return selectedYear;
+    },
+    scrollToYear: vi.fn(() => Promise.resolve()),
+    snapToClosestYear: vi.fn(() => Promise.resolve()),
+    syncYear: vi.fn(),
+    handleScroll: vi.fn(),
+    rangeStart: 1984,
+    rangeEnd: 2026,
+    yearWidth: 60,
+  });
+
+  render(<GameScreen onFinish={() => {}} />);
+  fireEvent.click(screen.getByRole('button', { name: /lock/i }));
+
+  await screen.findByText(/Messi makes his La Liga debut/i);
+  const card = await screen.findByRole('dialog', {}, { timeout: 3000 });
+  expect(card).toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole('button', { name: 'Next Round' }));
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(screen.getByText('Round 2 of 10')).toBeInTheDocument();
+});
+
+test('regular day: no media card, footer Next button unchanged', async () => {
+  vi.mocked(useGame).mockReturnValue({
+    state: {
+      puzzleId: 'puzzle-1',
+      currentRound: 0,
+      results: [],
+      totalScore: 0,
+      completed: false,
+    },
+    currentEvent: { text: 'LeBron makes The Block', year: 2016 },
+    currentRound: 0,
+    totalRounds: 5,
+    isComplete: false,
+    results: [],
+    totalScore: 0,
+    submitGuess: vi.fn(() => ({
+      event: { text: 'LeBron makes The Block', year: 2016, detail: 'In 2016, ...' },
+      guessedYear: 2016,
+      actualYear: 2016,
+      diff: 0,
+      score: 100,
+    })),
+    recordPause: vi.fn(),
+  });
+
+  vi.mocked(useTimeline).mockReturnValue({
+    containerRef: { current: null },
+    get selectedYear() {
+      return selectedYear;
+    },
+    scrollToYear: vi.fn(() => Promise.resolve()),
+    snapToClosestYear: vi.fn(() => Promise.resolve()),
+    syncYear: vi.fn(),
+    handleScroll: vi.fn(),
+    rangeStart: 1984,
+    rangeEnd: 2026,
+    yearWidth: 60,
+  });
+
+  render(<GameScreen onFinish={() => {}} />);
+  fireEvent.click(screen.getByRole('button', { name: /lock/i }));
+
+  await screen.findByTestId('confetti-active');
+
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+  const nextButton = screen.getByRole('button', { name: 'Next Round' });
+  fireEvent.click(nextButton);
+
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /lock/i })).toBeInTheDocument();
 });
