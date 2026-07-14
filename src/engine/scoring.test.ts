@@ -1,5 +1,5 @@
-import { expect, test } from 'vitest';
-import { calculateScore, getResultColor, getResultEmoji, getResultLabel } from './scoring';
+import { expect, test, describe } from 'vitest';
+import { calculateScore, getMaxPossibleScore, normalizePuzzleScore, getResultColor, getResultEmoji, getResultLabel } from './scoring';
 
 test('maps year gaps into the four presentation tiers (green = exact only)', () => {
   expect(getResultColor(0)).toBe('perfect');
@@ -31,4 +31,27 @@ test('uses the hand-tuned score table for early misses', () => {
   expect(calculateScore(3)).toBe(64);
   expect(calculateScore(5)).toBe(50);
   expect(calculateScore(9)).toBe(20);
+});
+
+describe('custom round weights', () => {
+  const FLAT_10 = [100, 100, 100, 100, 100, 100, 100, 100, 100, 100] as const;
+
+  test('calculateScore uses provided weights', () => {
+    expect(calculateScore(0, 9, FLAT_10)).toBe(100);   // perfect on round 10
+    expect(calculateScore(2, 5, FLAT_10)).toBe(72);    // 100 * 0.72
+  });
+
+  test('calculateScore defaults preserve existing behavior', () => {
+    expect(calculateScore(0, 4)).toBe(300);            // ROUND_WEIGHTS[4]
+    expect(calculateScore(0, 9)).toBe(300);            // clamps to last weight
+  });
+
+  test('getMaxPossibleScore with flat 10 weights is 1000', () => {
+    expect(getMaxPossibleScore(10, FLAT_10)).toBe(1000);
+    expect(getMaxPossibleScore(5)).toBe(1000);         // default unchanged
+  });
+
+  test('normalizePuzzleScore clamps against provided weights', () => {
+    expect(normalizePuzzleScore(1200, 10, FLAT_10)).toBe(1000);
+  });
 });

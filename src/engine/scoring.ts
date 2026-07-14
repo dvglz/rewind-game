@@ -3,23 +3,26 @@ import type { ResultColor } from '../types';
 export const ROUND_WEIGHTS = [100, 100, 200, 300, 300] as const;
 const SCORE_FACTORS = [1, 0.82, 0.72, 0.64, 0.57, 0.5, 0.42, 0.35, 0.29] as const;
 
-function getRoundWeight(roundIndex: number): number {
-  return ROUND_WEIGHTS[roundIndex] ?? ROUND_WEIGHTS[ROUND_WEIGHTS.length - 1];
+export type RoundWeights = readonly number[];
+
+function getRoundWeight(roundIndex: number, weights: RoundWeights = ROUND_WEIGHTS): number {
+  return weights[roundIndex] ?? weights[weights.length - 1] ?? 0;
 }
 
-export function calculateScore(diff: number, roundIndex = 0): number {
+export function calculateScore(diff: number, roundIndex = 0, weights: RoundWeights = ROUND_WEIGHTS): number {
   const absDiff = Math.abs(diff);
   const factor = SCORE_FACTORS[absDiff] ?? 0.2;
-  return Math.round(getRoundWeight(roundIndex) * factor);
+  return Math.round(getRoundWeight(roundIndex, weights) * factor);
 }
 
-export function getMaxPossibleScore(rounds: number): number {
-  return ROUND_WEIGHTS.slice(0, rounds).reduce((sum, weight) => sum + weight, 0);
+export function getMaxPossibleScore(rounds: number, weights: RoundWeights = ROUND_WEIGHTS): number {
+  return Array.from({ length: rounds }, (_, i) => getRoundWeight(i, weights))
+    .reduce((sum, weight) => sum + weight, 0);
 }
 
-export function normalizePuzzleScore(totalScore: number, rounds: number): number {
+export function normalizePuzzleScore(totalScore: number, rounds: number, weights: RoundWeights = ROUND_WEIGHTS): number {
   if (rounds <= 0) return 0;
-  return Math.min(Math.round(totalScore), getMaxPossibleScore(rounds));
+  return Math.min(Math.round(totalScore), getMaxPossibleScore(rounds, weights));
 }
 
 export function getResultColor(diff: number): ResultColor {
