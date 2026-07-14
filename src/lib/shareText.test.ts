@@ -125,3 +125,52 @@ test('uses the Archive title when the archive flag is set', () => {
   expect(text.startsWith('⏪ Rewind Archive #002')).toBe(true);
   expect(text).not.toContain('Rewind #');
 });
+
+test('special share text uses flag, label, shareLine, and /slug URL', () => {
+  const results = Array.from({ length: 10 }, (_, i) => ({
+    event: { text: `Q${i + 1}`, year: 2010 },
+    guessedYear: 2010,
+    actualYear: 2010,
+    diff: 0,
+    score: 100,
+  }));
+
+  const text = generateShareText(
+    28,
+    results,
+    1000,
+    1000,
+    3,
+    'american',
+    undefined,
+    false,
+    83_000,
+    {
+      slug: 'messi',
+      flag: '🇦🇷',
+      label: 'Messi Special',
+      shareLine: 'I walked Messi’s journey — 10 moments by year',
+    },
+  );
+
+  expect(text).toContain('⏪ Rewind #028 🇦🇷 Messi Special');
+  expect(text).toContain('I walked Messi’s journey — 10 moments by year');
+  expect(text).toContain('🟢🟢🟢🟢🟢🟢🟢🟢🟢🟢');
+  expect(text).toMatch(/Can you beat it\? https:\/\/.+\/messi$/);
+});
+
+test('non-special share text is unchanged', () => {
+  const results = Array.from({ length: 5 }, (_, i) => ({
+    event: { text: `Q${i + 1}`, year: 2010 },
+    guessedYear: 2010,
+    actualYear: 2010,
+    diff: 0,
+    score: 100,
+  }));
+
+  const text = generateShareText(28, results, 1000, 1000, 3, 'american', undefined, false, 83_000);
+
+  expect(text).toContain('⏪ Rewind #028\n');
+  expect(text).toContain('Guess 5 NBA moments by year');
+  expect(text).not.toContain('messi');
+});

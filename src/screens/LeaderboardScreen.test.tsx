@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { LeaderboardScreen } from './LeaderboardScreen';
 import { AuthProvider } from '../context/AuthContext';
+import { MESSI_SPECIAL } from '../data/specials';
 
 const { fetchLeaderboardMock, getDateOverrideMock, getDayOffsetFromTodayMock } = vi.hoisted(() => ({
   fetchLeaderboardMock: vi.fn(async (dayOffset: number) => ({
@@ -123,4 +124,27 @@ test('shows the leaderboard freshness and tiebreak disclaimer', async () => {
   );
 
   expect(await screen.findByText('Updates every 2 min. Ties: fastest run, then earliest submission.')).not.toBeNull();
+});
+
+test('shows the special label under the title when viewing the Messi special day', async () => {
+  getDateOverrideMock.mockReturnValue('2026-07-15');
+
+  render(
+    <AuthProvider>
+      <LeaderboardScreen onBack={() => {}} />
+    </AuthProvider>,
+  );
+
+  expect(await screen.findByText(`${MESSI_SPECIAL.label} ${MESSI_SPECIAL.flag}`)).not.toBeNull();
+});
+
+test('omits the special label on non-special days', async () => {
+  render(
+    <AuthProvider>
+      <LeaderboardScreen onBack={() => {}} />
+    </AuthProvider>,
+  );
+
+  await screen.findByRole('heading', { name: 'Leaderboard' });
+  expect(screen.queryByText(`${MESSI_SPECIAL.label} ${MESSI_SPECIAL.flag}`)).toBeNull();
 });

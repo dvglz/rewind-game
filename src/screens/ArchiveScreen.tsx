@@ -21,12 +21,12 @@ export function ArchiveScreen({ onBack, onPlayPast }: ArchiveScreenProps) {
   // Every past day back to launch (#001). Today's number bounds the loop; the
   // `number < 1` break is a safety net for dates before DAY_ZERO_DATE.
   const todayNumber = getPuzzleForDate(today, sport).number;
-  const days: { date: string; number: number }[] = [];
+  const days: { date: string; number: number; flag?: string }[] = [];
   for (let offset = 1; offset < todayNumber; offset++) {
     const date = shiftDate(today, -offset);
-    const number = getPuzzleForDate(date, sport).number;
-    if (number < 1) break; // before launch
-    days.push({ date, number });
+    const puzzle = getPuzzleForDate(date, sport);
+    if (puzzle.number < 1) break; // before launch
+    days.push({ date, number: puzzle.number, flag: puzzle.special?.flag });
   }
 
   const formatDate = (date: string) =>
@@ -57,7 +57,7 @@ export function ArchiveScreen({ onBack, onPlayPast }: ArchiveScreenProps) {
           <p className={styles.empty}>No past puzzles yet — check back tomorrow.</p>
         ) : (
           <ul className={styles.list}>
-            {days.map(({ date, number }) => (
+            {days.map(({ date, number, flag }) => (
               <li key={date}>
                 <button
                   className={styles.row}
@@ -65,7 +65,9 @@ export function ArchiveScreen({ onBack, onPlayPast }: ArchiveScreenProps) {
                   onClick={() => onPlayPast(date)}
                   aria-label={`Play #${String(number).padStart(3, '0')}`}
                 >
-                  <span className={styles.rowNumber}>#{String(number).padStart(3, '0')}</span>
+                  <span className={styles.rowNumber}>
+                    #{String(number).padStart(3, '0')}{flag ? ` ${flag}` : ''}
+                  </span>
                   <span className={styles.rowDate}>{formatDate(date)}</span>
                   <span className={styles.rowPlay}>Play</span>
                 </button>

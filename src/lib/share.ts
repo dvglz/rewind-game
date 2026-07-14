@@ -1,4 +1,4 @@
-import type { RoundResult } from '../types';
+import type { PuzzleSpecial, RoundResult } from '../types';
 import { getResultColor, getResultEmoji } from '../engine/scoring';
 import { formatTime } from './formatTime';
 
@@ -27,14 +27,24 @@ export function generateShareText(
   _date?: string,
   archive = false,
   elapsedMs = 0,
+  special?: PuzzleSpecial,
 ): string {
-  const base = sport === 'soccer' ? 'Rewind ⚽' : 'Rewind';
-  const title = archive ? (sport === 'soccer' ? 'Rewind Archive ⚽' : 'Rewind Archive') : base;
   const puzzleLabel = String(puzzleNumber).padStart(3, '0');
 
   const emojiRow = results
     .map((r) => getResultEmoji(getResultColor(r.diff)))
     .join('');
+
+  if (special) {
+    let text = `⏪ Rewind #${puzzleLabel} ${special.flag} ${special.label}\n`;
+    text += `${special.shareLine}\n`;
+    text += `${emojiRow} in ${formatTime(elapsedMs)}\n`;
+    text += `Can you beat it? ${getPublicAppUrl()}/${special.slug}`;
+    return text;
+  }
+
+  const base = sport === 'soccer' ? 'Rewind ⚽' : 'Rewind';
+  const title = archive ? (sport === 'soccer' ? 'Rewind Archive ⚽' : 'Rewind Archive') : base;
 
   let text = `⏪ ${title} #${puzzleLabel}\n`;
   text += `Guess 5 NBA moments by year\n`;

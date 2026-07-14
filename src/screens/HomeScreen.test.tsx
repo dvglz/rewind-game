@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { HomeScreen } from './HomeScreen';
 import { AuthProvider } from '../context/AuthContext';
+import { MESSI_SPECIAL } from '../data/specials';
 
 const { fetchProfileMock } = vi.hoisted(() => ({
   fetchProfileMock: vi.fn(),
@@ -293,6 +294,34 @@ test('hides the landing demo after the intro has been seen', async () => {
   );
 
   expect(screen.queryByText('Shaq is drafted by Orlando')).toBeNull();
+});
+
+test('shows the Messi special headline, sub, and flag on its date', () => {
+  window.history.replaceState({}, '', '/?date=2026-07-15');
+
+  render(
+    <AuthProvider>
+      <HomeScreen
+        onPlay={() => {}}
+        hasInProgressGame={false}
+        hasCompletedGame={false}
+        onViewResults={() => {}}
+        onLeaderboard={() => {}}
+        showDebugTools={false}
+        onGroups={() => {}}
+        onArchive={() => {}}
+        onNavigateAuth={() => {}}
+        onSignOut={() => {}}
+        onHowTo={() => {}}
+      />
+    </AuthProvider>
+  );
+
+  expect(screen.getByText(MESSI_SPECIAL.homeHeadline)).not.toBeNull();
+  expect(screen.getByText(MESSI_SPECIAL.homeSub)).not.toBeNull();
+
+  const meta = document.querySelector('p[class*="meta"]');
+  expect(meta?.textContent).toContain(`#028 ${MESSI_SPECIAL.flag}`);
 });
 
 test('compacts home spacing on short mobile screens', () => {

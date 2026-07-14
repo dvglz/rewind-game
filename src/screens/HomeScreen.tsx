@@ -8,6 +8,7 @@ import {
   SPORT_LABELS,
   type Sport,
 } from '../data/puzzles';
+import { getSpecialForDate } from '../data/specials';
 import { BurgerMenu } from '../components/BurgerMenu';
 import { LandingDemo } from '../components/LandingDemo';
 import { Toast } from '../components/Toast';
@@ -81,7 +82,10 @@ export function HomeScreen({
     timeZone: 'UTC',
   });
 
-  const puzzleNumber = String(getTodaysPuzzle(currentSport).number).padStart(3, '0');
+  const todaysPuzzle = getTodaysPuzzle(currentSport);
+  const puzzleNumber = String(todaysPuzzle.number).padStart(3, '0');
+  const special = todaysPuzzle.special ?? null;
+  const specialDay = special ? getSpecialForDate(getDateOverride()) : null;
 
   return (
     <div className={`${styles.container} ${showIntroDemo ? '' : styles.containerCompact}`}>
@@ -117,10 +121,11 @@ export function HomeScreen({
       />
       <div className={styles.intro}>
         <span className={styles.wordmark}>Rewind</span>
-        <h1 className={styles.headline}>Can you guess<br/>when it happened?</h1>
+        <h1 className={styles.headline}>
+          {specialDay ? specialDay.homeHeadline : <>Can you guess<br/>when it happened?</>}
+        </h1>
         <p className={styles.description}>
-          Ultimate NBA history test.
-          <br />5 new questions, daily.
+          {specialDay ? specialDay.homeSub : <>Ultimate NBA history test.<br />5 new questions, daily.</>}
         </p>
       </div>
 
@@ -140,7 +145,7 @@ export function HomeScreen({
         )}
 
         <p className={styles.meta}>
-          #{puzzleNumber} · {dateStr}
+          #{puzzleNumber}{special ? ` ${special.flag}` : ''} · {dateStr}
         </p>
 
       </div>

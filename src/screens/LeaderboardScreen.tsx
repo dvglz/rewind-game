@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getDateOverride } from '../data/puzzles';
+import { getSpecialForDate } from '../data/specials';
 import { fetchLeaderboard } from '../lib/leaderboard';
 import { getDayOffsetFromToday } from '../lib/leaderboard';
 import { formatTime } from '../lib/formatTime';
@@ -16,6 +17,12 @@ interface LeaderboardScreenProps {
   onBack: () => void;
 }
 
+function shiftDateByDays(isoDate: string, deltaDays: number): string {
+  const d = new Date(`${isoDate}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + deltaDays);
+  return d.toISOString().slice(0, 10);
+}
+
 export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
   const { user: authUser } = useAuth();
   const activeDate = getDateOverride();
@@ -23,6 +30,7 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
   const [dayOffset, setDayOffset] = useState(0);
   const [board, setBoard] = useState<GlobalLeaderboard | null>(null);
   const [loading, setLoading] = useState(true);
+  const shownSpecial = getSpecialForDate(shiftDateByDays(activeDate, -dayOffset));
 
   useEffect(() => {
     let cancelled = false;
@@ -69,6 +77,9 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
 
       <div className={styles.content}>
         <h1 className={styles.title}>Leaderboard</h1>
+        {shownSpecial && (
+          <p className={styles.specialLabel}>{shownSpecial.label} {shownSpecial.flag}</p>
+        )}
 
         <DateSelector
           dayOffset={dayOffset}

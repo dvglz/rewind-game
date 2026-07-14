@@ -44,7 +44,7 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
     results: RoundResult[];
   } | null>(null);
   const [remoteChecked, setRemoteChecked] = useState(false);
-  const maxScore = getMaxPossibleScore(5);
+  const maxScore = getMaxPossibleScore(puzzle.events.length, puzzle.weights);
   const dateLabel = new Date(`${getDateOverride()}T00:00:00Z`).toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
@@ -147,12 +147,14 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
       getDateOverride(),
       practice,
       displayState.elapsedMs,
+      puzzle.special,
     );
     const outcome = await shareResults(text);
     track('share_score', {
       method: outcome === 'shared' ? 'web_share' : 'clipboard',
       outcome,
       game_number: puzzle.number,
+      ...(puzzle.special ? { special: puzzle.special.slug } : {}),
     });
     setShareState(outcome);
     if (outcome !== 'failed') {

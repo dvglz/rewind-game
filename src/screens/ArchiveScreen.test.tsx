@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { ArchiveScreen } from './ArchiveScreen';
+import { MESSI_SPECIAL } from '../data/specials';
 
 const today = vi.hoisted(() => ({ value: '2026-06-22' }));
 vi.mock('../lib/date', () => ({ getTodayString: () => today.value }));
@@ -33,4 +34,12 @@ test('tapping a row plays that date', () => {
   render(<ArchiveScreen onBack={() => {}} onPlayPast={onPlayPast} />);
   fireEvent.click(screen.getAllByRole('button', { name: /Play #/ })[0]);
   expect(onPlayPast).toHaveBeenCalledWith('2026-06-21');
+});
+
+test('flags the Messi special day row with its flag', () => {
+  today.value = '2026-07-16'; // one day after the 2026-07-15 special, so it's in the archive
+  render(<ArchiveScreen onBack={() => {}} onPlayPast={() => {}} />);
+  const rows = screen.getAllByRole('button', { name: /Play #/ });
+  const messiRow = rows.find((row) => row.textContent?.includes('#028'));
+  expect(messiRow?.textContent).toContain(`#028 ${MESSI_SPECIAL.flag}`);
 });
