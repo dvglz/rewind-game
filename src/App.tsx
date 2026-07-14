@@ -113,6 +113,7 @@ function AppInner() {
     if (mode === 'auth') return isAppMode() ? 'home' : 'auth';
     if (mode === 'howto') return 'howto';
     if (mode === 'ordering') return 'ordering';
+    if (mode === 'archive') return 'archive';
     if (mode === 'game') {
       const sport = getSport();
       const puzzle = getTodaysPuzzle(sport);
