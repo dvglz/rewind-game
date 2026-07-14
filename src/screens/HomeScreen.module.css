@@ -266,22 +266,15 @@
   }
 }
 
-/* Special-event pill centered in the top bar (regular home: play the special;
+/* Special-event pill above the footer CTA (regular home: play the special;
    special mode: switch back). Pops in, then nudges periodically for eyeballs. */
 .specialSlot {
-  position: absolute;
-  top: calc(env(safe-area-inset-top, 0px) + 14px);
-  left: 0;
-  right: 0;
   display: flex;
   justify-content: center;
-  pointer-events: none;
-  z-index: 20;
 }
 
 .specialBanner,
 .specialBack {
-  pointer-events: auto;
   border: none;
   border-radius: 10px;
   padding: 10px 20px;

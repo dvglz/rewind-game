@@ -122,44 +122,6 @@ export function HomeScreen({
         }}
         onNavigateHowTo={() => onHowTo('menu')}
       />
-      {bannerSpecial && (
-        <div className={styles.specialSlot}>
-          <button
-            type="button"
-            className={styles.specialBanner}
-            onClick={() => {
-              // Clean URL: only the date override (testing) rides along, so the
-              // special always opens on its home screen — never mid-game.
-              const current = new URLSearchParams(window.location.search);
-              const params = new URLSearchParams();
-              const date = current.get('date');
-              if (date) params.set('date', date);
-              params.set('special', bannerSpecial.slug);
-              window.location.assign(`/?${params.toString()}`);
-            }}
-          >
-            {bannerSpecial.flag} Play the {bannerSpecial.label}
-          </button>
-        </div>
-      )}
-      {specialDay && (
-        <div className={styles.specialSlot}>
-          <button
-            type="button"
-            className={styles.specialBack}
-            onClick={() => {
-              const current = new URLSearchParams(window.location.search);
-              const params = new URLSearchParams();
-              const date = current.get('date');
-              if (date) params.set('date', date);
-              const qs = params.toString();
-              window.location.assign(qs ? `/?${qs}` : '/');
-            }}
-          >
-            🏀 Switch to NBA
-          </button>
-        </div>
-      )}
       <div className={styles.intro}>
         <span className={styles.wordmark}>Rewind</span>
         <h1 className={styles.headline}>
@@ -226,6 +188,44 @@ export function HomeScreen({
         </div>
           )}
         </>
+      )}
+      {bannerSpecial && (
+        <div className={styles.specialSlot}>
+          <button
+            type="button"
+            className={styles.specialBanner}
+            onClick={() => {
+              // Clean URL: only the date override (testing) rides along, so the
+              // special always opens on its home screen — never mid-game.
+              const current = new URLSearchParams(window.location.search);
+              const params = new URLSearchParams();
+              const date = current.get('date');
+              if (date) params.set('date', date);
+              params.set('special', bannerSpecial.slug);
+              window.location.assign(`/?${params.toString()}`);
+            }}
+          >
+            {bannerSpecial.flag} Play the {bannerSpecial.label}
+          </button>
+        </div>
+      )}
+      {specialDay && (
+        <div className={styles.specialSlot}>
+          <button
+            type="button"
+            className={styles.specialBack}
+            onClick={() => {
+              const current = new URLSearchParams(window.location.search);
+              const params = new URLSearchParams();
+              const date = current.get('date');
+              if (date) params.set('date', date);
+              const qs = params.toString();
+              window.location.assign(qs ? `/?${qs}` : '/');
+            }}
+          >
+            🏀 Switch to NBA
+          </button>
+        </div>
       )}
       {signOutToast && <Toast message="Signed Out" />}
       {isAuthenticated && (
