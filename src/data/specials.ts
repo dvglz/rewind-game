@@ -78,8 +78,8 @@ export const MESSI_SPECIAL: SpecialDay = {
       reveal: 'In 2012, Messi passed Gerd Müller’s 85-goal mark and finished on 91 goals for club and country — a record nobody has come close to since',
       media: {
         src: '/specials/messi/05-record-goals.jpg',
-        caption: 'Messi playing for Barcelona in the Champions League against Bayer Leverkusen, March 2012 — the record-breaking year',
-        credit: 'Photo: Shai Pal, CC BY-SA 3.0, via Wikimedia Commons',
+        caption: 'Messi strikes the ball for Argentina against Switzerland in Bern, February 2012 — during his record 91-goal calendar year',
+        credit: 'Photo: Fanny Schertzer, CC BY 3.0, via Wikimedia Commons',
       },
     },
     {
@@ -112,8 +112,8 @@ export const MESSI_SPECIAL: SpecialDay = {
       reveal: 'In 2022, Messi won maybe the greatest final ever played, beating France on penalties after a 3–3 epic to complete football’s last unfinished résumé',
       media: {
         src: '/specials/messi/09-worldcup.jpg',
-        caption: 'Messi scores a penalty for Argentina against France in the 2022 World Cup final in Qatar',
-        credit: 'Photo: Sebas, CC BY 3.0, via Wikimedia Commons',
+        caption: 'Messi captaining Argentina at the 2022 World Cup in Qatar, weeks before lifting the trophy',
+        credit: 'Photo: Hossein Zohrevand / Tasnim News Agency, CC BY 4.0, via Wikimedia Commons',
       },
     },
     {
