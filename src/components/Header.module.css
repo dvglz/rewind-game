@@ -78,6 +78,11 @@
   text-transform: uppercase;
 }
 
+.specialFlag {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
 .scoreLabel {
   display: none;
 }

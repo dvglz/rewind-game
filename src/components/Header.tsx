@@ -5,6 +5,7 @@ interface HeaderProps {
   onHome?: () => void;
   leftMeta?: string;
   gameNumber?: number;
+  specialFlag?: string;
   rightText?: string;
   scorePopping?: boolean;
   onScoreAnimationEnd?: () => void;
@@ -22,6 +23,7 @@ export function Header({
   onHome,
   leftMeta,
   gameNumber,
+  specialFlag,
   rightText,
   scorePopping,
   onScoreAnimationEnd,
@@ -55,6 +57,11 @@ export function Header({
             )}
             {gameNumber != null && (
               <span className={styles.gameNumber}>#{String(gameNumber).padStart(3, '0')}</span>
+            )}
+            {specialFlag && (
+              <span className={styles.specialFlag} role="img" aria-label="Special edition">
+                {specialFlag}
+              </span>
             )}
             {leftMeta && <span className={styles.meta}>{leftMeta}</span>}
             {onRules && (

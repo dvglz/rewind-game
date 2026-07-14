@@ -92,4 +92,15 @@ describe('Header', () => {
 
     expect(screen.getByTestId('app-header').className).toContain('gameHeader');
   });
+
+  it('renders the special flag beside the game number', () => {
+    render(<Header gameNumber={28} specialFlag="🇦🇷" />);
+    expect(screen.getByText('#028')).toBeInTheDocument();
+    expect(screen.getByText('🇦🇷')).toBeInTheDocument();
+  });
+
+  it('no flag element without specialFlag', () => {
+    render(<Header gameNumber={28} />);
+    expect(screen.queryByText('🇦🇷')).not.toBeInTheDocument();
+  });
 });
