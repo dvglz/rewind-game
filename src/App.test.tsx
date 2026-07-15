@@ -309,7 +309,8 @@ test('does not let stale reminder reason affect leaderboard sign-in', async () =
   await waitFor(() => {
     expect(screen.getByTestId('auth-screen')).toBeTruthy();
   });
-  expect(screen.getByTestId('auth-copy').textContent).toBe('auth');
+  // Leaderboard sign-in gets its own copy — the stale reminder reason must not leak.
+  expect(screen.getByTestId('auth-copy').textContent).toBe('Sign in to see where you rank');
 });
 
 test('gates the results rank CTA for anonymous users instead of showing an empty board', async () => {
@@ -368,6 +369,35 @@ test('sends signed-in users from the results rank CTA straight to the leaderboar
     expect(screen.getByTestId('leaderboard-screen')).toBeTruthy();
   });
   expect(screen.queryByTestId('auth-screen')).toBeNull();
+
+  window.history.replaceState({}, '', '/');
+});
+
+test('shows rank-specific sign-in copy when the leaderboard is the return target', async () => {
+  authControl.signedIn = false;
+  const { loadGameState } = await import('./engine/storage');
+  vi.mocked(loadGameState).mockReturnValue({
+    puzzleId: '2026-06-15-american',
+    currentRound: 5,
+    results: [],
+    totalScore: 500,
+    completed: true,
+    elapsedMs: 90000,
+  });
+  window.history.replaceState({}, '', '/?mode=results');
+
+  const { App } = await import('./App');
+  render(<App />);
+
+  await waitFor(() => {
+    expect(screen.getByTestId('results-screen')).toBeTruthy();
+  });
+
+  fireEvent.click(screen.getByRole('button', { name: 'See Your Rank' }));
+
+  await waitFor(() => {
+    expect(screen.getByTestId('auth-copy').textContent).toBe('Sign in to see where you rank');
+  });
 
   window.history.replaceState({}, '', '/');
 });

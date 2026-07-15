@@ -413,9 +413,11 @@ function AppInner() {
                 ? "You'll join a group right after signing in"
                 : getReturnTo() === 'archive'
                   ? 'Sign in to keep playing past puzzles'
-                  : isReminderAuth()
-                    ? REMINDER_AUTH_MESSAGE
-                    : undefined
+                  : getReturnTo() === 'leaderboard'
+                    ? 'Sign in to see where you rank'
+                    : isReminderAuth()
+                      ? REMINDER_AUTH_MESSAGE
+                      : undefined
             }
             reminderMode={isReminderAuth()}
           />
