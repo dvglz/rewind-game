@@ -241,7 +241,9 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
               </div>
             )}
           </>
-        ) : (
+        ) : !puzzle.special ? (
+          // Specials keep the CTA stack to rank + share — the archive holds the
+          // regular dailies, not the event.
           <button
             className={styles.secondaryButton}
             onClick={() => onArchive?.()}
@@ -250,7 +252,7 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
           >
             Play Past Days
           </button>
-        )}
+        ) : null}
 
         {!practice && (
           <>
