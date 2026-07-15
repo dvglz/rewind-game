@@ -347,7 +347,9 @@ function AppInner() {
         <ResultsScreen
           onHome={() => navigate('home')}
           onGroups={() => navigate('groups')}
-          onLeaderboard={() => navigate('leaderboard')}
+          onLeaderboard={() =>
+            (isAuthenticated || USE_MOCK) ? navigate('leaderboard') : navigateToAuth('leaderboard')
+          }
           onRequireAuth={(reason) => {
             if (reason === 'reminder') {
               navigateToReminderAuth();

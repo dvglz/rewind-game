@@ -2,8 +2,10 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useEffect, useMemo, useState, createContext, useContext, type ReactNode } from 'react';
 import { beforeEach, expect, test, vi } from 'vitest';
 
-const { trackPageViewMock } = vi.hoisted(() => ({
+const { trackPageViewMock, authControl } = vi.hoisted(() => ({
   trackPageViewMock: vi.fn(),
+  // Flip to false in a test to exercise the signed-out paths.
+  authControl: { signedIn: true },
 }));
 
 type AuthValue = {
@@ -20,19 +22,24 @@ const AuthStateContext = createContext<AuthValue>({
 
 vi.mock('./context/AuthContext', () => ({
   AuthProvider: ({ children }: { children: ReactNode }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    // `resolved` mirrors the real provider's async check; `signedIn` is the
+    // outcome — kept separate so a signed-out test still finishes loading.
+    const [resolved, setResolved] = useState(false);
 
     useEffect(() => {
       Promise.resolve().then(() => {
-        setIsAuthenticated(true);
+        setResolved(true);
       });
     }, []);
 
-    const value = useMemo<AuthValue>(() => ({
-      isAuthenticated,
-      loading: !isAuthenticated,
-      user: isAuthenticated ? { id: 7, username: 'authed', email: 'authed@test.dev' } : null,
-    }), [isAuthenticated]);
+    const value = useMemo<AuthValue>(() => {
+      const isAuthenticated = resolved && authControl.signedIn;
+      return {
+        isAuthenticated,
+        loading: !resolved,
+        user: isAuthenticated ? { id: 7, username: 'authed', email: 'authed@test.dev' } : null,
+      };
+    }, [resolved]);
 
     return <AuthStateContext.Provider value={value}>{children}</AuthStateContext.Provider>;
   },
@@ -117,10 +124,17 @@ vi.mock('./screens/OrderingScreen', () => ({
 }));
 
 vi.mock('./screens/ResultsScreen', () => ({
-  ResultsScreen: ({ onRequireAuth }: { onRequireAuth: (reason?: 'default' | 'reminder') => void }) => (
+  ResultsScreen: ({
+    onRequireAuth,
+    onLeaderboard,
+  }: {
+    onRequireAuth: (reason?: 'default' | 'reminder') => void;
+    onLeaderboard: () => void;
+  }) => (
     <div data-testid="results-screen">
       results
       <button type="button" onClick={() => onRequireAuth('reminder')}>Notify Me</button>
+      <button type="button" onClick={onLeaderboard}>See Your Rank</button>
     </div>
   ),
 }));
@@ -153,6 +167,7 @@ vi.mock('./screens/GroupsScreen', () => ({
 
 beforeEach(async () => {
   trackPageViewMock.mockClear();
+  authControl.signedIn = true;
   sessionStorage.clear();
   window.history.replaceState({}, '', '/?invite=EMNRLJ2G&returnTo=groups');
   const storage = await import('./engine/storage');
@@ -295,4 +310,64 @@ test('does not let stale reminder reason affect leaderboard sign-in', async () =
     expect(screen.getByTestId('auth-screen')).toBeTruthy();
   });
   expect(screen.getByTestId('auth-copy').textContent).toBe('auth');
+});
+
+test('gates the results rank CTA for anonymous users instead of showing an empty board', async () => {
+  authControl.signedIn = false;
+  const { loadGameState } = await import('./engine/storage');
+  vi.mocked(loadGameState).mockReturnValue({
+    puzzleId: '2026-06-15-american',
+    currentRound: 5,
+    results: [],
+    totalScore: 500,
+    completed: true,
+    elapsedMs: 90000,
+  });
+  window.history.replaceState({}, '', '/?mode=results');
+
+  const { App } = await import('./App');
+  render(<App />);
+
+  await waitFor(() => {
+    expect(screen.getByTestId('results-screen')).toBeTruthy();
+  });
+
+  fireEvent.click(screen.getByRole('button', { name: 'See Your Rank' }));
+
+  await waitFor(() => {
+    expect(screen.getByTestId('auth-screen')).toBeTruthy();
+  });
+  expect(screen.queryByTestId('leaderboard-screen')).toBeNull();
+  expect(window.location.search).toContain('returnTo=leaderboard');
+
+  window.history.replaceState({}, '', '/');
+});
+
+test('sends signed-in users from the results rank CTA straight to the leaderboard', async () => {
+  const { loadGameState } = await import('./engine/storage');
+  vi.mocked(loadGameState).mockReturnValue({
+    puzzleId: '2026-06-15-american',
+    currentRound: 5,
+    results: [],
+    totalScore: 500,
+    completed: true,
+    elapsedMs: 90000,
+  });
+  window.history.replaceState({}, '', '/?mode=results');
+
+  const { App } = await import('./App');
+  render(<App />);
+
+  await waitFor(() => {
+    expect(screen.getByTestId('results-screen')).toBeTruthy();
+  });
+
+  fireEvent.click(screen.getByRole('button', { name: 'See Your Rank' }));
+
+  await waitFor(() => {
+    expect(screen.getByTestId('leaderboard-screen')).toBeTruthy();
+  });
+  expect(screen.queryByTestId('auth-screen')).toBeNull();
+
+  window.history.replaceState({}, '', '/');
 });

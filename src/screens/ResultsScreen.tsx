@@ -181,7 +181,30 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
           section="summary"
         />
 
-        {!practice && (
+        {/* Specials lead with the rank CTA — the event board is the payoff of a
+            one-day contest; sharing stays available as the secondary action. */}
+        {!practice && puzzle.special && (
+          <>
+            <button
+              onClick={onLeaderboard}
+              className={styles.shareButton}
+              type="button"
+              style={{ animationDelay: '620ms' }}
+            >
+              See Your Rank
+            </button>
+            <button
+              onClick={() => void handleShare()}
+              className={styles.secondaryButton}
+              type="button"
+              style={{ animationDelay: '640ms' }}
+            >
+              Challenge a Friend
+            </button>
+          </>
+        )}
+
+        {!practice && !puzzle.special && (
           <button
             onClick={() => void handleShare()}
             className={styles.shareButton}
