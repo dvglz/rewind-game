@@ -47,7 +47,9 @@ describe('specials registry', () => {
     expect(getBannerSpecial('2026-07-16')?.slug).toBe('messi');
     expect(getBannerSpecial('2026-07-17')?.slug).toBe('messi');
     expect(getBannerSpecial('2026-07-18')?.slug).toBe('messi');
-    expect(getBannerSpecial('2026-07-19')).toBeNull();
+    expect(getBannerSpecial('2026-07-19')?.slug).toBe('messi');
+    expect(getBannerSpecial('2026-07-20')?.slug).toBe('messi');
+    expect(getBannerSpecial('2026-07-21')).toBeNull();
   });
 
   test('special scoring is live only during the window', () => {
@@ -57,7 +59,9 @@ describe('specials registry', () => {
     expect(isSpecialScoringLive(MESSI_SPECIAL, '2026-07-16')).toBe(true);
     expect(isSpecialScoringLive(MESSI_SPECIAL, '2026-07-17')).toBe(true);
     expect(isSpecialScoringLive(MESSI_SPECIAL, '2026-07-18')).toBe(true);
-    expect(isSpecialScoringLive(MESSI_SPECIAL, '2026-07-19')).toBe(false);
+    expect(isSpecialScoringLive(MESSI_SPECIAL, '2026-07-19')).toBe(true);
+    expect(isSpecialScoringLive(MESSI_SPECIAL, '2026-07-20')).toBe(true);
+    expect(isSpecialScoringLive(MESSI_SPECIAL, '2026-07-21')).toBe(false);
   });
 
   test('Messi special declares its own PlayHub game mode', () => {
@@ -120,21 +124,21 @@ describe('computeSpecialRedirect', () => {
 });
 
 describe('multi-day live window (endDate)', () => {
-  const extended = { ...MESSI_SPECIAL, endDate: '2026-07-20' };
+  const extended = { ...MESSI_SPECIAL, endDate: '2026-07-22' };
 
   test('window closes after endDate', () => {
-    expect(getBannerSpecial('2026-07-19')).toBeNull();
-    expect(isSpecialScoringLive(MESSI_SPECIAL, '2026-07-19')).toBe(false);
+    expect(getBannerSpecial('2026-07-21')).toBeNull();
+    expect(isSpecialScoringLive(MESSI_SPECIAL, '2026-07-21')).toBe(false);
   });
 
   test('extending endDate opens the extra days, and no more', () => {
     const days = SPECIAL_DAYS.splice(0, SPECIAL_DAYS.length, extended);
     try {
-      expect(getBannerSpecial('2026-07-19')?.slug).toBe('messi');
-      expect(getBannerSpecial('2026-07-20')?.slug).toBe('messi');
-      expect(getBannerSpecial('2026-07-21')).toBeNull();
-      expect(isSpecialScoringLive(extended, '2026-07-20')).toBe(true);
-      expect(isSpecialScoringLive(extended, '2026-07-21')).toBe(false);
+      expect(getBannerSpecial('2026-07-21')?.slug).toBe('messi');
+      expect(getBannerSpecial('2026-07-22')?.slug).toBe('messi');
+      expect(getBannerSpecial('2026-07-23')).toBeNull();
+      expect(isSpecialScoringLive(extended, '2026-07-22')).toBe(true);
+      expect(isSpecialScoringLive(extended, '2026-07-23')).toBe(false);
     } finally {
       SPECIAL_DAYS.splice(0, SPECIAL_DAYS.length, ...days);
     }
