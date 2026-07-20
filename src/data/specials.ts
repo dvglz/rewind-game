@@ -32,7 +32,7 @@ export interface SpecialDay {
 export const MESSI_SPECIAL: SpecialDay = {
   slug: 'messi',
   date: '2026-07-14',
-  endDate: '2026-07-20',
+  endDate: '2026-07-21',
   enabled: true,
   flag: '🇦🇷',
   label: 'Messi Special',
