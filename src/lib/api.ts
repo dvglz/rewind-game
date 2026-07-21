@@ -1,4 +1,5 @@
 import { getAccessToken } from './auth';
+import type { LeaderboardPeriod } from '../config/leaderboard';
 
 const BASE_URL = (import.meta.env.VITE_BASE_URL as string) ?? '';
 const DETAIL_STALE_PATTERNS = ['stale', 'already submitted', 'already been submitted', 'already played', 'duplicate'];
@@ -116,7 +117,7 @@ export interface LeaderboardApiResponse {
   me: Record<string, unknown> | null;
 }
 
-export async function fetchLeaderboardApi(groupId?: number, gameMode: string = GAME_MODE): Promise<LeaderboardApiResponse> {
+export async function fetchLeaderboardApi(period: LeaderboardPeriod = 'daily', groupId?: number, gameMode: string = GAME_MODE): Promise<LeaderboardApiResponse> {
   const params = new URLSearchParams({
     game_type: GAME_TYPE,
     game_mode: gameMode,
@@ -125,7 +126,7 @@ export async function fetchLeaderboardApi(groupId?: number, gameMode: string = G
     params.set('group_id', String(groupId));
   }
 
-  const res = await fetch(`${BASE_URL}/playhub/leaderboard/daily/scores/?${params.toString()}`, {
+  const res = await fetch(`${BASE_URL}/playhub/leaderboard/${period}/scores/?${params.toString()}`, {
     headers: getHeaders(),
   });
 
@@ -137,9 +138,9 @@ export async function fetchLeaderboardApi(groupId?: number, gameMode: string = G
   return res.json();
 }
 
-export async function fetchLeaderboardById(id: number, groupId?: number, gameMode: string = GAME_MODE): Promise<LeaderboardApiResponse> {
+export async function fetchLeaderboardById(id: number, period: LeaderboardPeriod = 'daily', groupId?: number, gameMode: string = GAME_MODE): Promise<LeaderboardApiResponse> {
   // Historical boards use path segments id/period/metric, with game_type/game_mode
-  // as query params — same period ("daily") and metric ("scores") as the live board.
+  // as query params — same metric ("scores") as the live board.
   const params = new URLSearchParams({
     game_type: GAME_TYPE,
     game_mode: gameMode,
@@ -148,7 +149,7 @@ export async function fetchLeaderboardById(id: number, groupId?: number, gameMod
     params.set('group_id', String(groupId));
   }
 
-  const res = await fetch(`${BASE_URL}/playhub/leaderboard/${id}/daily/scores/?${params.toString()}`, {
+  const res = await fetch(`${BASE_URL}/playhub/leaderboard/${id}/${period}/scores/?${params.toString()}`, {
     headers: getHeaders(),
   });
 

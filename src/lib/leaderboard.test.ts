@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, test, vi } from 'vitest';
 import { fetchLeaderboard } from './leaderboard';
 import { LEADERBOARD_PAGE_LIMIT } from '../config/leaderboard';
 
@@ -200,5 +200,53 @@ describe('fetchLeaderboard (real response mapping)', () => {
     const board = await fetchRealLeaderboard(1);
     expect(board.entries).toHaveLength(0);
     expect(board.currentUser).toBeNull();
+  });
+});
+
+describe('fetchLeaderboard period', () => {
+  const okResponse = (id: number, startDate = '2026-07-14', endDate = '2026-07-20') => ({
+    ok: true,
+    json: async () => ({
+      leaderboard: { id, start_date: startDate, end_date: endDate, previous_leaderboard_id: id - 1 },
+      top_20: [{ user_id: 1, username: 'A', scores: 900, place_scores: 1, total_time: 60 }],
+      me: null,
+    }),
+  });
+
+  beforeEach(() => {
+    vi.stubEnv('VITE_MOCK_API', 'false');
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(okResponse(10)));
+  });
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it('requests the weekly period at offset 0', async () => {
+    await fetchLeaderboard(0, { period: 'weekly' });
+    const url = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
+    expect(url).toContain('/playhub/leaderboard/weekly/scores/');
+  });
+
+  it('requests the monthly period at offset 0', async () => {
+    await fetchLeaderboard(0, { period: 'monthly' });
+    const url = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0][0] as string;
+    expect(url).toContain('/playhub/leaderboard/monthly/scores/');
+  });
+
+  it('maps start/end dates onto the board', async () => {
+    const board = await fetchLeaderboard(0, { period: 'weekly' });
+    expect(board.startDate).toBe('2026-07-14');
+    expect(board.endDate).toBe('2026-07-20');
+  });
+
+  it('keys the id cache per period so daily and weekly do not collide', async () => {
+    // Prime daily then weekly at offset 1; both must hit the network for their
+    // own period rather than reusing a cross-period cached id.
+    await fetchLeaderboard(0, { period: 'daily' });
+    await fetchLeaderboard(0, { period: 'weekly' });
+    const urls = (fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.map((c) => c[0] as string);
+    expect(urls.some((u) => u.includes('/daily/scores/'))).toBe(true);
+    expect(urls.some((u) => u.includes('/weekly/scores/'))).toBe(true);
   });
 });

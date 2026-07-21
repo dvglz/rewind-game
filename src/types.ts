@@ -103,13 +103,17 @@ export interface GlobalLeaderboardEntry {
 }
 
 export interface GlobalLeaderboard {
-  /** ISO `YYYY-MM-DD` day this board is for. */
+  /** ISO `YYYY-MM-DD` this board is for (equals `startDate`; kept for back-compat). */
   date: string;
+  /** Period start from the backend `leaderboard.start_date`. */
+  startDate: string;
+  /** Period end from the backend `leaderboard.end_date`. */
+  endDate: string;
   /** Whether an older leaderboard exists via previous_leaderboard_id. */
   hasPrevious: boolean;
   /** Top-N rows, length <= LEADERBOARD_PAGE_LIMIT. */
   entries: GlobalLeaderboardEntry[];
-  /** The signed-in user's own row, or null if not authed / no score that day. */
+  /** The signed-in user's own row, or null if not authed / no score this period. */
   currentUser: GlobalLeaderboardEntry | null;
 }
 

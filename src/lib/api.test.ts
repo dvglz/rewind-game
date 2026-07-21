@@ -211,7 +211,7 @@ describe('fetchLeaderboardApi', () => {
     mockFetch.mockResolvedValueOnce({ ok: true, json: async () => ({ leaderboard: { id: 1 }, top_20: [], me: null }) });
 
     const { fetchLeaderboardApi } = await import('./api');
-    await fetchLeaderboardApi(42);
+    await fetchLeaderboardApi('daily', 42);
 
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('group_id=42'),
@@ -245,7 +245,7 @@ describe('fetchLeaderboardById', () => {
     });
 
     const { fetchLeaderboardById } = await import('./api');
-    await fetchLeaderboardById(10, 5);
+    await fetchLeaderboardById(10, 'daily', 5);
 
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining('group_id=5'),

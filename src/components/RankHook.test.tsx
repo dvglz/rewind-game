@@ -29,7 +29,7 @@ test('logged-out: shows blurred claim CTA and routes to auth on tap', () => {
 
 test('authenticated: fetches and shows the real rank, links to leaderboard, fires rank_reveal', async () => {
   vi.mocked(fetchLeaderboard).mockResolvedValue({
-    date: '2026-06-24', hasPrevious: false, entries: [],
+    date: '2026-06-24', startDate: '2026-06-24', endDate: '2026-06-24', hasPrevious: false, entries: [],
     currentUser: { rank: 347, displayName: 'me', score: 5000, timeMs: 1000, isCurrentUser: true },
   });
   const onOpen = vi.fn();

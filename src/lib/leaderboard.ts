@@ -1,5 +1,5 @@
 import type { GlobalLeaderboard, GlobalLeaderboardEntry } from '../types';
-import { LEADERBOARD_PAGE_LIMIT } from '../config/leaderboard';
+import { LEADERBOARD_PAGE_LIMIT, type LeaderboardPeriod } from '../config/leaderboard';
 import { fetchLeaderboardApi, fetchLeaderboardById } from './api';
 import type { LeaderboardApiResponse } from './api';
 import { getTodayString } from './date';
@@ -51,25 +51,40 @@ const NAME_POOL = [
   'Devin', 'Skyler', 'Hayden', 'Emerson', 'Rowan', 'Finley', 'Marlon', 'Dana',
 ];
 
-/** Max achievable score for a day (5 rounds, normalized to 1000). */
+/** Max achievable score for a single day (5 rounds, normalized to 1000). */
 const MAX_DAILY_SCORE = 1000;
 
-function mockBoard(dayOffset: number): GlobalLeaderboard {
-  const date = dateForOffset(dayOffset);
-  const rng = seededRng(hashString(date));
+/** Rough number of days aggregated into a period, for scaling mock score sums. */
+function periodDays(period: LeaderboardPeriod): number {
+  if (period === 'weekly') return 7;
+  if (period === 'monthly') return 30;
+  return 1;
+}
 
-  // 50..80 players for the day.
+/** ISO range covering the period `offset` steps before today. */
+function mockPeriodRange(period: LeaderboardPeriod, offset: number): { startDate: string; endDate: string } {
+  const span = periodDays(period);
+  const endDate = dateForOffset(offset * span);
+  const startDate = dateForOffset(offset * span + span - 1);
+  return { startDate, endDate };
+}
+
+function mockBoard(period: LeaderboardPeriod, offset: number): GlobalLeaderboard {
+  const { startDate, endDate } = mockPeriodRange(period, offset);
+  const rng = seededRng(hashString(`${period}:${startDate}`));
+  const maxScore = MAX_DAILY_SCORE * periodDays(period);
+
+  // 50..80 players for the period.
   const totalPlayers = 50 + Math.floor(rng() * 31);
 
-  // Descending scores, capped at MAX_DAILY_SCORE and floored at 0.
+  // Descending scores, capped at maxScore and floored at 0.
   const scores: number[] = [];
-  let score = MAX_DAILY_SCORE - Math.floor(rng() * 40); // top score 960..1000
+  let score = maxScore - Math.floor(rng() * 40);
   for (let i = 0; i < totalPlayers; i++) {
     scores.push(Math.max(0, score));
     score -= 2 + Math.floor(rng() * 16);
   }
 
-  // Plausible completion times (45s..5m), independent of score.
   const times: number[] = scores.map(() => 45000 + Math.floor(rng() * 255000));
 
   const entries: GlobalLeaderboardEntry[] = scores
@@ -82,7 +97,6 @@ function mockBoard(dayOffset: number): GlobalLeaderboard {
       isCurrentUser: false,
     }));
 
-  // Mock "you" at a fixed rank outside the page so the pinned-row path is exercised.
   const userRank = Math.min(34, totalPlayers);
   const currentUser: GlobalLeaderboardEntry = {
     rank: userRank,
@@ -92,7 +106,7 @@ function mockBoard(dayOffset: number): GlobalLeaderboard {
     isCurrentUser: true,
   };
 
-  return { date, hasPrevious: true, entries, currentUser };
+  return { date: startDate, startDate, endDate, hasPrevious: true, entries, currentUser };
 }
 
 // ── Leaderboard ID cache ──────────────────────────────────
@@ -102,9 +116,9 @@ function mockBoard(dayOffset: number): GlobalLeaderboard {
 // endpoint, offset N comes from previous_leaderboard_id of offset N-1.
 const leaderboardIdCache = new Map<string, number>();
 
-function cacheKey(dayOffset: number, groupId?: number, gameMode?: string): string {
-  const base = groupId != null ? `group:${groupId}:${dayOffset}` : `global:${dayOffset}`;
-  return gameMode ? `${gameMode}:${base}` : base;
+function cacheKey(period: LeaderboardPeriod, offset: number, groupId?: number, gameMode?: string): string {
+  const base = groupId != null ? `group:${groupId}:${offset}` : `global:${offset}`;
+  return `${period}:${gameMode ?? ''}:${base}`;
 }
 
 // ── Response mapping ──────────────────────────────────────
@@ -151,65 +165,73 @@ function mapResponse(raw: LeaderboardApiResponse): GlobalLeaderboard {
     );
 
   const currentUser = raw.me ? mapRow(raw.me, 0, true) : null;
-  const date = raw.leaderboard?.start_date ?? dateForOffset(0);
+  const startDate = raw.leaderboard?.start_date ?? dateForOffset(0);
+  const endDate = raw.leaderboard?.end_date ?? startDate;
   const hasPrevious = raw.leaderboard?.previous_leaderboard_id != null;
 
-  return { date, hasPrevious, entries, currentUser };
+  return { date: startDate, startDate, endDate, hasPrevious, entries, currentUser };
 }
 
 /** Cache the leaderboard ID at `offset` and its previous pointer at `offset+1`. */
-function cacheFromResponse(raw: LeaderboardApiResponse, offset: number, groupId?: number, gameMode?: string): void {
+function cacheFromResponse(raw: LeaderboardApiResponse, period: LeaderboardPeriod, offset: number, groupId?: number, gameMode?: string): void {
   if (!raw.leaderboard) return;
-  leaderboardIdCache.set(cacheKey(offset, groupId, gameMode), raw.leaderboard.id);
+  leaderboardIdCache.set(cacheKey(period, offset, groupId, gameMode), raw.leaderboard.id);
   if (raw.leaderboard.previous_leaderboard_id != null) {
-    leaderboardIdCache.set(cacheKey(offset + 1, groupId, gameMode), raw.leaderboard.previous_leaderboard_id);
+    leaderboardIdCache.set(cacheKey(period, offset + 1, groupId, gameMode), raw.leaderboard.previous_leaderboard_id);
   }
 }
 
 // ── Public API ─────────────────────────────────────────────
 
-export async function fetchLeaderboard(dayOffset: number, groupId?: number, gameMode?: string): Promise<GlobalLeaderboard> {
+function mockApiFallbackRange(period: LeaderboardPeriod, offset: number): { startDate: string; endDate: string } {
+  const span = period === 'weekly' ? 7 : period === 'monthly' ? 30 : 1;
+  return { startDate: dateForOffset(offset * span + span - 1), endDate: dateForOffset(offset * span) };
+}
+
+export async function fetchLeaderboard(
+  offset: number,
+  opts: { period?: LeaderboardPeriod; groupId?: number; gameMode?: string } = {},
+): Promise<GlobalLeaderboard> {
+  const { period = 'daily', groupId, gameMode } = opts;
+
   if (usesMockApi()) {
     await new Promise((r) => setTimeout(r, 300));
-    return mockBoard(dayOffset);
+    return mockBoard(period, offset);
   }
 
-  // dayOffset 0 → current daily leaderboard
-  if (dayOffset === 0) {
-    const raw = await fetchLeaderboardApi(groupId, gameMode);
-    cacheFromResponse(raw, 0, groupId, gameMode);
+  // offset 0 → current leaderboard for this period
+  if (offset === 0) {
+    const raw = await fetchLeaderboardApi(period, groupId, gameMode);
+    cacheFromResponse(raw, period, 0, groupId, gameMode);
     return mapResponse(raw);
   }
 
-  // dayOffset > 0 → walk the chain via previous_leaderboard_id
-  if (!leaderboardIdCache.has(cacheKey(dayOffset, groupId, gameMode))) {
-    // Fill the chain from the closest cached offset
-    let closest = dayOffset - 1;
-    while (closest >= 0 && !leaderboardIdCache.has(cacheKey(closest, groupId, gameMode))) {
+  // offset > 0 → walk the chain via previous_leaderboard_id
+  if (!leaderboardIdCache.has(cacheKey(period, offset, groupId, gameMode))) {
+    let closest = offset - 1;
+    while (closest >= 0 && !leaderboardIdCache.has(cacheKey(period, closest, groupId, gameMode))) {
       closest--;
     }
-    // If nothing is cached, fetch today first
     if (closest < 0) {
-      const todayRaw = await fetchLeaderboardApi(groupId, gameMode);
-      cacheFromResponse(todayRaw, 0, groupId, gameMode);
+      const todayRaw = await fetchLeaderboardApi(period, groupId, gameMode);
+      cacheFromResponse(todayRaw, period, 0, groupId, gameMode);
       closest = 0;
     }
-    // Walk forward from closest cached to fill up to dayOffset
-    for (let i = closest + 1; i <= dayOffset; i++) {
-      const prevId = leaderboardIdCache.get(cacheKey(i, groupId, gameMode));
-      if (!prevId) break; // no further history
-      const prevRaw = await fetchLeaderboardById(prevId, groupId, gameMode);
-      cacheFromResponse(prevRaw, i, groupId, gameMode);
+    for (let i = closest + 1; i <= offset; i++) {
+      const prevId = leaderboardIdCache.get(cacheKey(period, i, groupId, gameMode));
+      if (!prevId) break;
+      const prevRaw = await fetchLeaderboardById(prevId, period, groupId, gameMode);
+      cacheFromResponse(prevRaw, period, i, groupId, gameMode);
     }
   }
 
-  const targetId = leaderboardIdCache.get(cacheKey(dayOffset, groupId, gameMode));
+  const targetId = leaderboardIdCache.get(cacheKey(period, offset, groupId, gameMode));
   if (!targetId) {
-    // No leaderboard exists that far back
-    return { date: dateForOffset(dayOffset), hasPrevious: false, entries: [], currentUser: null };
+    const { startDate, endDate } = mockApiFallbackRange(period, offset);
+    return { date: startDate, startDate, endDate, hasPrevious: false, entries: [], currentUser: null };
   }
 
-  const raw = await fetchLeaderboardById(targetId, groupId, gameMode);
-  cacheFromResponse(raw, dayOffset, groupId, gameMode);
+  const raw = await fetchLeaderboardById(targetId, period, groupId, gameMode);
+  cacheFromResponse(raw, period, offset, groupId, gameMode);
   return mapResponse(raw);
 }
