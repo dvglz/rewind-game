@@ -121,6 +121,33 @@ test('practice mode gives the dated puzzle an isolated practice- id', () => {
   expect(puzzle.events).toHaveLength(5);
 });
 
+describe('new-questions block (2026-07-21) leads the rotation', () => {
+  test('today (#34) serves the first new day', () => {
+    const puzzle = getPuzzleForDate('2026-07-21');
+    expect(puzzle.number).toBe(34);
+    expect(puzzle.events[0].text).toBe('Jordan finally breaks through for his first NBA title');
+    expect(puzzle.events.map((e) => e.year)).toEqual([1991, 2015, 2002, 2023, 2021]);
+  });
+
+  test('#43 serves the last new day', () => {
+    const puzzle = getPuzzleForDate('2026-07-30');
+    expect(puzzle.number).toBe(43);
+    expect(puzzle.events[0].text).toBe('Curry buries France with four late threes for gold');
+  });
+
+  test('#44 resumes the legacy cycle at old Day 1', () => {
+    const puzzle = getPuzzleForDate('2026-07-31');
+    expect(puzzle.number).toBe(44);
+    expect(puzzle.events[0].text).toBe('The Warriors finish 73-9, breaking the wins record');
+  });
+
+  test('the pre-block archive is unchanged (#33 = old Day 3)', () => {
+    const puzzle = getPuzzleForDate('2026-07-20');
+    expect(puzzle.number).toBe(33);
+    expect(puzzle.events[0].text).toBe('Vince Carter takes over the Slam Dunk Contest');
+  });
+});
+
 describe('special resolution (parallel mode)', () => {
   test('the regular daily is untouched on the special date', () => {
     const puzzle = getPuzzleForDate('2026-07-15', 'american');
