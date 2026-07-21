@@ -3,9 +3,12 @@ import { getDateOverride } from '../data/puzzles';
 import { buildBoardSlots, initialSlotIndex } from '../lib/boardSlots';
 import { fetchGroups, fetchGroup, createGroup, joinGroup, leaveGroup } from '../lib/playhub';
 import { fetchLeaderboard, getDayOffsetFromToday } from '../lib/leaderboard';
+import { periodLabel } from '../lib/periodLabel';
 import { formatTime } from '../lib/formatTime';
+import { DEFAULT_LEADERBOARD_PERIOD, type LeaderboardPeriod } from '../config/leaderboard';
 import { GroupLeaderboard } from '../components/GroupLeaderboard';
 import { DateSelector } from '../components/DateSelector';
+import { PeriodSelector } from '../components/PeriodSelector';
 import { CreateGroupModal } from '../components/CreateGroupModal';
 import { JoinGroupModal } from '../components/JoinGroupModal';
 import { ArrowLeft, Plus, RewindGlyph } from '../components/icons';
@@ -19,9 +22,11 @@ import styles from './GroupsScreen.module.css';
 
 interface GroupBoardState {
   groupId: number;
-  /** Day the board was fetched for (activeDateOffset + slot offset). */
+  /** Day/period offset the board was fetched for. */
   dayOffset: number;
-  /** Special game mode the board was fetched for (undefined = regular daily). */
+  /** Period the board was fetched for. */
+  period: LeaderboardPeriod;
+  /** Special game mode the board was fetched for (undefined = regular). */
   gameMode?: string;
   board: GlobalLeaderboard | null;
 }
@@ -79,19 +84,23 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
   const [toast, setToast] = useState('');
   const slots = useMemo(() => buildBoardSlots(activeDate), [activeDate]);
   const [slotIndex, setSlotIndex] = useState(() => initialSlotIndex(slots));
+  const [period, setPeriod] = useState<LeaderboardPeriod>(DEFAULT_LEADERBOARD_PERIOD);
+  const [periodOffset, setPeriodOffset] = useState(0);
   const [groupBoardState, setGroupBoardState] = useState<GroupBoardState | null>(null);
   const detailGroupIds = useRef(new Set<number>());
   const group = selectedGroupId == null ? null : groups.find((g) => g.id === selectedGroupId) ?? null;
+  const isDaily = period === 'daily';
   const slot = slots[slotIndex] ?? slots[0];
-  const slotGameMode = slot.kind === 'special' ? slot.special.gameMode : undefined;
-  const requestedDayOffset = activeDateOffset + slot.offset;
+  const slotGameMode = isDaily && slot.kind === 'special' ? slot.special.gameMode : undefined;
+  const requestedDayOffset = isDaily ? activeDateOffset + slot.offset : periodOffset;
   // The stored board only counts when it matches BOTH the open group and the
-  // selected day — so switching group or day makes it "not loaded yet" and we
-  // show the loader instead of stale scores or a DNP flash.
+  // selected day/period — so switching group, day, or period makes it "not
+  // loaded yet" and we show the loader instead of stale scores or a DNP flash.
   const activeBoardState =
     group &&
     groupBoardState?.groupId === group.id &&
     groupBoardState.dayOffset === requestedDayOffset &&
+    groupBoardState.period === period &&
     groupBoardState.gameMode === slotGameMode
       ? groupBoardState
       : null;
@@ -181,30 +190,31 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
 
     let cancelled = false;
     const groupId = group.id;
-    const requested = activeDateOffset + slot.offset;
-    const gameMode = slot.kind === 'special' ? slot.special.gameMode : undefined;
-    fetchLeaderboard(requested, group.id, gameMode)
+    const requested = isDaily ? activeDateOffset + slot.offset : periodOffset;
+    const gameMode = isDaily && slot.kind === 'special' ? slot.special.gameMode : undefined;
+    fetchLeaderboard(requested, { period, groupId: group.id, gameMode })
       .then((board) => {
-        if (!cancelled) setGroupBoardState({ groupId, dayOffset: requested, gameMode, board });
+        if (!cancelled) setGroupBoardState({ groupId, dayOffset: requested, period, gameMode, board });
       })
       .catch(() => {
-        if (!cancelled) setGroupBoardState({ groupId, dayOffset: requested, gameMode, board: null });
+        if (!cancelled) setGroupBoardState({ groupId, dayOffset: requested, period, gameMode, board: null });
       });
 
     return () => {
       cancelled = true;
     };
-  }, [activeDateOffset, slot, group?.id]);
+  }, [activeDateOffset, slot, periodOffset, period, isDaily, group?.id]);
 
   useEffect(() => {
     if (!group) return;
     track('leaderboard_view', {
       scope: 'group',
-      day_offset: slot.offset,
-      ...(slot.kind === 'special' ? { special: slot.special.slug } : {}),
+      period,
+      day_offset: isDaily ? slot.offset : periodOffset,
+      ...(isDaily && slot.kind === 'special' ? { special: slot.special.slug } : {}),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [group?.id, slot]);
+  }, [group?.id, slot, period, periodOffset, isDaily]);
 
   const handleCreate = async (name: string) => {
     const createdGroup = await createGroup(name);
@@ -359,6 +369,8 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
     if (group) {
       setSelectedGroupId(null);
       setConfirmLeave(false);
+      setPeriodOffset(0);
+      setPeriod(DEFAULT_LEADERBOARD_PERIOD);
       return;
     }
     onBack();
@@ -387,14 +399,29 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
               Invite Friends
             </button>
 
-            <DateSelector
-              dayOffset={slot.offset}
-              baseDate={activeDate}
-              specialLabel={slot.kind === 'special' ? `${slot.special.label} ${slot.special.flag}` : undefined}
-              canNext={slotIndex > 0}
-              onPrev={() => setSlotIndex((i) => Math.min(i + 1, slots.length - 1))}
-              onNext={() => setSlotIndex((i) => Math.max(0, i - 1))}
-            />
+            <PeriodSelector value={period} onChange={(next) => { setPeriod(next); setSlotIndex(initialSlotIndex(slots)); setPeriodOffset(0); }} />
+
+            {isDaily ? (
+              <DateSelector
+                dayOffset={slot.offset}
+                baseDate={activeDate}
+                specialLabel={slot.kind === 'special' ? `${slot.special.label} ${slot.special.flag}` : undefined}
+                canNext={slotIndex > 0}
+                onPrev={() => setSlotIndex((i) => Math.min(i + 1, slots.length - 1))}
+                onNext={() => setSlotIndex((i) => Math.max(0, i - 1))}
+              />
+            ) : (
+              <DateSelector
+                dayOffset={periodOffset}
+                baseDate={activeDate}
+                hasPrevious={groupBoard?.hasPrevious ?? true}
+                label={periodLabel(period, periodOffset, groupBoard?.startDate, groupBoard?.endDate).label}
+                subLabel={periodLabel(period, periodOffset, groupBoard?.startDate, groupBoard?.endDate).subLabel}
+                canNext={periodOffset > 0}
+                onPrev={() => setPeriodOffset((o) => o + 1)}
+                onNext={() => setPeriodOffset((o) => Math.max(0, o - 1))}
+              />
+            )}
           </div>
 
           <div className={styles.leaderboardArea}>
@@ -436,6 +463,8 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
                   onClick={() => {
                     setSelectedGroupId(g.id);
                     setSlotIndex(initialSlotIndex(slots));
+                    setPeriod(DEFAULT_LEADERBOARD_PERIOD);
+                    setPeriodOffset(0);
                     setConfirmLeave(false);
                   }}
                   type="button"

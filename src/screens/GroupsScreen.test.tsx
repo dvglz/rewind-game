@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { GroupsScreen } from './GroupsScreen';
 
@@ -104,7 +104,7 @@ test('opens a selected group and keeps DNP members visible while merging scores 
 
   fireEvent.click(await screen.findByRole('button', { name: /the boys/i }));
 
-  expect(fetchLeaderboard).toHaveBeenCalledWith(expect.any(Number), 42, undefined);
+  expect(fetchLeaderboard).toHaveBeenCalledWith(expect.any(Number), { period: 'daily', groupId: 42, gameMode: undefined });
   expect(await screen.findByText('Mike')).not.toBeNull();
   expect(await screen.findByText('You')).not.toBeNull();
   expect(await screen.findByText('Sarah')).not.toBeNull();
@@ -128,7 +128,7 @@ test('shows group leaderboard scores when the group roster is missing', async ()
 
   fireEvent.click(await screen.findByRole('button', { name: /the boys/i }));
 
-  expect(fetchLeaderboard).toHaveBeenCalledWith(expect.any(Number), 42, undefined);
+  expect(fetchLeaderboard).toHaveBeenCalledWith(expect.any(Number), { period: 'daily', groupId: 42, gameMode: undefined });
   expect(await screen.findByText('Mike')).not.toBeNull();
   expect(await screen.findByText('You')).not.toBeNull();
   expect(await screen.findByText('940')).not.toBeNull();
@@ -416,4 +416,29 @@ test('uses the native share sheet on touch devices', async () => {
   fireEvent.click(await screen.findByRole('button', { name: /invite friends/i }));
 
   expect(share).toHaveBeenCalledWith({ text: expect.stringContaining('YPWFZC') });
+});
+
+test('refetches the group board weekly when Weekly is selected', async () => {
+  fetchGroups.mockResolvedValueOnce([smallGroup, bigGroup]);
+  fetchLeaderboard.mockResolvedValue({
+    date: '2026-07-14',
+    startDate: '2026-07-14',
+    endDate: '2026-07-20',
+    hasPrevious: true,
+    currentUser: null,
+    entries: [],
+  });
+
+  render(<GroupsScreen onBack={() => {}} onRequireAuth={() => {}} isAuthenticated />);
+
+  fireEvent.click(await screen.findByRole('button', { name: /the boys/i }));
+  await screen.findByRole('heading', { name: 'the boys' });
+
+  fetchLeaderboard.mockClear();
+  fireEvent.click(screen.getByRole('tab', { name: 'Weekly' }));
+
+  await waitFor(() => expect(fetchLeaderboard).toHaveBeenCalled());
+  const opts = fetchLeaderboard.mock.calls.at(-1)?.[1] as { period?: string; groupId?: number } | undefined;
+  expect(opts?.period).toBe('weekly');
+  expect(opts?.groupId).toBeTruthy();
 });
