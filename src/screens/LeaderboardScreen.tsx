@@ -65,7 +65,7 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
   const entries: GroupLeaderboardEntry[] = (board?.entries ?? []).map((e) => ({
     displayName: e.displayName,
     score: e.score,
-    time: formatTime(e.timeMs),
+    time: isDaily ? formatTime(e.timeMs) : undefined,
     isCurrentUser: e.isCurrentUser,
   }));
 
@@ -75,7 +75,7 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
           rank: board.currentUser.rank,
           displayName: authUser?.username ?? board.currentUser.displayName,
           score: board.currentUser.score,
-          time: formatTime(board.currentUser.timeMs),
+          time: isDaily ? formatTime(board.currentUser.timeMs) : undefined,
         }
       : undefined;
 

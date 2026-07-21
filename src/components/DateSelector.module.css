@@ -32,17 +32,24 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 2px;
+  /* Reserve a fixed two-line height so the stepper never grows/shrinks between
+     daily (Today + date), period (This Week + range), and the brief blank while
+     a period board loads. 20 + 18 + 2 gap = 40. */
+  min-height: 40px;
 }
 
 .dayLabel {
   font-family: var(--font-body);
   font-size: 16px;
+  line-height: 20px;
   color: var(--color-text);
 }
 
 .dateLabel {
   font-family: var(--font-body);
   font-size: 14px;
+  line-height: 18px;
   color: var(--color-muted);
 }

@@ -351,14 +351,14 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
     return {
       displayName: name,
       score: scoreEntry?.score ?? null,
-      time: scoreEntry ? formatTime(scoreEntry.timeMs) : undefined,
+      time: isDaily && scoreEntry ? formatTime(scoreEntry.timeMs) : undefined,
       isCurrentUser: isMe,
     };
   });
   const scoreOnlyRows: GroupLeaderboardEntry[] = uniqueScoreRows.map((entry) => ({
     displayName: entry.displayName,
     score: entry.score,
-    time: formatTime(entry.timeMs),
+    time: isDaily ? formatTime(entry.timeMs) : undefined,
     isCurrentUser: entry.isCurrentUser,
   }));
   const leaderboardEntries = memberRows.length > 0 ? memberRows : scoreOnlyRows;
