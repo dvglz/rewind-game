@@ -1,0 +1,28 @@
+.selector {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  margin: 0 auto 12px;
+  max-width: 360px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+}
+
+.tab {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.65);
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tabActive {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
