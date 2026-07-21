@@ -14,13 +14,15 @@ interface DateSelectorProps {
   label?: string;
   /** Explicit secondary line (overrides the computed date line). */
   subLabel?: string;
+  /** Noun for the step unit in the arrow aria-labels (e.g. "day", "week", "month"). */
+  unit?: string;
   /** Force the next arrow's state (used when a special slot sits between days). */
   canNext?: boolean;
   onPrev: () => void;
   onNext: () => void;
 }
 
-export function DateSelector({ dayOffset, baseDate, hasPrevious = true, specialLabel, label, subLabel, canNext, onPrev, onNext }: DateSelectorProps) {
+export function DateSelector({ dayOffset, baseDate, hasPrevious = true, specialLabel, label, subLabel, unit = 'day', canNext, onPrev, onNext }: DateSelectorProps) {
   const date = baseDate ? new Date(`${baseDate}T00:00:00Z`) : new Date();
   if (baseDate) {
     date.setUTCDate(date.getUTCDate() - dayOffset);
@@ -48,7 +50,7 @@ export function DateSelector({ dayOffset, baseDate, hasPrevious = true, specialL
         onClick={onPrev}
         disabled={!hasPrevious}
         type="button"
-        aria-label="Previous day"
+        aria-label={`Previous ${unit}`}
       >
         <ChevronLeft />
       </button>
@@ -61,7 +63,7 @@ export function DateSelector({ dayOffset, baseDate, hasPrevious = true, specialL
         onClick={onNext}
         disabled={nextDisabled}
         type="button"
-        aria-label="Next day"
+        aria-label={`Next ${unit}`}
       >
         <ChevronRight />
       </button>

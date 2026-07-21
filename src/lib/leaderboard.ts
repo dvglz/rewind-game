@@ -110,10 +110,11 @@ function mockBoard(period: LeaderboardPeriod, offset: number): GlobalLeaderboard
 }
 
 // ── Leaderboard ID cache ──────────────────────────────────
-// Key: "global:{dayOffset}" or "group:{groupId}:{dayOffset}"
+// Key: built by cacheKey(period, offset, groupId?, gameMode?), e.g.
+// "{period}:{gameMode}:global:{offset}" or "{period}:{gameMode}:group:{groupId}:{offset}".
 // Value: leaderboard ID from the backend.
-// Populated as the user navigates days: offset 0 comes from the daily
-// endpoint, offset N comes from previous_leaderboard_id of offset N-1.
+// Populated as the user navigates days/weeks/months: offset 0 comes from the
+// current-period endpoint, offset N comes from previous_leaderboard_id of offset N-1.
 const leaderboardIdCache = new Map<string, number>();
 
 function cacheKey(period: LeaderboardPeriod, offset: number, groupId?: number, gameMode?: string): string {

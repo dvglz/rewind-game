@@ -417,6 +417,7 @@ export function GroupsScreen({ onBack, onRequireAuth, isAuthenticated, pendingIn
                 hasPrevious={groupBoard?.hasPrevious ?? true}
                 label={periodLabel(period, periodOffset, groupBoard?.startDate, groupBoard?.endDate).label}
                 subLabel={periodLabel(period, periodOffset, groupBoard?.startDate, groupBoard?.endDate).subLabel}
+                unit={period === 'weekly' ? 'week' : 'month'}
                 canNext={periodOffset > 0}
                 onPrev={() => setPeriodOffset((o) => o + 1)}
                 onNext={() => setPeriodOffset((o) => Math.max(0, o - 1))}

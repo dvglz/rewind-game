@@ -31,4 +31,12 @@ describe('DateSelector label override', () => {
     // The day-computed date for offset 2 from 2026-07-21 would be "Jul 19, 2026" — it must NOT render in period mode.
     expect(screen.queryByText(/Jul 19/)).not.toBeInTheDocument();
   });
+
+  it('uses the unit noun in the arrow aria-labels', () => {
+    render(
+      <DateSelector dayOffset={0} baseDate="2026-07-21" label="This Week" unit="week" onPrev={() => {}} onNext={() => {}} />,
+    );
+    expect(screen.getByLabelText('Previous week')).toBeInTheDocument();
+    expect(screen.getByLabelText('Next week')).toBeInTheDocument();
+  });
 });

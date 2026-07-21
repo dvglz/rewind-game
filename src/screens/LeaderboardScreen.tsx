@@ -118,6 +118,7 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
             hasPrevious={board?.hasPrevious ?? true}
             label={periodText.label}
             subLabel={periodText.subLabel}
+            unit={period === 'weekly' ? 'week' : 'month'}
             canNext={periodOffset > 0}
             onPrev={() => setPeriodOffset((o) => o + 1)}
             onNext={() => setPeriodOffset((o) => Math.max(0, o - 1))}
