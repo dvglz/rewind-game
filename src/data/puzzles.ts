@@ -216,6 +216,15 @@ function rawToGameEvent(raw: RawEvent, sport: Sport): GameEvent {
  */
 const DAY_ZERO_DATE = '2026-06-18';
 
+// New-questions block: 10 American-sport days were appended to DAY_DEFINITIONS
+// on 2026-07-21 (indices 30-39). From that date they LEAD the rotation
+// (puzzles #34-#43), after which the full 40-day pool cycles. Dates before the
+// block keep the original 30-day cycle, so the #1-#33 archive is unchanged.
+// Soccer is unaffected.
+const NEW_BLOCK_DATE = '2026-07-21';
+const NEW_BLOCK_SIZE = 10;
+const LEGACY_DAY_COUNT = 30;
+
 function dayIndex(dateStr: string): number {
   const ms = new Date(dateStr).getTime() - new Date(DAY_ZERO_DATE).getTime();
   return Math.floor(ms / 86_400_000);
@@ -342,10 +351,21 @@ export function getPuzzleForDate(dateStr: string, sport: Sport = 'american'): Pu
     const shuffled = seededShuffle(pool, seed);
     picked = shuffled.slice(0, 5);
   } else {
-    // Normal mode: curated day-based selection, cycling through available days
+    // Normal mode: curated day-based selection, cycling through available days.
     const days = DAY_POOLS[sport] || DAY_POOLS.american;
-    const idx = ((dIdx % days.length) + days.length) % days.length;
-    picked = days[idx];
+    const hasNewBlock =
+      sport === 'american' && days.length === LEGACY_DAY_COUNT + NEW_BLOCK_SIZE;
+    if (hasNewBlock && dIdx >= dayIndex(NEW_BLOCK_DATE)) {
+      // On/after the block date: play the 10 new days first, then cycle all 40.
+      const pos =
+        (((dIdx - dayIndex(NEW_BLOCK_DATE)) % days.length) + days.length) % days.length;
+      picked = days[pos < NEW_BLOCK_SIZE ? LEGACY_DAY_COUNT + pos : pos - NEW_BLOCK_SIZE];
+    } else {
+      // Before the block date (or soccer): original cycle over the legacy days.
+      const cycle = hasNewBlock ? LEGACY_DAY_COUNT : days.length;
+      const idx = ((dIdx % cycle) + cycle) % cycle;
+      picked = days[idx];
+    }
   }
 
   return {
