@@ -165,7 +165,167 @@ export const MESSI_SPECIAL: SpecialDay = {
   ],
 };
 
-export const SPECIAL_DAYS: SpecialDay[] = [MESSI_SPECIAL];
+// ⚠️ HIDDEN DEMO (not launched) — reachable via /bron & ?special=bron / /bron2 &
+// ?special=bron2 (computeSpecialRedirect passes: today >= date), but `endDate` is
+// set BEFORE `date` so the live window is EMPTY: NO home banner and NO leaderboard
+// slot (both require today <= endDate), and play is practice (scores not
+// submitted). `date` = today only to keep the header number clean (#NNN). Normal
+// visitors see nothing; only the direct link reaches it. Before a REAL launch:
+// set real staggered dates, add images, and wire the all-time board (alltime flag
+// + board slot) per the 2026-07-21 spec.
+export const BRON_VOL1: SpecialDay = {
+  slug: 'bron',
+  date: '2026-07-21',
+  endDate: '2026-07-20',
+  enabled: true,
+  flag: '👑',
+  label: 'BRON Vol I',
+  gameMode: 'rewind_bron',
+  homeHeadline: 'The King, in 10 Moments',
+  homeSub: 'Rewind LeBron’s come-up — from draft night to the Cleveland promise kept.',
+  shareLine: 'I rewound LeBron’s come-up — 10 moments, Vol I',
+  weights: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
+  events: [
+    {
+      id: 'evt_bron_draft',
+      title: 'Cleveland drafts LeBron out of high school',
+      date: '2003-06-26',
+      reveal: 'Cleveland used the No. 1 pick on a teenager from nearby Akron. Before playing an NBA game, LeBron had already appeared on the cover of Sports Illustrated as “The Chosen One.”',
+    },
+    {
+      id: 'evt_bron_56',
+      title: 'LeBron drops 56 on Toronto at age 20',
+      date: '2005-03-20',
+      reveal: 'LeBron became the youngest player ever to score 50 in an NBA game. He held that record until Brandon Jennings did it at 20 years and 52 days.',
+    },
+    {
+      id: 'evt_bron_poolad',
+      title: 'Nike introduces the four LeBrons',
+      date: '2006-10-24',
+      reveal: 'The commercial split LeBron into Kid, Athlete, Business and Wise. Wise LeBron’s random “Oh Lord” resurfaced 15 years later as a viral TikTok sound.',
+    },
+    {
+      id: 'evt_bron_48special',
+      title: 'LeBron scores 25 straight to stun Detroit',
+      date: '2007-05-31',
+      reveal: 'LeBron scored Cleveland’s final 25 points and 29 of its last 30 in a double-overtime win. He was only 22.',
+    },
+    {
+      id: 'evt_bron_mvp',
+      title: 'LeBron wins his first MVP',
+      date: '2009-05-04',
+      reveal: 'LeBron led Cleveland to a franchise-record 66 wins, then received the MVP trophy inside his old high-school gym in Akron.',
+    },
+    {
+      id: 'evt_bron_decision',
+      title: 'LeBron takes his talents to South Beach',
+      date: '2010-07-08',
+      reveal: 'Nearly 10 million people watched The Decision live. The backlash included burned jerseys and a furious open letter from Cleveland’s owner written in Comic Sans.',
+    },
+    {
+      id: 'evt_bron_firsttitle',
+      title: 'LeBron finally wins his first championship',
+      date: '2012-06-21',
+      reveal: 'LeBron closed out his first title with a triple-double: 26 points, 11 rebounds and 13 assists against Oklahoma City.',
+    },
+    {
+      id: 'evt_bron_rayallen',
+      title: 'Ray Allen saves LeBron’s season',
+      date: '2013-06-20',
+      reveal: 'Miami was five seconds from losing the Finals when Chris Bosh found Ray Allen in the corner. The shot forced overtime and eventually a Game 7.',
+    },
+    {
+      id: 'evt_bron_2015finals',
+      title: 'LeBron leads both Finals teams in everything',
+      date: '2015-06-16',
+      reveal: 'LeBron became the first player to lead both Finals teams in total points, rebounds and assists. Cleveland still lost the series in six.',
+    },
+    {
+      id: 'evt_bron_theblock',
+      title: 'LeBron completes the 3–1 Finals comeback',
+      date: '2016-06-19',
+      reveal: 'LeBron led every player in the Finals in points, rebounds, assists, steals and blocks, something no one had ever done before.',
+    },
+  ],
+};
+
+export const BRON_VOL2: SpecialDay = {
+  slug: 'bron2',
+  date: '2026-07-21',
+  endDate: '2026-07-20',
+  enabled: true,
+  flag: '👑',
+  label: 'BRON Vol II',
+  gameMode: 'rewind_bron',
+  homeHeadline: 'The Reign — Vol II',
+  homeSub: 'Ten more moments — the Lakers, the records, and a first with his son.',
+  shareLine: 'I rewound LeBron’s reign — 10 moments, Vol II',
+  weights: [100, 100, 100, 100, 100, 100, 100, 100, 100, 100],
+  events: [
+    {
+      id: 'evt_bron_meme',
+      title: 'LeBron posts “smiling through it all”',
+      date: '2018-02-16',
+      reveal: 'LeBron posted the poolside photo shortly after being told to “shut up and dribble.” It later became a reaction meme for pretending everything is completely fine.',
+    },
+    {
+      id: 'evt_bron_51jr',
+      title: 'LeBron scores 51 and still loses the Finals opener',
+      date: '2018-05-31',
+      reveal: 'LeBron delivered the highest-scoring Finals performance ever in a loss. J.R. Smith then dribbled out the clock because he thought Cleveland was winning.',
+    },
+    {
+      id: 'evt_bron_passjordan',
+      title: 'LeBron passes Michael Jordan in career points',
+      date: '2019-03-06',
+      reveal: 'The kid who chose No. 23 because of Jordan passed him with an and-one layup against Denver. LeBron covered his face and cried during the timeout.',
+    },
+    {
+      id: 'evt_bron_bubble',
+      title: 'LeBron wins the NBA bubble title',
+      date: '2020-10-11',
+      reveal: 'LeBron became the first player to win Finals MVP with three different franchises: Miami, Cleveland and the Lakers.',
+    },
+    {
+      id: 'evt_bron_kareem',
+      title: 'LeBron breaks Kareem’s scoring record',
+      date: '2023-02-07',
+      reveal: 'Kareem’s record had stood for almost 39 years. The game stopped for a ceremony immediately after LeBron’s record-breaking shot, even though the third quarter was still going.',
+    },
+    {
+      id: 'evt_bron_paris',
+      title: 'LeBron carries the Team USA flag in Paris',
+      date: '2024-08-10',
+      reveal: 'LeBron became the first U.S. men’s basketball player to serve as an Olympic Opening Ceremony flag bearer. He later won gold and tournament MVP at age 39.',
+    },
+    {
+      id: 'evt_bron_bronny',
+      title: 'LeBron and Bronny share an NBA court',
+      date: '2024-10-22',
+      reveal: 'They became the first father and son to play together in an NBA game. Baseball’s famous father-son teammates, Ken Griffey Sr. and Jr., watched courtside.',
+    },
+    {
+      id: 'evt_bron_luka',
+      title: 'The Lakers trade for Luka Dončić',
+      date: '2025-02-01',
+      reveal: 'The Lakers landed a 25-year-old superstar who had taken Dallas to the Finals only months earlier. LeBron said he was just as shocked as everyone else.',
+    },
+    {
+      id: 'evt_bron_50k',
+      title: 'LeBron reaches 50,000 total points',
+      date: '2025-03-04',
+      reveal: 'LeBron entered the game one point short and crossed 50,000 with a three assisted by Luka. The milestone combines regular-season and playoff points.',
+    },
+    {
+      id: 'evt_bron_games',
+      title: 'LeBron breaks the NBA games-played record',
+      date: '2026-03-23',
+      reveal: 'LeBron passed Robert Parish by appearing in his 1,612th regular-season game. It happened during his record 23rd NBA season.',
+    },
+  ],
+};
+
+export const SPECIAL_DAYS: SpecialDay[] = [MESSI_SPECIAL, BRON_VOL1, BRON_VOL2];
 
 const SPECIAL_PARAM = 'special';
 
