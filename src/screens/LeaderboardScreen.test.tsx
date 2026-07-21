@@ -1,12 +1,19 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, expect, test, vi } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { LeaderboardScreen } from './LeaderboardScreen';
 import { AuthProvider } from '../context/AuthContext';
 import { MESSI_SPECIAL, SPECIAL_DAYS } from '../data/specials';
+import type { GlobalLeaderboard } from '../types';
+import type { LeaderboardPeriod } from '../config/leaderboard';
 
 const { fetchLeaderboardMock, getDateOverrideMock, getDayOffsetFromTodayMock } = vi.hoisted(() => ({
-  fetchLeaderboardMock: vi.fn(async (dayOffset: number) => ({
+  fetchLeaderboardMock: vi.fn(async (
+    dayOffset: number,
+    _opts?: { period?: LeaderboardPeriod; groupId?: number; gameMode?: string },
+  ): Promise<GlobalLeaderboard> => ({
     date: dayOffset === 0 ? '2026-06-11' : '2026-06-10',
+    startDate: dayOffset === 0 ? '2026-06-11' : '2026-06-10',
+    endDate: dayOffset === 0 ? '2026-06-11' : '2026-06-10',
     hasPrevious: dayOffset === 0,
     currentUser: { rank: 34, displayName: 'You', score: 410, timeMs: 159000, isCurrentUser: true },
     entries: [
@@ -82,7 +89,7 @@ test('disables previous-day navigation when the current board has no earlier his
 
   fireEvent.click(previousButton);
 
-  await waitFor(() => expect(fetchLeaderboardMock).toHaveBeenLastCalledWith(1, undefined, undefined));
+  await waitFor(() => expect(fetchLeaderboardMock).toHaveBeenLastCalledWith(1, { period: 'daily', gameMode: undefined }));
   await waitFor(() => expect((previousButton as HTMLButtonElement).disabled).toBe(true));
 });
 
@@ -96,7 +103,7 @@ test('anchors the first leaderboard view to the active puzzle date', async () =>
     </AuthProvider>,
   );
 
-  await waitFor(() => expect(fetchLeaderboardMock).toHaveBeenCalledWith(1, undefined, undefined));
+  await waitFor(() => expect(fetchLeaderboardMock).toHaveBeenCalledWith(1, { period: 'daily', gameMode: undefined }));
   expect(await screen.findByText('Today')).not.toBeNull();
   expect(screen.getByText('Jun 15, 2026')).not.toBeNull();
 });
@@ -148,7 +155,7 @@ test('inserts a Messi Special slot after its date and fetches its own game mode'
   );
 
   await screen.findByRole('heading', { name: 'Leaderboard' });
-  await waitFor(() => expect(fetchLeaderboardMock).toHaveBeenCalledWith(0, undefined, undefined));
+  await waitFor(() => expect(fetchLeaderboardMock).toHaveBeenCalledWith(0, { period: 'daily', gameMode: undefined }));
 
   // One step back from the regular Jul 15 board sits the special board.
   fireEvent.click(screen.getByRole('button', { name: 'Previous day' }));
@@ -156,12 +163,12 @@ test('inserts a Messi Special slot after its date and fetches its own game mode'
   expect(await screen.findByText(`${MESSI_SPECIAL.label} ${MESSI_SPECIAL.flag}`)).not.toBeNull();
   expect(screen.getByText('Jul 15, 2026')).not.toBeNull();
   await waitFor(() =>
-    expect(fetchLeaderboardMock).toHaveBeenLastCalledWith(0, undefined, MESSI_SPECIAL.gameMode),
+    expect(fetchLeaderboardMock).toHaveBeenLastCalledWith(0, { period: 'daily', gameMode: MESSI_SPECIAL.gameMode }),
   );
 
   // Stepping forward returns to the regular board.
   fireEvent.click(screen.getByRole('button', { name: 'Next day' }));
-  await waitFor(() => expect(fetchLeaderboardMock).toHaveBeenLastCalledWith(0, undefined, undefined));
+  await waitFor(() => expect(fetchLeaderboardMock).toHaveBeenLastCalledWith(0, { period: 'daily', gameMode: undefined }));
 });
 
 test('opens directly on the special board when viewing from special mode', async () => {
@@ -177,7 +184,7 @@ test('opens directly on the special board when viewing from special mode', async
 
     expect(await screen.findByText(`${MESSI_SPECIAL.label} ${MESSI_SPECIAL.flag}`)).not.toBeNull();
     await waitFor(() =>
-      expect(fetchLeaderboardMock).toHaveBeenCalledWith(0, undefined, MESSI_SPECIAL.gameMode),
+      expect(fetchLeaderboardMock).toHaveBeenCalledWith(0, { period: 'daily', gameMode: MESSI_SPECIAL.gameMode }),
     );
   } finally {
     window.history.replaceState({}, '', '/');
@@ -210,9 +217,56 @@ test('extended special window pins one board slot per live day', async () => {
     expect(await screen.findByText(`${MESSI_SPECIAL.label} ${MESSI_SPECIAL.flag}`)).not.toBeNull();
     expect(screen.getByText('Jul 15, 2026')).not.toBeNull();
     await waitFor(() =>
-      expect(fetchLeaderboardMock).toHaveBeenLastCalledWith(1, undefined, MESSI_SPECIAL.gameMode),
+      expect(fetchLeaderboardMock).toHaveBeenLastCalledWith(1, { period: 'daily', gameMode: MESSI_SPECIAL.gameMode }),
     );
   } finally {
     SPECIAL_DAYS.splice(0, SPECIAL_DAYS.length, ...original);
   }
+});
+
+describe('LeaderboardScreen periods', () => {
+  // These tests exercise the weekly/monthly period axis, so they set their
+  // own resolved board (with startDate/endDate) on the shared mock. This
+  // describe block is the last thing in the file, so the reassigned
+  // implementation never leaks into an earlier test.
+  beforeEach(() => {
+    fetchLeaderboardMock.mockReset();
+    fetchLeaderboardMock.mockResolvedValue({
+      date: '2026-07-14',
+      startDate: '2026-07-14',
+      endDate: '2026-07-20',
+      hasPrevious: true,
+      entries: [],
+      currentUser: null,
+    });
+  });
+
+  test('fetches weekly when the Weekly tab is selected', async () => {
+    render(
+      <AuthProvider>
+        <LeaderboardScreen onBack={() => {}} />
+      </AuthProvider>,
+    );
+
+    await waitFor(() => expect(fetchLeaderboardMock).toHaveBeenCalled());
+    fetchLeaderboardMock.mockClear();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Weekly' }));
+
+    await waitFor(() => expect(fetchLeaderboardMock).toHaveBeenCalled());
+    const opts = fetchLeaderboardMock.mock.calls.at(-1)?.[1];
+    expect(opts?.period).toBe('weekly');
+  });
+
+  test('shows the period range label for weekly', async () => {
+    render(
+      <AuthProvider>
+        <LeaderboardScreen onBack={() => {}} />
+      </AuthProvider>,
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Weekly' }));
+
+    await waitFor(() => expect(screen.getByText(/Jul 14/)).toBeInTheDocument());
+  });
 });
