@@ -54,7 +54,7 @@ export function DateSelector({ dayOffset, baseDate, hasPrevious = true, specialL
       </button>
       <div className={styles.center}>
         <span className={styles.dayLabel}>{dayLabel}</span>
-        <span className={styles.dateLabel}>{subLabel ?? dateStr}</span>
+        <span className={styles.dateLabel}>{subLabel ?? (label != null ? '' : dateStr)}</span>
       </div>
       <button
         className={`${styles.arrow} ${nextDisabled ? styles.arrowDisabled : ''}`}

@@ -45,6 +45,7 @@ export function LeaderboardScreen({ onBack }: LeaderboardScreenProps) {
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
+    setBoard(null);
     fetchLeaderboard(offset, { period, gameMode })
       .then((b) => { if (!cancelled) setBoard(b); })
       .catch(() => { if (!cancelled) setBoard(null); })
