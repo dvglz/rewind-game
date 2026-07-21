@@ -243,4 +243,85 @@ export const DAY_DEFINITIONS: string[][] = [
     'evt_aba_nba_merger',
     'evt_draymond_second_round_pick',
   ],
+  // --- New block (added 2026-07-21): leads the rotation from that date. ---
+  // Day 31
+  [
+    'evt_jordan_first_title',
+    'evt_warriors_2015_title',
+    'evt_iverson_practice',
+    'evt_mitchell_71',
+    'evt_cp3_suns_finals',
+  ],
+  // Day 32
+  [
+    'evt_durant_real_mvp_speech',
+    'evt_kobe_2009_title',
+    'evt_spurs_1999_title',
+    'evt_webber_timeout',
+    'evt_embiid_70',
+  ],
+  // Day 33
+  [
+    'evt_lakers_2002_threepeat',
+    'evt_giannis_first_mvp',
+    'evt_pistons_2004_title',
+    'evt_penny_shaq_magic_finals',
+    'evt_sonics_1996_finals',
+  ],
+  // Day 34
+  [
+    'evt_lebron_bronny_debut',
+    'evt_jokic_first_mvp',
+    'evt_wade_2006_title',
+    'evt_jordan_the_shot_ehlo',
+    'evt_hawks_60_wins',
+  ],
+  // Day 35
+  [
+    'evt_ant_wolves_wcf',
+    'evt_shaq_signs_lakers',
+    'evt_durant_suns_trade',
+    'evt_laettner_shot',
+    'evt_melo_knicks_trade',
+  ],
+  // Day 36
+  [
+    'evt_lebron_first_mvp',
+    'evt_klay_leaves_warriors',
+    'evt_butler_heat_finals',
+    'evt_monta_ellis_trade_curry',
+    'evt_rose_50_comeback',
+  ],
+  // Day 37
+  [
+    'evt_thunder_first_title',
+    'evt_dwight_superman_dunk',
+    'evt_kawhi_raptors_trade',
+    'evt_lakers_celtics_2010_game7',
+    'evt_nets_trade_harden_big_three',
+  ],
+  // Day 38
+  [
+    'evt_luka_traded_lakers',
+    'evt_wemby_roty',
+    'evt_kawhi_bounce',
+    'evt_simmons_passes_dunk',
+    'evt_klay_14_threes',
+  ],
+  // Day 39
+  [
+    'evt_lebron_40k',
+    'evt_tatum_game7_51',
+    'evt_giannis_50_title',
+    'evt_lavine_gordon_dunk_contest',
+    'evt_wilkins_bird_duel',
+  ],
+  // Day 40
+  [
+    'evt_curry_paris_gold',
+    'evt_bucks_trade_jrue',
+    'evt_spurs_2014_title',
+    'evt_barkley_mvp_suns',
+    'evt_derozan_52_raptors',
+  ],
 ];
