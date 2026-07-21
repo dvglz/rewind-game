@@ -10,13 +10,17 @@ interface DateSelectorProps {
   hasPrevious?: boolean;
   /** Overrides the weekday line (e.g. "Messi Special 🇦🇷" for a special-event board). */
   specialLabel?: string;
+  /** Explicit primary line (overrides the computed weekday/Today line). */
+  label?: string;
+  /** Explicit secondary line (overrides the computed date line). */
+  subLabel?: string;
   /** Force the next arrow's state (used when a special slot sits between days). */
   canNext?: boolean;
   onPrev: () => void;
   onNext: () => void;
 }
 
-export function DateSelector({ dayOffset, baseDate, hasPrevious = true, specialLabel, canNext, onPrev, onNext }: DateSelectorProps) {
+export function DateSelector({ dayOffset, baseDate, hasPrevious = true, specialLabel, label, subLabel, canNext, onPrev, onNext }: DateSelectorProps) {
   const date = baseDate ? new Date(`${baseDate}T00:00:00Z`) : new Date();
   if (baseDate) {
     date.setUTCDate(date.getUTCDate() - dayOffset);
@@ -24,7 +28,7 @@ export function DateSelector({ dayOffset, baseDate, hasPrevious = true, specialL
     date.setDate(date.getDate() - dayOffset);
   }
 
-  const dayLabel = specialLabel ?? (dayOffset === 0
+  const dayLabel = label ?? specialLabel ?? (dayOffset === 0
     ? 'Today'
     : date.toLocaleDateString('en-US', { weekday: 'long', ...(baseDate ? { timeZone: 'UTC' } : {}) }));
 
@@ -50,7 +54,7 @@ export function DateSelector({ dayOffset, baseDate, hasPrevious = true, specialL
       </button>
       <div className={styles.center}>
         <span className={styles.dayLabel}>{dayLabel}</span>
-        <span className={styles.dateLabel}>{dateStr}</span>
+        <span className={styles.dateLabel}>{subLabel ?? dateStr}</span>
       </div>
       <button
         className={`${styles.arrow} ${nextDisabled ? styles.arrowDisabled : ''}`}
