@@ -65,7 +65,7 @@ describe('BurgerMenu', () => {
 
     const link = screen.getByRole('link', { name: /18 Names/ });
     expect(link.getAttribute('href')).toBe(
-      'https://clutchpoints-18names-test.4taps.me/?utm_source=rewind&utm_medium=crosspromo'
+      'https://clutchpoints-18names-test.4taps.me/?lab=2099-12-31&practice=1'
     );
     expect(link.getAttribute('target')).toBe('_blank');
     expect(link.textContent).toContain('NEW');
