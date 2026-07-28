@@ -15,6 +15,8 @@ import { Toast } from '../components/Toast';
 import { useAuth } from '../context/AuthContext';
 import { isAppMode } from '../lib/appMode';
 import { hasSeenHomeIntro, markHomeIntroSeen } from '../lib/homeIntro';
+import { track } from '../lib/analytics';
+import { EIGHTEEN_NAMES_URL, EIGHTEEN_PROMO } from '../data/crossPromo';
 import styles from './HomeScreen.module.css';
 
 // App Store link for the "Play in the iOS app" menu item. Leave empty to hide it.
@@ -192,8 +194,8 @@ export function HomeScreen({
           )}
         </>
       )}
-      {bannerSpecial && (
-        <div className={styles.specialSlot}>
+      <div className={styles.specialSlot}>
+        {bannerSpecial && (
           <button
             type="button"
             className={styles.specialBanner}
@@ -210,10 +212,8 @@ export function HomeScreen({
           >
             {bannerSpecial.flag} Play the {bannerSpecial.label}
           </button>
-        </div>
-      )}
-      {specialDay && (
-        <div className={styles.specialSlot}>
+        )}
+        {specialDay && (
           <button
             type="button"
             className={styles.specialBack}
@@ -228,8 +228,17 @@ export function HomeScreen({
           >
             🏀 Switch to NBA
           </button>
-        </div>
-      )}
+        )}
+        <a
+          className={styles.promoBanner}
+          href={EIGHTEEN_NAMES_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => track('promo_18names_click', { surface: 'home' })}
+        >
+          {EIGHTEEN_PROMO.homeBanner}
+        </a>
+      </div>
       {signOutToast && <Toast message="Signed Out" />}
       {isAuthenticated && (
         <p className={styles.footerCta}>

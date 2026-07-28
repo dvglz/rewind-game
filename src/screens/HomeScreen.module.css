@@ -274,11 +274,14 @@
   left: 0;
   right: 0;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
 
 .specialBanner,
-.specialBack {
+.specialBack,
+.promoBanner {
   border: none;
   border-radius: 10px;
   padding: 10px 20px;
@@ -301,8 +304,15 @@
   color: var(--color-bg);
 }
 
+.promoBanner {
+  background: var(--color-text);
+  color: var(--color-bg);
+  text-decoration: none;
+}
+
 .specialBanner:active,
-.specialBack:active {
+.specialBack:active,
+.promoBanner:active {
   transform: scale(0.97);
 }
 

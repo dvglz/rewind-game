@@ -21,6 +21,16 @@ vi.mock('../lib/homeIntro', () => ({
   markHomeIntroSeen: vi.fn(),
 }));
 
+const { trackMock } = vi.hoisted(() => ({ trackMock: vi.fn() }));
+
+vi.mock('../lib/analytics', () => ({
+  track: trackMock,
+  trackPageView: vi.fn(),
+  initAnalytics: vi.fn(),
+  setUser: vi.fn(),
+  clearUser: vi.fn(),
+}));
+
 beforeEach(() => {
   fetchProfileMock.mockResolvedValue(null);
 });
@@ -389,4 +399,35 @@ test('no special banner before the event day', () => {
 
   expect(screen.queryByRole('button', { name: /Play the Messi Special/ })).toBeNull();
   window.history.replaceState({}, '', '/');
+});
+
+test('shows the 18 Names promo banner and tracks clicks', () => {
+  render(
+    <AuthProvider>
+      <HomeScreen
+        onPlay={() => {}}
+        hasInProgressGame={false}
+        hasCompletedGame={false}
+        onViewResults={() => {}}
+        onLeaderboard={() => {}}
+        showDebugTools={false}
+        onGroups={() => {}}
+        onArchive={() => {}}
+        onNavigateAuth={() => {}}
+        onSignOut={() => {}}
+        onHowTo={() => {}}
+      />
+    </AuthProvider>
+  );
+
+  const link = screen.getByRole('link', { name: /Play 18 Names/ });
+  expect(link.getAttribute('href')).toBe(
+    'https://clutchpoints-18names-test.4taps.me/?utm_source=rewind&utm_medium=crosspromo'
+  );
+  expect(link.getAttribute('target')).toBe('_blank');
+  expect(link.getAttribute('rel')).toContain('noopener');
+
+  link.addEventListener('click', (e) => e.preventDefault());
+  fireEvent.click(link);
+  expect(trackMock).toHaveBeenCalledWith('promo_18names_click', { surface: 'home' });
 });
