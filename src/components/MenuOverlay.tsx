@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { Close } from './icons';
+import { track } from '../lib/analytics';
+import { EIGHTEEN_NAMES_URL, EIGHTEEN_PROMO } from '../data/crossPromo';
 import styles from './MenuOverlay.module.css';
 
 export type TopLevelMenuScreen = 'home' | 'results' | 'groups' | 'auth' | 'leaderboard' | 'archive';
@@ -278,6 +280,20 @@ export function MenuOverlay({
               Play in the iOS app
             </a>
           ) : null}
+          <a
+            href={EIGHTEEN_NAMES_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${styles.navButton} ${styles.menuItem}`}
+            style={{ '--stagger-index': appStoreHref ? 6 : 5 } as CSSProperties}
+            onClick={() => {
+              track('promo_18names_click', { surface: 'menu' });
+              onClose();
+            }}
+          >
+            {EIGHTEEN_PROMO.menuLabel}
+            <span className={styles.newPill}>NEW</span>
+          </a>
         </nav>
 
         <div className={styles.bottomSection}>

@@ -2,6 +2,16 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { BurgerMenu } from './BurgerMenu';
 
+const { trackMock } = vi.hoisted(() => ({ trackMock: vi.fn() }));
+
+vi.mock('../lib/analytics', () => ({
+  track: trackMock,
+  trackPageView: vi.fn(),
+  initAnalytics: vi.fn(),
+  setUser: vi.fn(),
+  clearUser: vi.fn(),
+}));
+
 function createProps() {
   return {
     currentScreen: 'home' as const,
@@ -47,6 +57,22 @@ describe('BurgerMenu', () => {
     expect(screen.getByRole('button', { name: 'Close menu' }) === document.activeElement).toBe(true);
     expect(container.contains(dialog)).toBe(false);
     expect(document.body.style.overflow).toBe('hidden');
+  });
+
+  it('renders the 18 Names promo item and tracks clicks', () => {
+    render(<BurgerMenu {...createProps()} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }));
+
+    const link = screen.getByRole('link', { name: /18 Names/ });
+    expect(link.getAttribute('href')).toBe(
+      'https://clutchpoints-18names-test.4taps.me/?utm_source=rewind&utm_medium=crosspromo'
+    );
+    expect(link.getAttribute('target')).toBe('_blank');
+    expect(link.textContent).toContain('NEW');
+
+    link.addEventListener('click', (e) => e.preventDefault());
+    fireEvent.click(link);
+    expect(trackMock).toHaveBeenCalledWith('promo_18names_click', { surface: 'menu' });
   });
 
   it('renders an Archive item that routes to the archive', () => {

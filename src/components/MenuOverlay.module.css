@@ -160,3 +160,15 @@
     opacity: 1;
   }
 }
+
+/* "NEW" pill on the 18 Names cross-promo item. */
+.newPill {
+  margin-left: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  background: var(--color-text);
+  color: var(--color-bg);
+}
