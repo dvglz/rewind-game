@@ -208,34 +208,3 @@
   text-underline-offset: 2px;
   cursor: pointer;
 }
-
-/* 18 Names cross-promo (dev-only; branch is local-only — see src/data/crossPromo.ts). */
-.promoBlock {
-  opacity: 0;
-  animation: fadeInUp 0.35s ease forwards;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  margin-top: 16px;
-}
-
-.promoKicker {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 13px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-muted);
-}
-
-.promoTitle {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 20px;
-  color: var(--color-text);
-}
-
-.promoLink {
-  text-decoration: none;
-}

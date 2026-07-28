@@ -372,7 +372,9 @@ test('hides the sign-in prompt when in app mode', () => {
   expect(screen.queryByRole('button', { name: 'Notify Me' })).toBeNull();
 });
 
-test('shows the 18 Names promo card and tracks clicks', () => {
+test('renders the countdown reminder bar on non-practice daily results', () => {
+  // The 18 Names promo now lives inside the reminder bar (it rolls in on a timer);
+  // the reminder's own test file covers the timed swap and the tracked click.
   render(
     <ResultsScreen
       onHome={() => {}}
@@ -382,20 +384,12 @@ test('shows the 18 Names promo card and tracks clicks', () => {
     />
   );
 
-  const link = screen.getByRole('link', { name: 'Play 18 Names' });
-  expect(link.getAttribute('href')).toBe(
-    'https://clutchpoints-18names-test.4taps.me/?utm_source=rewind&utm_medium=crosspromo'
-  );
-  expect(link.getAttribute('target')).toBe('_blank');
-  expect(link.getAttribute('rel')).toContain('noopener');
-  expect(screen.getByText('18 Names — Bron in Philly')).not.toBeNull();
-
-  link.addEventListener('click', (e) => e.preventDefault());
-  fireEvent.click(link);
-  expect(trackMock).toHaveBeenCalledWith('promo_18names_click', { surface: 'results' });
+  expect(screen.getByLabelText('Next Rewind puzzle')).not.toBeNull();
+  // Promo has not rolled in yet (no timer advance) and no standalone promo card exists.
+  expect(screen.queryByRole('link', { name: /Play 18 Names/ })).toBeNull();
 });
 
-test('practice mode hides the 18 Names promo', () => {
+test('practice mode renders neither the reminder bar nor the 18 Names promo', () => {
   window.history.replaceState({}, '', '/?date=2026-06-19&practice=1');
   render(
     <ResultsScreen
@@ -409,5 +403,6 @@ test('practice mode hides the 18 Names promo', () => {
   );
 
   expect(screen.getByRole('button', { name: 'Play Again' })).not.toBeNull();
-  expect(screen.queryByRole('link', { name: 'Play 18 Names' })).toBeNull();
+  expect(screen.queryByLabelText('Next Rewind puzzle')).toBeNull();
+  expect(screen.queryByRole('link', { name: /Play 18 Names/ })).toBeNull();
 });
