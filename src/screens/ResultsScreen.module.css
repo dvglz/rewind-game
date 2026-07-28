@@ -209,7 +209,7 @@
   cursor: pointer;
 }
 
-/* 18 Names cross-promo (dev/test only — ships via origin-4taps/dev only). */
+/* 18 Names cross-promo (dev-only; branch is local-only — see src/data/crossPromo.ts). */
 .promoBlock {
   opacity: 0;
   animation: fadeInUp 0.35s ease forwards;

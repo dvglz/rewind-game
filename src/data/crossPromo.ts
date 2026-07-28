@@ -1,6 +1,7 @@
-// 18 Names cross-promo. Dev/test only for now: this ships via origin-4taps/dev
-// (test site) and must not reach the prod deploy branches until launch.
-// Swap the host for the real 18 Names domain at launch.
+// 18 Names cross-promo. LOCAL-ONLY for now: origin/dev deploys BOTH the test site
+// and rewindgame.com (live), so there is no safe test-only deploy branch — do not
+// push until the ship path is explicitly decided. At launch, swap the host for the
+// real 18 Names domain (keep the UTM params).
 export const EIGHTEEN_NAMES_URL =
   'https://clutchpoints-18names-test.4taps.me/?utm_source=rewind&utm_medium=crosspromo';
 
