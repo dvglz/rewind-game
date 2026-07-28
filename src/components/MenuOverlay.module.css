@@ -161,9 +161,16 @@
   }
 }
 
+/* 18 Names cross-promo item — anchored at the foot of the menu. Flex keeps the
+   NEW pill vertically centered against the label (via gap, not margin). */
+.promoItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 /* "NEW" pill on the 18 Names cross-promo item. */
 .newPill {
-  margin-left: 10px;
   padding: 2px 8px;
   border-radius: 999px;
   font-size: 11px;

@@ -280,11 +280,17 @@ export function MenuOverlay({
               Play in the iOS app
             </a>
           ) : null}
+        </nav>
+
+        <div className={styles.bottomSection}>
+          {/* 18 Names cross-promo — anchored at the foot of the menu, just above the
+              divider, so it reads as an aside rather than a core nav destination.
+              Kept before the auth row so Sign In stays the last focusable element. */}
           <a
             href={EIGHTEEN_NAMES_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className={`${styles.navButton} ${styles.menuItem}`}
+            className={`${styles.navButton} ${styles.promoItem} ${styles.menuItem}`}
             style={{ '--stagger-index': appStoreHref ? 6 : 5 } as CSSProperties}
             onClick={() => {
               track('promo_18names_click', { surface: 'menu' });
@@ -294,9 +300,6 @@ export function MenuOverlay({
             {EIGHTEEN_PROMO.menuLabel}
             <span className={styles.newPill}>NEW</span>
           </a>
-        </nav>
-
-        <div className={styles.bottomSection}>
           <div className={styles.divider} />
           <div className={styles.metaSection}>
             {isAuthLoading ? (
