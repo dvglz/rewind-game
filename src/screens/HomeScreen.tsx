@@ -155,16 +155,6 @@ export function HomeScreen({
         <p className={styles.meta}>
           #{puzzleNumber}{special ? ` ${special.flag}` : ''} · {dateStr}
         </p>
-
-        <a
-          className={styles.promoBanner}
-          href={EIGHTEEN_NAMES_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => track('promo_18names_click', { surface: 'home' })}
-        >
-          {EIGHTEEN_PROMO.homeBanner}
-        </a>
       </div>
 
       {showDebugTools && (
@@ -239,6 +229,19 @@ export function HomeScreen({
           >
             🏀 Switch to NBA
           </button>
+        </div>
+      )}
+      {!showIntroDemo && !bannerSpecial && !specialDay && (
+        <div className={styles.specialSlot}>
+          <a
+            className={styles.promoBanner}
+            href={EIGHTEEN_NAMES_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => track('promo_18names_click', { surface: 'home' })}
+          >
+            {EIGHTEEN_PROMO.homeBanner}
+          </a>
         </div>
       )}
       {signOutToast && <Toast message="Signed Out" />}

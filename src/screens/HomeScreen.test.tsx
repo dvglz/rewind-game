@@ -401,7 +401,13 @@ test('no special banner before the event day', () => {
   window.history.replaceState({}, '', '/');
 });
 
-test('shows the 18 Names promo banner and tracks clicks', () => {
+test('shows the 18 Names promo banner and tracks clicks once the intro demo is done', async () => {
+  // The promo now lives in the specials slot, gated off the intro demo — so it only
+  // shows after the landing demo has been seen (and outside any special window).
+  const { hasSeenHomeIntro } = await import('../lib/homeIntro');
+  (hasSeenHomeIntro as ReturnType<typeof vi.fn>).mockReturnValue(true);
+  window.history.replaceState({}, '', '/?date=2026-07-13');
+
   render(
     <AuthProvider>
       <HomeScreen
@@ -430,4 +436,31 @@ test('shows the 18 Names promo banner and tracks clicks', () => {
   link.addEventListener('click', (e) => e.preventDefault());
   fireEvent.click(link);
   expect(trackMock).toHaveBeenCalledWith('promo_18names_click', { surface: 'home' });
+});
+
+test('hides the 18 Names promo while the intro demo is showing', () => {
+  // First-visit anonymous web user outside any special window: the landing demo
+  // takes the slot, so the cross-promo stays hidden (hasSeenHomeIntro defaults false).
+  window.history.replaceState({}, '', '/?date=2026-07-13');
+
+  render(
+    <AuthProvider>
+      <HomeScreen
+        onPlay={() => {}}
+        hasInProgressGame={false}
+        hasCompletedGame={false}
+        onViewResults={() => {}}
+        onLeaderboard={() => {}}
+        showDebugTools={false}
+        onGroups={() => {}}
+        onArchive={() => {}}
+        onNavigateAuth={() => {}}
+        onSignOut={() => {}}
+        onHowTo={() => {}}
+      />
+    </AuthProvider>
+  );
+
+  expect(screen.getByText('Rose becomes the youngest MVP')).not.toBeNull();
+  expect(screen.queryByRole('link', { name: /Play 18 Names/ })).toBeNull();
 });

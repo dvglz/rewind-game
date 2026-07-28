@@ -303,9 +303,6 @@
 }
 
 .promoBanner {
-  display: inline-block;
-  margin-top: 14px;
-  text-align: center;
   background: var(--color-text);
   color: var(--color-bg);
   text-decoration: none;
