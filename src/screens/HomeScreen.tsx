@@ -156,6 +156,15 @@ export function HomeScreen({
           #{puzzleNumber}{special ? ` ${special.flag}` : ''} · {dateStr}
         </p>
 
+        <a
+          className={styles.promoBanner}
+          href={EIGHTEEN_NAMES_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => track('promo_18names_click', { surface: 'home' })}
+        >
+          {EIGHTEEN_PROMO.homeBanner}
+        </a>
       </div>
 
       {showDebugTools && (
@@ -194,8 +203,8 @@ export function HomeScreen({
           )}
         </>
       )}
-      <div className={styles.specialSlot}>
-        {bannerSpecial && (
+      {bannerSpecial && (
+        <div className={styles.specialSlot}>
           <button
             type="button"
             className={styles.specialBanner}
@@ -212,8 +221,10 @@ export function HomeScreen({
           >
             {bannerSpecial.flag} Play the {bannerSpecial.label}
           </button>
-        )}
-        {specialDay && (
+        </div>
+      )}
+      {specialDay && (
+        <div className={styles.specialSlot}>
           <button
             type="button"
             className={styles.specialBack}
@@ -228,17 +239,8 @@ export function HomeScreen({
           >
             🏀 Switch to NBA
           </button>
-        )}
-        <a
-          className={styles.promoBanner}
-          href={EIGHTEEN_NAMES_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => track('promo_18names_click', { surface: 'home' })}
-        >
-          {EIGHTEEN_PROMO.homeBanner}
-        </a>
-      </div>
+        </div>
+      )}
       {signOutToast && <Toast message="Signed Out" />}
       {isAuthenticated && (
         <p className={styles.footerCta}>
