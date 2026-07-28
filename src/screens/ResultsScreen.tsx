@@ -11,6 +11,7 @@ import { ResultsCountdownReminder } from '../components/ResultsCountdownReminder
 import { useAuth } from '../context/AuthContext';
 import { isAppMode } from '../lib/appMode';
 import { track } from '../lib/analytics';
+import { EIGHTEEN_NAMES_URL, EIGHTEEN_PROMO } from '../data/crossPromo';
 import type { RoundResult } from '../types';
 import styles from './ResultsScreen.module.css';
 
@@ -253,6 +254,22 @@ export function ResultsScreen({ onHome, onGroups, onLeaderboard, onRequireAuth, 
             Play Past Days
           </button>
         ) : null}
+
+        {!practice && (
+          <div className={styles.promoBlock} style={{ animationDelay: '680ms' }}>
+            <p className={styles.promoKicker}>{EIGHTEEN_PROMO.kicker}</p>
+            <p className={styles.promoTitle}>{EIGHTEEN_PROMO.title}</p>
+            <a
+              className={`${styles.secondaryButton} ${styles.promoLink}`}
+              href={EIGHTEEN_NAMES_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => track('promo_18names_click', { surface: 'results' })}
+            >
+              {EIGHTEEN_PROMO.cta}
+            </a>
+          </div>
+        )}
 
         {!practice && (
           <>

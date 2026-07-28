@@ -2,11 +2,20 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, expect, test, vi } from 'vitest';
 import { ResultsScreen } from './ResultsScreen';
 
-const { fetchMyScore, supersededRef, gradeSeenRef, markGradeSeen } = vi.hoisted(() => ({
+const { fetchMyScore, supersededRef, gradeSeenRef, markGradeSeen, trackMock } = vi.hoisted(() => ({
   fetchMyScore: vi.fn(),
   supersededRef: { value: false },
   gradeSeenRef: { value: false },
   markGradeSeen: vi.fn(),
+  trackMock: vi.fn(),
+}));
+
+vi.mock('../lib/analytics', () => ({
+  track: trackMock,
+  trackPageView: vi.fn(),
+  initAnalytics: vi.fn(),
+  setUser: vi.fn(),
+  clearUser: vi.fn(),
 }));
 
 let currentState: typeof completedState | null;
@@ -48,6 +57,7 @@ beforeEach(() => {
   supersededRef.value = false;
   gradeSeenRef.value = false;
   markGradeSeen.mockReset();
+  trackMock.mockReset();
   fetchMyScore.mockReset();
   sessionStorage.clear();
   window.history.replaceState(null, '', '/');
@@ -360,4 +370,44 @@ test('hides the sign-in prompt when in app mode', () => {
   expect(screen.queryByText(/Sign in to unlock/i)).toBeNull();
   expect(screen.queryByLabelText('Next Rewind puzzle')).toBeNull();
   expect(screen.queryByRole('button', { name: 'Notify Me' })).toBeNull();
+});
+
+test('shows the 18 Names promo card and tracks clicks', () => {
+  render(
+    <ResultsScreen
+      onHome={() => {}}
+      onGroups={() => {}}
+      onLeaderboard={() => {}}
+      onRequireAuth={() => {}}
+    />
+  );
+
+  const link = screen.getByRole('link', { name: 'Play 18 Names' });
+  expect(link.getAttribute('href')).toBe(
+    'https://clutchpoints-18names-test.4taps.me/?utm_source=rewind&utm_medium=crosspromo'
+  );
+  expect(link.getAttribute('target')).toBe('_blank');
+  expect(link.getAttribute('rel')).toContain('noopener');
+  expect(screen.getByText('18 Names — Bron in Philly')).not.toBeNull();
+
+  link.addEventListener('click', (e) => e.preventDefault());
+  fireEvent.click(link);
+  expect(trackMock).toHaveBeenCalledWith('promo_18names_click', { surface: 'results' });
+});
+
+test('practice mode hides the 18 Names promo', () => {
+  window.history.replaceState({}, '', '/?date=2026-06-19&practice=1');
+  render(
+    <ResultsScreen
+      onHome={() => {}}
+      onGroups={() => {}}
+      onLeaderboard={() => {}}
+      onRequireAuth={() => {}}
+      onBackToArchive={() => {}}
+      onPlayAgain={() => {}}
+    />
+  );
+
+  expect(screen.getByRole('button', { name: 'Play Again' })).not.toBeNull();
+  expect(screen.queryByRole('link', { name: 'Play 18 Names' })).toBeNull();
 });
